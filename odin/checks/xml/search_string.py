@@ -18,6 +18,9 @@ class SearchString(FileCheck):
                 continue
             for search in arch.iter("search"):
                 if search.attrib:
+                    # Ignore extension.
+                    if len(search.attrib) == 1 and "position" in search.attrib:
+                        continue
                     yield Issue(
                         "search_view_element_takes_no_attributes",
                         "`<search>` view element takes no attributes",
