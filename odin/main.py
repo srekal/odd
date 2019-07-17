@@ -20,14 +20,13 @@ def parse_manifest(addon_path: AddonPath):
 
 def find_manifest(path: pathlib.Path):
     for child in path.iterdir():
-        if (
-            child.is_file()
-            and child.name in const.MANIFEST_FILENAMES
-        ):
+        if child.is_file() and child.name in const.MANIFEST_FILENAMES:
             return child
 
 
-def discover_addons(dir_path: pathlib.Path) -> typing.Generator[pathlib.Path, None, None]:
+def discover_addons(
+    dir_path: pathlib.Path
+) -> typing.Generator[pathlib.Path, None, None]:
     for child in dir_path.iterdir():
         if child.is_dir():
             manifest = find_manifest(child)
@@ -49,7 +48,9 @@ def get_addon_checks():
     }
 
 
-def check_addon(manifest_path: pathlib.Path, version: typing.Optional[OdooVersion] = None):
+def check_addon(
+    manifest_path: pathlib.Path, version: typing.Optional[OdooVersion] = None
+):
     addon_path = AddonPath(manifest_path)
 
     try:
