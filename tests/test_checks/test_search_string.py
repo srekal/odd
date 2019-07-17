@@ -6,14 +6,15 @@ from odin.main import check_addon
 
 
 def test_search_string(test_data_dir):
-    addon_path = test_data_dir / "search_string"
-    issues = list(check_addon(addon_path / "__manifest__.py", version=12))
+    manifest_path = test_data_dir / "search_string" / "__manifest__.py"
+    addon_path = AddonPath(manifest_path)
+    issues = list(check_addon(manifest_path, version=12))
     assert issues == [
         Issue(
             "search_view_element_takes_no_attributes",
             "`<search>` view element takes no attributes",
-            AddonPath(addon_path / "__manifest__.py"),
-            [Location(addon_path / "views/foo.xml", [7])],
+            addon_path,
+            [Location(addon_path.path / "views/foo.xml", [7])],
             categories=["maintainability"],
         )
     ]
