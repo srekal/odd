@@ -44,6 +44,9 @@ KNOWN_KEYS = {
     "price",
     "currency",
     "iap",
+    # OCA.
+    "maintainers",
+    "development_status",
 }
 
 
