@@ -1,0 +1,41 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "odin"
+author = "Naglis Jonaitis"
+author-email = "naglis@mailbox.org"
+home-page = "https://naglis.me/"
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Environment :: Console",
+    "Intended Audience :: Other Audience",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python",
+    "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+]
+requires = [
+    "lxml==4.3.4",
+    "defusedxml==0.6.0",
+]
+requires-python="~=3.7"
+description-file="README.rst"
+
+[tool.flit.metadata.requires-extra]
+test = [
+    "pytest-cov==2.7.1",
+    "flake8==3.6.0",
+    "flake8-quotes==1.0.0",
+    "flake8-comprehensions==1.4.1",
+    "flake8-commas==2.0.0",
+]
+
+[tool.flit.scripts]
+odin = "odin.main:main"
