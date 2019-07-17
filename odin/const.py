@@ -1,4 +1,4 @@
-MANIFEST_FILENAMES = frozenset(("__manifest__", "__openerp__"))
+MANIFEST_FILENAMES = frozenset(("__manifest__.py", "__openerp__.py"))
 
 MIN_SUPPORTED_VERSION = 8
 MAX_SUPPORTED_VERSION = 12

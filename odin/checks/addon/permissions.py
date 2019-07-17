@@ -3,7 +3,7 @@ from odin.issue import Issue, Location
 from odin.utils import list_files
 
 
-class FilePermissionsCheck(AddonCheck):
+class FilePermissions(AddonCheck):
     def check(self, addon):
         for path in list_files(addon.path, list_dirs=True):
             if path.is_file():
@@ -17,7 +17,7 @@ class FilePermissionsCheck(AddonCheck):
                     )
 
 
-class DirectoryPermissionsCheck(AddonCheck):
+class DirectoryPermissions(AddonCheck):
     def check(self, addon):
         for path in list_files(addon.path, list_dirs=True):
             if path.is_dir():

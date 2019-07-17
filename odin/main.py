@@ -4,7 +4,7 @@ import pathlib
 import typing
 
 from odin.addon import Addon, AddonPath
-from odin.checks.addon import DirectoryPermissionsCheck, FilePermissionsCheck
+from odin.checks.addon import DirectoryPermissions, FilePermissions, ManifestKeys
 from odin.checks.xml import SearchString, TreeString
 from odin.const import SUPPORTED_VERSIONS
 from odin.typedefs import OdooVersion
@@ -22,10 +22,19 @@ def find_manifest(path: pathlib.Path):
     for child in path.iterdir():
         if (
             child.is_file()
-            and child.stem in const.MANIFEST_FILENAMES
-            and child.suffix.lower() == ".py"
+            and child.name in const.MANIFEST_FILENAMES
         ):
             return child
+
+
+def discover_addons(dir_path: pathlib.Path) -> typing.Generator[pathlib.Path, None, None]:
+    for child in dir_path.iterdir():
+        if child.is_dir():
+            manifest = find_manifest(child)
+            if manifest:
+                yield manifest
+            else:
+                yield from discover_addons(child)
 
 
 def get_xml_checks():
@@ -34,16 +43,13 @@ def get_xml_checks():
 
 def get_addon_checks():
     return {
-        "directory_permissions": DirectoryPermissionsCheck(),
-        "file_permissions": FilePermissionsCheck(),
+        "directory_permissions": DirectoryPermissions(),
+        "file_permissions": FilePermissions(),
+        "manifest_keys": ManifestKeys(),
     }
 
 
-def check_addon(path: pathlib.Path, version: typing.Optional[OdooVersion] = None):
-    manifest_path = find_manifest(path)
-    if manifest_path is None:
-        raise SystemExit("Could not find addon manifest")
-
+def check_addon(manifest_path: pathlib.Path, version: typing.Optional[OdooVersion] = None):
     addon_path = AddonPath(manifest_path)
 
     try:
@@ -66,9 +72,10 @@ def check_addon(path: pathlib.Path, version: typing.Optional[OdooVersion] = None
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("addon_path", type=pathlib.Path)
+    parser.add_argument("path", type=pathlib.Path)
     parser.add_argument("version", type=int, choices=SUPPORTED_VERSIONS)
     args = parser.parse_args()
 
-    for issue in check_addon(args.addon_path, version=args.version):
-        print(format_issue(issue))
+    for manifest_path in discover_addons(args.path):
+        for issue in check_addon(manifest_path, version=args.version):
+            print(format_issue(issue))

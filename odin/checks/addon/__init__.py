@@ -1,4 +1,5 @@
-from .permissions import DirectoryPermissionsCheck, FilePermissionsCheck
+from .manifest_keys import ManifestKeys
+from .permissions import DirectoryPermissions, FilePermissions
 
 
-__all__ = ["DirectoryPermissionsCheck", "FilePermissionsCheck"]
+__all__ = ["DirectoryPermissions", "FilePermissions", "ManifestKeys"]
