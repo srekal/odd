@@ -11,7 +11,7 @@ def test_directory_permissions(test_data_dir):
     assert issues == [
         Issue(
             "directory_permissions",
-            "Directories should have 755 permissions",
+            "Directories should have 755 permissions (current: 775)",
             AddonPath(addon_path / "__manifest__.py"),
             [Location(addon_path / "views")],
             categories=["correctness"],

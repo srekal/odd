@@ -9,7 +9,7 @@ def test_file_permissions(test_data_dir):
     assert issues == [
         Issue(
             "file_permissions",
-            "Files should have 644 permissions",
+            "Files should have 644 permissions (current: 664)",
             AddonPath(addon_path / "__manifest__.py"),
             [Location(addon_path / "__manifest__.py")],
             categories=["correctness"],
