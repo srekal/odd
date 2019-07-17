@@ -1,8 +1,14 @@
 import functools
 import pathlib
 
+import yarl
+
 from odin.addon import AddonPath
 from odin.issue import Issue
+
+
+def odoo_commit_url(commit: str) -> yarl.URL:
+    return yarl.URL(f"https://github.com/odoo/odoo/commit/{commit}")
 
 
 def list_files(dir: pathlib.Path, list_dirs=False):

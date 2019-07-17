@@ -4,11 +4,16 @@ import pathlib
 import typing
 
 from odin.addon import Addon, AddonPath
-from odin.checks.addon import DirectoryPermissions, FilePermissions, ManifestKeys
+from odin.checks.addon import (
+    DirectoryPermissions,
+    FilePermissions,
+    ManifestFilename,
+    ManifestKeys,
+)
 from odin.checks.xml import SearchString, TreeString
 from odin.const import SUPPORTED_VERSIONS
 from odin.typedefs import OdooVersion
-from odin.utils import get_addon_files, format_issue
+from odin.utils import format_issue, get_addon_files
 
 from . import const
 
@@ -45,6 +50,7 @@ def get_addon_checks():
         "directory_permissions": DirectoryPermissions(),
         "file_permissions": FilePermissions(),
         "manifest_keys": ManifestKeys(),
+        "manifest_filename": ManifestFilename(),
     }
 
 
