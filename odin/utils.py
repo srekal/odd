@@ -1,5 +1,6 @@
 import functools
 import pathlib
+import typing
 
 import yarl
 
@@ -9,6 +10,28 @@ from odin.issue import Issue
 
 def odoo_commit_url(commit: str) -> yarl.URL:
     return yarl.URL(f"https://github.com/odoo/odoo/commit/{commit}")
+
+
+def odoo_source_url(
+    commit: str,
+    path: str,
+    *,
+    start: typing.Optional[int] = None,
+    end: typing.Optional[int] = None,
+) -> yarl.URL:
+    if end and not start:
+        raise ValueError("`start` must be provided if `end` is provided")
+
+    fragment = None
+    if start is not None:
+        fragment = f"L{start:d}" if end is None else f"L{start:d}-L{end:d}"
+
+    return yarl.URL.build(
+        scheme="https",
+        host="github.com",
+        path=f"/odoo/odoo/blob/{commit}/{path}",
+        fragment=fragment,
+    )
 
 
 def list_files(dir: pathlib.Path, list_dirs=False):

@@ -5,6 +5,7 @@ import typing
 
 from odin.addon import Addon, AddonPath
 from odin.checks.addon import (
+    ButtonClasses,
     DirectoryPermissions,
     FilePermissions,
     ManifestFilename,
@@ -42,7 +43,11 @@ def discover_addons(
 
 
 def get_xml_checks():
-    return {"search_string": SearchString(), "tree_string": TreeString()}
+    return {
+        "search_string": SearchString(),
+        "tree_string": TreeString(),
+        "button_classes": ButtonClasses(),
+    }
 
 
 def get_addon_checks():
