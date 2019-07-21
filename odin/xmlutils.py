@@ -1,14 +1,14 @@
 import pathlib
 import typing
 
-import lxml.etree as etree
+from defusedxml import lxml
 
 from odin.typedefs import Element, ElementGenerator
 
 
 def get_root(xml_filename: pathlib.Path):
     with xml_filename.open(mode="rb") as f:
-        return etree.parse(f).getroot()
+        return lxml.parse(f).getroot()
 
 
 def get_records(root: Element) -> ElementGenerator:

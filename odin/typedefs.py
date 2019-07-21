@@ -1,6 +1,6 @@
 import typing
 
-import lxml.etree as etree
+import lxml.etree as etree  # nosec
 
 
 OdooVersion = int
