@@ -42,7 +42,7 @@ def discover_addons(
                 yield from discover_addons(child)
 
 
-def get_xml_checks():
+def get_file_checks():
     return {
         "search_string": SearchString(),
         "tree_string": TreeString(),
@@ -78,7 +78,7 @@ def check_addon(
         yield from func.check(addon)
 
     for file_path in get_addon_files(addon.addon_path):
-        for check_name, func in get_xml_checks().items():
+        for check_name, func in get_file_checks().items():
             yield from func.check(file_path, addon)
 
 
