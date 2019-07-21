@@ -84,10 +84,11 @@ def check_addon(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("path", type=pathlib.Path)
+    parser.add_argument("paths", type=pathlib.Path, nargs="+")
     parser.add_argument("version", type=int, choices=SUPPORTED_VERSIONS)
     args = parser.parse_args()
 
-    for manifest_path in discover_addons(args.path):
-        for issue in check_addon(manifest_path, version=args.version):
-            print(format_issue(issue))
+    for path in args.paths:
+        for manifest_path in discover_addons(path):
+            for issue in check_addon(manifest_path, version=args.version):
+                print(format_issue(issue))
