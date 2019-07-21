@@ -3,7 +3,12 @@ import pathlib
 from odin.addon import Addon
 from odin.checks import FileCheck
 from odin.issue import Issue, Location
-from odin.xmlutils import get_model_records, get_root, get_view_arch
+from odin.xmlutils import (
+    get_model_records,
+    get_root,
+    get_view_arch,
+    get_xpath_expr_target_element,
+)
 
 
 class TreeString(FileCheck):
@@ -23,5 +28,20 @@ class TreeString(FileCheck):
                         "`<tree>` `string` attribute is deprecated (no longer displayed) since version 8.0",
                         addon.addon_path,
                         [Location(filename, [search.sourceline])],
+                        categories=["maintainability", "deprecated"],
+                    )
+            for xpath in arch.xpath('.//xpath[@position="attributes"]'):
+                expr = xpath.get("expr")
+                if not expr:
+                    continue
+                nodename = get_xpath_expr_target_element(expr)
+                if nodename != "tree":
+                    continue
+                for attr in xpath.xpath('.//attribute[@name="string"]'):
+                    yield Issue(
+                        "tree_view_string_attribute_deprecated",
+                        "`<tree>` `string` attribute is deprecated (no longer displayed) since version 8.0",
+                        addon.addon_path,
+                        [Location(filename, [attr.sourceline])],
                         categories=["maintainability", "deprecated"],
                     )
