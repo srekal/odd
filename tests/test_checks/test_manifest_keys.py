@@ -52,7 +52,7 @@ from odin.main import check_addon
     ],
 )
 def test_file_permissions(addon_name, expected_issues, test_data_dir):
-    manifest_path = test_data_dir / addon_name / "__manifest__.py"
+    manifest_path = test_data_dir / "manifest_keys" / addon_name / "__manifest__.py"
     issues = list(check_addon(manifest_path, version=12))
     assert issues == [
         Issue(
