@@ -37,6 +37,9 @@ test = [
     "flake8-comprehensions==1.4.1",
     "flake8-commas==2.0.0",
 ]
+dev = [
+    "pre-commit==1.17.0",
+]
 
 [tool.flit.scripts]
 odin = "odin.main:main"
