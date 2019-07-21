@@ -1,10 +1,11 @@
 import functools
+import operator
 import pathlib
 import typing
 
 import yarl
-
 from odin.addon import AddonPath
+from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue
 
 
@@ -68,3 +69,36 @@ def format_issue(issue: Issue) -> str:
     location_str = " (%s)" % "; ".join(locations) if locations else ""
 
     return f"{issue.addon_path.name}{location_str}: {issue.description}"
+
+
+def _get_operator(version_spec: str, version_cls):
+    for prefix, op in (
+        ("*", lambda a, b: bool(a)),
+        ("<=", operator.le),
+        ("<", operator.lt),
+        (">=", operator.ge),
+        (">", operator.gt),
+        ("!=", operator.ne),
+        ("!", operator.ne),
+        ("==", operator.eq),
+        ("=", operator.eq),
+    ):
+        if version_spec.startswith(prefix):
+            return op, version_cls(version_spec[len(prefix) :])
+
+    raise ValueError(f"Invalid version specification: {version_spec}")
+
+
+def lookup_version_list(version_map, version: int):
+    if not isinstance(version, int):
+        raise TypeError(f'Invalid version, expected an integer, got {version} ({type(version)})')
+    if version not in SUPPORTED_VERSIONS:
+        raise ValueError(f"Unsupported version \"{version}\", must be one of {SUPPORTED_VERSIONS}")
+
+    result = []
+    for version_ranges, values in version_map.items():
+        for version_spec in version_ranges.split(","):
+            op, v2 = _get_operator(version_spec, version_cls=int)
+            if op(version, v2):
+                result.extend(values)
+    return result
