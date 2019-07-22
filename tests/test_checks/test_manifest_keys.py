@@ -1,6 +1,6 @@
 import pytest
-
 from odin.addon import AddonPath
+from odin.checks.addon import ManifestKeys
 from odin.issue import Issue, Location
 from odin.main import check_addon
 
@@ -53,7 +53,9 @@ from odin.main import check_addon
 )
 def test_file_permissions(addon_name, expected_issues, test_data_dir):
     manifest_path = test_data_dir / "manifest_keys" / addon_name / "__manifest__.py"
-    issues = list(check_addon(manifest_path, version=12))
+    issues = list(
+        check_addon(manifest_path, {"manifest_keys": ManifestKeys}, version=12)
+    )
     assert issues == [
         Issue(
             **{

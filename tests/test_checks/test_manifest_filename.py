@@ -1,13 +1,15 @@
 import yarl
-
 from odin.addon import AddonPath
+from odin.checks.addon import ManifestFilename
 from odin.issue import Issue, Location
 from odin.main import check_addon
 
 
 def test_manifest_filename(test_data_dir):
     manifest_path = test_data_dir / "manifest_filename" / "__openerp__.py"
-    issues = list(check_addon(manifest_path, version=10))
+    issues = list(
+        check_addon(manifest_path, {"manifest_filename": ManifestFilename}, version=10)
+    )
     assert issues == [
         Issue(
             "deprecated_manifest_filename",

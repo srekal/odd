@@ -4,6 +4,7 @@ import pathlib
 import typing
 
 from odin.addon import Addon, AddonPath
+from odin.checks import AddonCheck, FileCheck
 from odin.checks.addon import (
     ButtonClasses,
     DirectoryPermissions,
@@ -42,27 +43,34 @@ def discover_addons(
                 yield from discover_addons(child)
 
 
-def get_file_checks():
+def get_checks():
     return {
-        "search_string": SearchString(),
-        "tree_string": TreeString(),
-        "button_classes": ButtonClasses(),
-    }
-
-
-def get_addon_checks():
-    return {
-        "directory_permissions": DirectoryPermissions(),
-        "file_permissions": FilePermissions(),
-        "manifest_keys": ManifestKeys(),
-        "manifest_filename": ManifestFilename(),
+        "search_string": SearchString,
+        "tree_string": TreeString,
+        "button_classes": ButtonClasses,
+        "directory_permissions": DirectoryPermissions,
+        "file_permissions": FilePermissions,
+        "manifest_keys": ManifestKeys,
+        "manifest_filename": ManifestFilename,
     }
 
 
 def check_addon(
-    manifest_path: pathlib.Path, version: typing.Optional[OdooVersion] = None
+    manifest_path: pathlib.Path,
+    checks: typing.Mapping[str, typing.Type[typing.Union[AddonCheck, FileCheck]]],
+    *,
+    version: typing.Optional[OdooVersion] = None,
 ):
     addon_path = AddonPath(manifest_path)
+    addon_checks, file_checks = {}, {}
+
+    for check_name, check_cls in checks.items():
+        if issubclass(check_cls, AddonCheck):
+            addon_checks[check_name] = check_cls()
+        elif issubclass(check_cls, FileCheck):
+            file_checks[check_name] = check_cls()
+        else:
+            raise TypeError(f"Unsupported check class: {check_cls}")
 
     try:
         manifest = parse_manifest(addon_path)
@@ -74,11 +82,11 @@ def check_addon(
 
     addon = Addon(manifest_path, manifest, version)
 
-    for check_name, func in get_addon_checks().items():
+    for func in addon_checks.values():
         yield from func.check(addon)
 
     for file_path in get_addon_files(addon.addon_path):
-        for check_name, func in get_file_checks().items():
+        for func in file_checks.values():
             yield from func.check(file_path, addon)
 
 
@@ -88,7 +96,8 @@ def main():
     parser.add_argument("version", type=int, choices=SUPPORTED_VERSIONS)
     args = parser.parse_args()
 
+    checks = get_checks()
     for path in args.paths:
         for manifest_path in discover_addons(path):
-            for issue in check_addon(manifest_path, version=args.version):
+            for issue in check_addon(manifest_path, checks, version=args.version):
                 print(format_issue(issue))

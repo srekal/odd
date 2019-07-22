@@ -1,6 +1,7 @@
 import pytest
 import yarl
 from odin.addon import AddonPath
+from odin.checks.addon import ButtonClasses
 from odin.issue import Issue, Location
 from odin.main import check_addon
 
@@ -8,7 +9,9 @@ from odin.main import check_addon
 def test_button_classes(test_data_dir):
     manifest_path = test_data_dir / "button_classes" / "__manifest__.py"
     addon_path = AddonPath(manifest_path)
-    issues = list(check_addon(manifest_path, version=12))
+    issues = list(
+        check_addon(manifest_path, {"button_classes": ButtonClasses}, version=12)
+    )
     assert issues == [
         Issue(
             "deprecated_button_class",
