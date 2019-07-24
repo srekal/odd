@@ -35,12 +35,20 @@ def odoo_source_url(
     )
 
 
-def list_files(dir: pathlib.Path, list_dirs=False):
+def list_files(
+    dir: pathlib.Path,
+    *,
+    list_dirs: bool = False,
+    exclude_dirs: typing.Optional[typing.Iterable[pathlib.Path]] = None,
+):
+    exclude_dirs = set(exclude_dirs) if exclude_dirs else set()
     for path in dir.iterdir():
         if path.is_dir():
+            if path in exclude_dirs:
+                continue
             if list_dirs:
                 yield path
-            yield from list_files(path)
+            yield from list_files(path, list_dirs=list_dirs, exclude_dirs=exclude_dirs)
         else:
             yield path
 
