@@ -38,8 +38,10 @@ def discover_addons(
                 yield from discover_addons(child)
 
 
-def get_checks():
-    return {
+def get_checks(
+    whitelist: typing.Optional[typing.Iterable[str]] = None
+) -> typing.Dict[str, typing.Union[AddonCheck, FileCheck]]:
+    checks = {
         "search_string": SearchString,
         "tree_string": TreeString,
         "button_classes": ButtonClasses,
@@ -49,6 +51,11 @@ def get_checks():
         "manifest_filename": ManifestFilename,
         "no_update": NoUpdate,
     }
+    return (
+        {name: cls_ for name, cls_ in checks.items() if name in whitelist}
+        if whitelist
+        else checks
+    )
 
 
 def check_addon(
@@ -89,10 +96,11 @@ def check_addon(
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("paths", type=pathlib.Path, nargs="+")
+    parser.add_argument("-w", "--whitelist", metavar="CHECKS", nargs="*")
     parser.add_argument("version", type=int, choices=SUPPORTED_VERSIONS)
     args = parser.parse_args()
 
-    checks = get_checks()
+    checks = get_checks(whitelist=args.whitelist)
     for path in args.paths:
         for manifest_path in discover_addons(path):
             for issue in check_addon(manifest_path, checks, version=args.version):
