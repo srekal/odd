@@ -3,7 +3,7 @@ import ast
 import pathlib
 import typing
 
-from odin.addon import Addon, AddonPath, parse_manifest
+from odin.addon import Addon, AddonPath, discover_addons, parse_manifest
 from odin.checks import AddonCheck, FileCheck
 from odin.checks.addon import (
     ButtonClasses,
@@ -18,24 +18,6 @@ from odin.typedefs import OdooVersion
 from odin.utils import format_issue, get_addon_files
 
 from . import const
-
-
-def find_manifest(path: pathlib.Path):
-    for child in path.iterdir():
-        if child.is_file() and child.name in const.MANIFEST_FILENAMES:
-            return child
-
-
-def discover_addons(
-    dir_path: pathlib.Path
-) -> typing.Generator[pathlib.Path, None, None]:
-    for child in dir_path.iterdir():
-        if child.is_dir():
-            manifest = find_manifest(child)
-            if manifest:
-                yield manifest
-            else:
-                yield from discover_addons(child)
 
 
 def get_checks(

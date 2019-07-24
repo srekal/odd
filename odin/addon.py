@@ -3,6 +3,7 @@ import dataclasses
 import pathlib
 import typing
 
+from odin.const import MANIFEST_FILENAMES
 from odin.typedefs import OdooVersion
 
 
@@ -52,3 +53,21 @@ def parse_manifest(addon_path: AddonPath):
     # FIXME: Check for manifest file size.
     with addon_path.manifest_path.open(mode="r") as f:
         return ast.literal_eval(f.read())
+
+
+def find_manifest(path: pathlib.Path) -> typing.Optional[pathlib.Path]:
+    for child in path.iterdir():
+        if child.is_file() and child.name in MANIFEST_FILENAMES:
+            return child
+
+
+def discover_addons(
+    dir_path: pathlib.Path
+) -> typing.Generator[pathlib.Path, None, None]:
+    for child in dir_path.iterdir():
+        if child.is_dir():
+            manifest = find_manifest(child)
+            if manifest:
+                yield manifest
+            else:
+                yield from discover_addons(child)
