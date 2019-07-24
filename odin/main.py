@@ -7,17 +7,16 @@ from odin.addon import Addon, AddonPath, discover_addons, parse_manifest
 from odin.checks import AddonCheck, FileCheck
 from odin.checks.addon import (
     ButtonClasses,
+    DataFileInclusion,
     DirectoryPermissions,
     FilePermissions,
     ManifestFilename,
     ManifestKeys,
 )
-from odin.checks.xml import SearchString, TreeString, NoUpdate
+from odin.checks.xml import NoUpdate, SearchString, TreeString
 from odin.const import SUPPORTED_VERSIONS
 from odin.typedefs import OdooVersion
 from odin.utils import format_issue, get_addon_files
-
-from . import const
 
 
 def get_checks(
@@ -28,6 +27,7 @@ def get_checks(
         "tree_string": TreeString,
         "button_classes": ButtonClasses,
         "directory_permissions": DirectoryPermissions,
+        "data_file_inclusion": DataFileInclusion,
         "file_permissions": FilePermissions,
         "manifest_keys": ManifestKeys,
         "manifest_filename": ManifestFilename,

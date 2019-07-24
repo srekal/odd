@@ -1,0 +1,37 @@
+from odin.checks import AddonCheck
+from odin.issue import Issue, Location
+from odin.utils import list_files, lookup_version_list
+
+EXT_VERSION_MAP = {">=8": ["csv", "xml", "sql"], ">=8,<12": ["yml"]}
+
+
+class DataFileInclusion(AddonCheck):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._checked_addons = set()
+
+    def check(self, addon):
+        if addon.name in self._checked_addons:
+            return
+
+        extensions = {
+            f".{ext}" for ext in lookup_version_list(EXT_VERSION_MAP, addon.version)
+        }
+        combined_data_files = {*addon.data_files, *addon.demo_files, *addon.qweb_files}
+        exclude_dirs = {addon.path / dir for dir in ("tests", "static/src/xml")}
+
+        for file_path in list_files(
+            addon.path, list_dirs=False, exclude_dirs=exclude_dirs
+        ):
+            if file_path.suffix not in extensions:
+                continue
+            if file_path not in combined_data_files:
+                yield Issue(
+                    "data_file_missing_in_manifest",
+                    f"Data file is not included in `demo` or `data` sections in the manifest file",
+                    addon.addon_path,
+                    [Location(file_path)],
+                    categories=["correctness"],
+                )
+
+        self._checked_addons.add(addon.name)
