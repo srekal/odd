@@ -85,12 +85,12 @@ def check_addon(
 
     addon = Addon(manifest_path, manifest, version)
 
-    for func in addon_checks.values():
-        yield from func.check(addon)
+    for addon_check in addon_checks.values():
+        yield from addon_check.check(addon)
 
     for file_path in get_addon_files(addon.addon_path):
-        for func in file_checks.values():
-            yield from func.check(file_path, addon)
+        for file_check in file_checks.values():
+            yield from file_check.check(file_path, addon)
 
 
 def main():
