@@ -1,5 +1,3 @@
-import pathlib
-
 from odin.checks import FileCheck
 from odin.issue import Issue, Location
 from odin.xmlutils import get_model_records, get_root, split_xml_id
