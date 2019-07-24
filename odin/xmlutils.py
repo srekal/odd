@@ -47,6 +47,7 @@ def get_xpath_expr_target_element(xpath_expr: str) -> typing.Optional[str]:
 
 
 def split_xml_id(xml_id: str) -> typing.Tuple[typing.Optional[str], str]:
+    addon_name = None
     if "." in xml_id:
-        return xml_id.split(".")
-    return None, xml_id
+        addon_name, xml_id = xml_id.split(".")[:2]
+    return addon_name, xml_id
