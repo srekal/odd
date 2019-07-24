@@ -10,6 +10,7 @@ from odin.checks.addon import (
     DataFileInclusion,
     DirectoryPermissions,
     FilePermissions,
+    IrModelAccessNoGroup,
     ManifestFilename,
     ManifestKeys,
 )
@@ -23,15 +24,16 @@ def get_checks(
     whitelist: typing.Optional[typing.Iterable[str]] = None
 ) -> typing.Dict[str, typing.Union[AddonCheck, FileCheck]]:
     checks = {
+        "button_classes": ButtonClasses,
+        "data_file_inclusion": DataFileInclusion,
+        "directory_permissions": DirectoryPermissions,
+        "file_permissions": FilePermissions,
+        "ir_model_access_no_group": IrModelAccessNoGroup,
+        "manifest_filename": ManifestFilename,
+        "manifest_keys": ManifestKeys,
+        "no_update": NoUpdate,
         "search_string": SearchString,
         "tree_string": TreeString,
-        "button_classes": ButtonClasses,
-        "directory_permissions": DirectoryPermissions,
-        "data_file_inclusion": DataFileInclusion,
-        "file_permissions": FilePermissions,
-        "manifest_keys": ManifestKeys,
-        "manifest_filename": ManifestFilename,
-        "no_update": NoUpdate,
     }
     return (
         {name: cls_ for name, cls_ in checks.items() if name in whitelist}
