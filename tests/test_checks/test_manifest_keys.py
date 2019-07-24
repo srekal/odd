@@ -1,12 +1,11 @@
 import pytest
-from odin.addon import AddonPath
 from odin.checks.addon import ManifestKeys
-from odin.issue import Issue, Location
-from odin.main import check_addon
+
+from ..common import run_check_test
 
 
 @pytest.mark.parametrize(
-    "addon_name, expected_issues",
+    "addon_name, expected",
     [
         (
             "manifest_keys_unknown_keys",
@@ -15,6 +14,7 @@ from odin.main import check_addon
                     "slug": "unknown_manifest_key",
                     "description": 'Unknown manifest key "foo"',
                     "categories": ["correctness"],
+                    "locations": [(["__manifest__.py"], [])],
                 }
             ],
         ),
@@ -25,6 +25,7 @@ from odin.main import check_addon
                     "slug": "deprecated_manifest_key",
                     "description": '"active" manifest key was renamed to "auto_install"',
                     "categories": ["correctness", "deprecated"],
+                    "locations": [(["__manifest__.py"], [])],
                 }
             ],
         ),
@@ -35,6 +36,7 @@ from odin.main import check_addon
                     "slug": "deprecated_manifest_key",
                     "description": '"demo_xml" manifest key was deprecated in favor of "demo"',
                     "categories": ["correctness", "deprecated"],
+                    "locations": [(["__manifest__.py"], [])],
                 }
             ],
         ),
@@ -45,24 +47,19 @@ from odin.main import check_addon
                     "slug": "deprecated_manifest_key",
                     "description": '"init_xml" manifest key was deprecated in favor of "data"',
                     "categories": ["correctness", "deprecated"],
+                    "locations": [(["__manifest__.py"], [])],
                 }
             ],
         ),
         ("manifest_keys_deprecated_xml_init_xml_csv", []),
     ],
 )
-def test_file_permissions(addon_name, expected_issues, test_data_dir):
-    manifest_path = test_data_dir / "manifest_keys" / addon_name / "__manifest__.py"
-    issues = list(
-        check_addon(manifest_path, {"manifest_keys": ManifestKeys}, version=12)
+def test_file_permissions(test_data_dir, addon_name, expected):
+    run_check_test(
+        test_data_dir,
+        "manifest_keys",
+        (addon_name, "__manifest__.py"),
+        12,
+        ManifestKeys,
+        expected,
     )
-    assert issues == [
-        Issue(
-            **{
-                "addon_path": AddonPath(manifest_path),
-                "locations": [Location(manifest_path)],
-                **issue,
-            }
-        )
-        for issue in expected_issues
-    ]

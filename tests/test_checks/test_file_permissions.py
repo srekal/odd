@@ -1,20 +1,31 @@
-from odin.addon import AddonPath
+import pytest
 from odin.checks.addon import FilePermissions
-from odin.issue import Issue, Location
-from odin.main import check_addon
+
+from ..common import run_check_test
 
 
-def test_file_permissions(test_data_dir):
-    manifest_path = test_data_dir / "file_permissions" / "__manifest__.py"
-    issues = list(
-        check_addon(manifest_path, {"file_permissions": FilePermissions}, version=12)
-    )
-    assert issues == [
-        Issue(
+@pytest.mark.parametrize(
+    "addon_name, expected",
+    [
+        (
             "file_permissions",
-            "Files should have 644 permissions (current: 664)",
-            AddonPath(manifest_path),
-            [Location(manifest_path)],
-            categories=["correctness"],
+            [
+                {
+                    "slug": "file_permissions",
+                    "description": "Files should have 644 permissions (current: 664)",
+                    "locations": [(["__manifest__.py"], [])],
+                    "categories": ["correctness"],
+                }
+            ],
         )
-    ]
+    ],
+)
+def test_file_permissions(test_data_dir, addon_name, expected):
+    run_check_test(
+        test_data_dir,
+        "file_permissions",
+        ("__manifest__.py",),
+        12,
+        FilePermissions,
+        expected,
+    )

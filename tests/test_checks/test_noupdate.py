@@ -1,17 +1,14 @@
 import pytest
-
-from odin.addon import AddonPath
-from odin.issue import Issue, Location
-from odin.main import check_addon
 from odin.checks.xml import NoUpdate
+
+from ..common import run_check_test
 
 
 @pytest.mark.parametrize(
-    "addon_name, version, expected",
+    "addon_name, expected",
     [
         (
             "noupdate_cron",
-            12,
             [
                 {
                     "slug": "expected_noupdate_flag",
@@ -21,11 +18,10 @@ from odin.checks.xml import NoUpdate
                 }
             ],
         ),
-        ("noupdate_cron_extension", 12, []),
-        ("noupdate_cron_odoo_1", 12, []),
+        ("noupdate_cron_extension", []),
+        ("noupdate_cron_odoo_1", []),
         (
             "noupdate_cron_odoo_0",
-            12,
             [
                 {
                     "slug": "expected_noupdate_flag",
@@ -37,21 +33,12 @@ from odin.checks.xml import NoUpdate
         ),
     ],
 )
-def test_noupdate(test_data_dir, addon_name, version, expected):
-    manifest_path = test_data_dir / "noupdate" / addon_name / "__manifest__.py"
-    addon_path = AddonPath(manifest_path)
-    issues = list(check_addon(manifest_path, {"noupdate": NoUpdate}, version=version))
-
-    expected_issues = []
-    for issue in expected:
-        locations = []
-        for path_parts, line_nos in issue.pop("locations", []):
-            locations.append(
-                Location(manifest_path.parent.joinpath(*path_parts), line_nos)
-            )
-
-        expected_issues.append(
-            Issue(**{"addon_path": addon_path, "locations": locations, **issue})
-        )
-
-    assert issues == expected_issues
+def test_noupdate(test_data_dir, addon_name, expected):
+    run_check_test(
+        test_data_dir,
+        "noupdate",
+        (addon_name, "__manifest__.py"),
+        12,
+        NoUpdate,
+        expected,
+    )

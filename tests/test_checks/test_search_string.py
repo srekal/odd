@@ -1,22 +1,26 @@
 import pytest
-from odin.addon import AddonPath
 from odin.checks.xml import SearchString
-from odin.issue import Issue, Location
-from odin.main import check_addon
+
+from ..common import run_check_test
 
 
-def test_search_string(test_data_dir):
-    manifest_path = test_data_dir / "search_string" / "__manifest__.py"
-    addon_path = AddonPath(manifest_path)
-    issues = list(
-        check_addon(manifest_path, {"search_string": SearchString}, version=12)
-    )
-    assert issues == [
-        Issue(
-            "search_view_element_takes_no_attributes",
-            "`<search>` view element takes no attributes",
-            addon_path,
-            [Location(addon_path.path / "views/foo.xml", [7])],
-            categories=["maintainability"],
+@pytest.mark.parametrize(
+    "addon_name, expected",
+    [
+        (
+            "search_string",
+            [
+                {
+                    "slug": "search_view_element_takes_no_attributes",
+                    "description": "`<search>` view element takes no attributes",
+                    "locations": [(["views", "foo.xml"], [7])],
+                    "categories": ["maintainability"],
+                }
+            ],
         )
-    ]
+    ],
+)
+def test_search_string(test_data_dir, addon_name, expected):
+    run_check_test(
+        test_data_dir, "search_string", ("__manifest__.py",), 12, SearchString, expected
+    )
