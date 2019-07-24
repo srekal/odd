@@ -89,11 +89,17 @@ def _get_operator(version_spec: str, version_cls):
     raise ValueError(f"Invalid version specification: {version_spec}")
 
 
-def lookup_version_list(version_map, version: int):
+def lookup_version_list(
+    version_map: typing.Mapping[str, typing.List[typing.Any]], version: int
+) -> typing.List[typing.Any]:
     if not isinstance(version, int):
-        raise TypeError(f'Invalid version, expected an integer, got {version} ({type(version)})')
+        raise TypeError(
+            f"Invalid version, expected an integer, got {version} ({type(version)})"
+        )
     if version not in SUPPORTED_VERSIONS:
-        raise ValueError(f"Unsupported version \"{version}\", must be one of {SUPPORTED_VERSIONS}")
+        raise ValueError(
+            f'Unsupported version "{version}", must be one of {SUPPORTED_VERSIONS}'
+        )
 
     result = []
     for version_ranges, values in version_map.items():
