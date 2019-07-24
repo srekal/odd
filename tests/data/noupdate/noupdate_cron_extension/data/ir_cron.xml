@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+<record forcecreate="True" id="other_addon.ir_cron_foo" model="ir.cron">
+    <field name="active" eval="False"/>
+</record>
+
+</data>
+</odoo>

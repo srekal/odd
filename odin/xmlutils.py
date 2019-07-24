@@ -20,10 +20,12 @@ def get_records(root: Element) -> ElementGenerator:
             yield child
 
 
-def get_model_records(root: Element, model: str) -> ElementGenerator:
+def get_model_records(
+    root: Element, model: typing.Optional[str] = None
+) -> ElementGenerator:
     for el in get_records(root):
         if el.tag == "record":
-            if el.get("model") == model:
+            if not model or el.get("model") == model:
                 yield el
 
 
@@ -42,3 +44,9 @@ def get_xpath_expr_target_element(xpath_expr: str) -> typing.Optional[str]:
     if nodename == ".":
         nodename = None
     return nodename
+
+
+def split_xml_id(xml_id: str) -> typing.Tuple[typing.Optional[str], str]:
+    if "." in xml_id:
+        return xml_id.split(".")
+    return None, xml_id

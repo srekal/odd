@@ -3,7 +3,7 @@ import ast
 import pathlib
 import typing
 
-from odin.addon import Addon, AddonPath
+from odin.addon import Addon, AddonPath, parse_manifest
 from odin.checks import AddonCheck, FileCheck
 from odin.checks.addon import (
     ButtonClasses,
@@ -12,7 +12,7 @@ from odin.checks.addon import (
     ManifestFilename,
     ManifestKeys,
 )
-from odin.checks.xml import SearchString, TreeString
+from odin.checks.xml import SearchString, TreeString, NoUpdate
 from odin.const import SUPPORTED_VERSIONS
 from odin.typedefs import OdooVersion
 from odin.utils import format_issue, get_addon_files
@@ -47,6 +47,7 @@ def get_checks():
         "file_permissions": FilePermissions,
         "manifest_keys": ManifestKeys,
         "manifest_filename": ManifestFilename,
+        "no_update": NoUpdate,
     }
 
 
