@@ -51,10 +51,6 @@ KNOWN_KEYS = {
 
 
 class ManifestKeys(AddonCheck):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._checked_addons = set()
-
     def _check_active(self, manifest):
         if "active" in manifest:
             yield {
@@ -87,8 +83,6 @@ class ManifestKeys(AddonCheck):
             }
 
     def check(self, addon):
-        if addon.name in self._checked_addons:
-            return
         for check in ("active", "deprecated_xml", "unknown_keys"):
             for issue in getattr(self, f"_check_{check}")(addon.manifest):
                 yield Issue(
@@ -98,4 +92,3 @@ class ManifestKeys(AddonCheck):
                         **issue,
                     }
                 )
-        self._checked_addons.add(addon.name)

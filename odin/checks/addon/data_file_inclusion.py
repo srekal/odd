@@ -6,14 +6,7 @@ EXT_VERSION_MAP = {">=8": ["csv", "xml", "sql"], ">=8,<12": ["yml"]}
 
 
 class DataFileInclusion(AddonCheck):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._checked_addons = set()
-
     def check(self, addon):
-        if addon.name in self._checked_addons:
-            return
-
         extensions = {
             f".{ext}" for ext in lookup_version_list(EXT_VERSION_MAP, addon.version)
         }
@@ -33,5 +26,3 @@ class DataFileInclusion(AddonCheck):
                     [Location(file_path)],
                     categories=["correctness"],
                 )
-
-        self._checked_addons.add(addon.name)
