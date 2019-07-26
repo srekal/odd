@@ -12,6 +12,7 @@ from odin.checks.addon import (
     IrModelAccessNoGroup,
     ManifestFilename,
     ManifestKeys,
+    RouteKwargs,
 )
 from odin.checks.xml import NoUpdate, SearchString, TreeString
 from odin.const import SUPPORTED_VERSIONS
@@ -31,6 +32,7 @@ def get_checks(
         "manifest_filename": ManifestFilename,
         "manifest_keys": ManifestKeys,
         "no_update": NoUpdate,
+        "route_kwargs": RouteKwargs,
         "search_string": SearchString,
         "tree_string": TreeString,
     }

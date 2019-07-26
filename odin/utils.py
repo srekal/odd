@@ -98,8 +98,11 @@ def _get_operator(version_spec: str, version_cls):
 
 
 def lookup_version_list(
-    version_map: typing.Mapping[str, typing.List[typing.Any]], version: int
-) -> typing.List[typing.Any]:
+    version_map: typing.Mapping[str, typing.List[typing.Any]],
+    version: int,
+    *,
+    result_cls=list,
+) -> typing.Union[typing.List[typing.Any], typing.Set[typing.Any]]:
     if not isinstance(version, int):
         raise TypeError(
             f"Invalid version, expected an integer, got {version} ({type(version)})"
@@ -109,10 +112,24 @@ def lookup_version_list(
             f'Unsupported version "{version}", must be one of {SUPPORTED_VERSIONS}'
         )
 
-    result = []
+    result = result_cls()
+    extend = result.extend if result_cls == list else result.update
     for version_ranges, values in version_map.items():
         for version_spec in version_ranges.split(","):
             op, v2 = _get_operator(version_spec, version_cls=int)
             if op(version, v2):
-                result.extend(values)
+                extend(values)
+    return result
+
+
+def expand_version_list(
+    version_map: typing.Mapping[str, typing.List[typing.Any]],
+    *versions: int,
+    result_cls=list,
+) -> typing.Dict[int, typing.Union[typing.List[typing.Any], typing.Set[typing.Any]]]:
+    result = {}
+    for version in versions:
+        result[version] = lookup_version_list(
+            version_map, version, result_cls=result_cls
+        )
     return result

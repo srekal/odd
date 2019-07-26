@@ -4,6 +4,7 @@ from .ir_model_access import IrModelAccessNoGroup
 from .manifest_filename import ManifestFilename
 from .manifest_keys import ManifestKeys
 from .permissions import DirectoryPermissions, FilePermissions
+from .route_kwargs import RouteKwargs
 
 __all__ = [
     "ButtonClasses",
@@ -13,4 +14,5 @@ __all__ = [
     "IrModelAccessNoGroup",
     "ManifestFilename",
     "ManifestKeys",
+    "RouteKwargs",
 ]
