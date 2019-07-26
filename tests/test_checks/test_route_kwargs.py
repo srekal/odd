@@ -15,7 +15,7 @@ from ..common import run_check_test
                     "slug": "unknown_route_kwarg",
                     "description": 'Controller method `index` has an unknown `route()` keyword argument "sitemap"',
                     "categories": ["correctness"],
-                    "locations": [(["controllers", "main.py"], [6])],
+                    "locations": [(["controllers", "main.py"], [5])],
                 }
             ],
         ),
