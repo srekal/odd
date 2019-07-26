@@ -1,5 +1,7 @@
 import pathlib
 
+import yarl
+
 from odin.addon import AddonPath
 from odin.issue import Issue, Location
 from odin.main import check_addon
@@ -17,8 +19,20 @@ def run_check_test(
             locations.append(
                 Location(manifest_path.parent.joinpath(*path_parts), line_nos)
             )
+
+        sources = []
+        for source in issue.pop("sources", []):
+            sources.append(yarl.URL(source))
+
         expected_issues.append(
-            Issue(**{"addon_path": addon_path, "locations": locations, **issue})
+            Issue(
+                **{
+                    "addon_path": addon_path,
+                    "locations": locations,
+                    "sources": sources,
+                    **issue,
+                }
+            )
         )
 
     actual_issues = list(

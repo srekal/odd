@@ -13,6 +13,7 @@ from odin.checks.addon import (
     ManifestFilename,
     ManifestKeys,
     RouteKwargs,
+    TrackVisibilityAlways,
 )
 from odin.checks.xml import NoUpdate, SearchString, TreeString
 from odin.const import SUPPORTED_VERSIONS
@@ -34,6 +35,7 @@ def get_checks(
         "no_update": NoUpdate,
         "route_kwargs": RouteKwargs,
         "search_string": SearchString,
+        "track_visibility_always": TrackVisibilityAlways,
         "tree_string": TreeString,
     }
     return (

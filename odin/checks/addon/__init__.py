@@ -5,6 +5,7 @@ from .manifest_filename import ManifestFilename
 from .manifest_keys import ManifestKeys
 from .permissions import DirectoryPermissions, FilePermissions
 from .route_kwargs import RouteKwargs
+from .track_visibility_always import TrackVisibilityAlways
 
 __all__ = [
     "ButtonClasses",
@@ -15,4 +16,5 @@ __all__ = [
     "ManifestFilename",
     "ManifestKeys",
     "RouteKwargs",
+    "TrackVisibilityAlways",
 ]
