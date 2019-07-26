@@ -1,14 +1,8 @@
-import ast
-import logging
-import sys
-
+import parso
 from odin.checks import FileCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue, Location
-from odin.utils import expand_version_list, lookup_version_list
-
-_logger = logging.getLogger(__name__)
-
+from odin.utils import expand_version_list, extract_func_name, lookup_version_list, walk
 
 ROUTE_KWARG_VERSION_MAP = {
     ">=8": ["auth", "methods", "multilang", "type", "website"],
@@ -28,43 +22,30 @@ class RouteKwargs(FileCheck):
             return
 
         with filename.open(mode="rt") as f:
-            try:
-                tree = ast.parse(f.read())
-            except SyntaxError as exc:
-                _logger.warning(
-                    "A syntax error occurred while parsing Python module: %s. "
-                    "It either contains syntax errors or was written for a different "
-                    "Python version (ours is %s).",
-                    filename,
-                    ".".join(map(str, sys.version_info[:3])),
-                )
-                return
+            module = parso.parse(f.read())
 
-            for node in ast.walk(tree):
-                if not isinstance(node, ast.FunctionDef):
+            for node in walk(module):
+                if node.type != "decorator":
                     continue
 
-                for dec_node in node.decorator_list:
-                    if not isinstance(dec_node, ast.Call):
-                        continue
-                    elif not dec_node.keywords:
-                        continue
+                name_parts = extract_func_name(node)
+                if (len(name_parts) == 1 and name_parts[0] != "route") or (
+                    len(name_parts) == 2
+                    and (name_parts[0] != "http" or name_parts[1] != "route")
+                ):
+                    continue
 
-                    if isinstance(dec_node.func, ast.Name):
-                        dec_name = dec_node.func.id
-                    else:
-                        dec_name = dec_node.func.attr
+                kwargs = {
+                    c.children[0].value: (c.children[0].line, c.children[0].start_pos)
+                    for c in walk(node)
+                    if c.type == "argument"
+                }
 
-                    if dec_name != "route":
-                        continue
-
-                    for kw in {kw.arg for kw in dec_node.keywords} - ROUTE_KWARGS[
-                        addon.version
-                    ]:
-                        yield Issue(
-                            "unknown_route_kwarg",
-                            f'Controller method `{node.name}` has an unknown `route()` keyword argument "{kw}"',
-                            addon.addon_path,
-                            [Location(filename, [dec_node.lineno])],
-                            categories=["correctness"],
-                        )
+                for kw in kwargs.keys() - ROUTE_KWARGS[addon.version]:
+                    yield Issue(
+                        "unknown_route_kwarg",
+                        f'Unknown `http.route()` keyword argument "{kw}"',
+                        addon.addon_path,
+                        [Location(filename, [kwargs[kw][0]])],
+                        categories=["correctness"],
+                    )

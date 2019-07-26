@@ -133,3 +133,24 @@ def expand_version_list(
             version_map, version, result_cls=result_cls
         )
     return result
+
+
+def walk(node):
+    yield node
+    try:
+        children = node.children
+    except AttributeError:
+        pass
+    else:
+        for child in children:
+            yield from walk(child)
+
+
+def extract_func_name(node):
+    name_parts = []
+    for child in walk(node):
+        if child.type == "operator" and child.value == "(":
+            break
+        elif child.type == "name":
+            name_parts.append(child.value)
+    return name_parts
