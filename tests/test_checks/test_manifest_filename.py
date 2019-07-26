@@ -1,5 +1,4 @@
 import pytest
-import yarl
 from odin.checks.addon import ManifestFilename
 
 from ..common import run_check_test
@@ -17,9 +16,7 @@ from ..common import run_check_test
                     "locations": [(["__openerp__.py"], [])],
                     "categories": ["deprecated"],
                     "sources": [
-                        yarl.URL(
-                            "https://github.com/odoo/odoo/commit/4339196e5231aa734a0154e2f4e88b2e54f27d48"
-                        )
+                        "https://github.com/odoo/odoo/commit/4339196e5231aa734a0154e2f4e88b2e54f27d48"
                     ],
                 }
             ],

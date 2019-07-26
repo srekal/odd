@@ -1,5 +1,4 @@
 import pytest
-import yarl
 from odin.checks.addon import ButtonClasses
 
 from ..common import run_check_test
@@ -17,9 +16,7 @@ from ..common import run_check_test
                     "categories": ["maintainability", "deprecated"],
                     "locations": [(["views", "foo.xml"], [11])],
                     "sources": [
-                        yarl.URL(
-                            "https://github.com/odoo/odoo/blob/1e5fbb8e5bf0e0458d83a399b2b59d03a601e86a/addons/web/static/src/js/core/dom.js#L340-L345"
-                        )
+                        "https://github.com/odoo/odoo/blob/1e5fbb8e5bf0e0458d83a399b2b59d03a601e86a/addons/web/static/src/js/core/dom.js#L340-L345"
                     ],
                 },
                 {
@@ -28,9 +25,7 @@ from ..common import run_check_test
                     "locations": [(["views", "foo.xml"], [23])],
                     "categories": ["maintainability", "deprecated"],
                     "sources": [
-                        yarl.URL(
-                            "https://github.com/odoo/odoo/blob/1e5fbb8e5bf0e0458d83a399b2b59d03a601e86a/addons/web/static/src/js/core/dom.js#L340-L345"
-                        )
+                        "https://github.com/odoo/odoo/blob/1e5fbb8e5bf0e0458d83a399b2b59d03a601e86a/addons/web/static/src/js/core/dom.js#L340-L345"
                     ],
                 },
             ],
