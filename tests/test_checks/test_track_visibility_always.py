@@ -15,7 +15,7 @@ from ..common import run_check_test
                     "slug": "track_visibility_always_deprecated",
                     "description": 'Field `track_visibility` attribute value "always" is deprecated since version 12.0',
                     "categories": ["deprecated"],
-                    "locations": [(["models", "foo.py"], [10])],
+                    "locations": [(["models", "foo.py"], [(10, 8)])],
                     "sources": [
                         "https://github.com/odoo/odoo/commit/c99de4551583e801ecc6669ac456c4f7e2eef1da"
                     ],

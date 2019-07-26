@@ -4,6 +4,7 @@ import pathlib
 import typing
 
 import yarl
+import parso
 from odin.addon import AddonPath
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue
@@ -154,3 +155,7 @@ def extract_func_name(node):
         elif child.type == "name":
             name_parts.append(child.value)
     return name_parts
+
+
+def get_string_node_value(node: parso.python.tree.String) -> str:
+    return node._get_payload()

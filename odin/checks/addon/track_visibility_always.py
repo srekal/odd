@@ -1,8 +1,8 @@
-import ast
+import parso
 
 from odin.checks import FileCheck
 from odin.issue import Issue, Location
-from odin.utils import odoo_commit_url
+from odin.utils import odoo_commit_url, walk, get_string_node_value
 
 
 class TrackVisibilityAlways(FileCheck):
@@ -10,22 +10,24 @@ class TrackVisibilityAlways(FileCheck):
         if addon.version < 12 or filename.suffix.lower() != ".py":
             return
 
-        with filename.open(mode="rb") as f:
-            tree = ast.parse(f.read())
-
-            for node in ast.walk(tree):
-                if not isinstance(node, ast.keyword):
+        with filename.open(mode="r") as f:
+            module = parso.parse(f.read())
+            for node in walk(module):
+                if node.type != "argument":
                     continue
                 if (
-                    node.arg == "track_visibility"
-                    and isinstance(node.value, ast.Str)
-                    and node.value.s == "always"
+                    node.children[0].type == "name"
+                    and node.children[0].value == "track_visibility"
+                    and node.children[1].type == "operator"
+                    and node.children[1].value == "="
+                    and node.children[2].type == "string"
+                    and get_string_node_value(node.children[2]) == "always"
                 ):
                     yield Issue(
                         "track_visibility_always_deprecated",
                         'Field `track_visibility` attribute value "always" is deprecated since version 12.0',
                         addon.addon_path,
-                        [Location(filename, [node.value.lineno])],
+                        [Location(filename, [node.start_pos])],
                         categories=["deprecated"],
                         sources=[
                             odoo_commit_url("c99de4551583e801ecc6669ac456c4f7e2eef1da")
