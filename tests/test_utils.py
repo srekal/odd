@@ -24,6 +24,12 @@ TEST_ADDON_PATH = AddonPath(TEST_MANIFEST_PATH)
             ),
             "baz (__manifest__.py, lines: 2, 10): bar",
         ),
+        (
+            Issue(
+                "foo", "bar", TEST_ADDON_PATH, [Location(TEST_MANIFEST_PATH, [(2, 10)])]
+            ),
+            "baz (__manifest__.py, line: 2, column: 10): bar",
+        ),
     ],
 )
 def test_format_issue(issue, expected):
@@ -31,9 +37,9 @@ def test_format_issue(issue, expected):
     assert actual == expected
 
 
-
 @pytest.mark.parametrize(
-    "version_map, version, expected", [
+    "version_map, version, expected",
+    [
         ({"==8": ["a"]}, 8, ["a"]),
         ({"==8": ["a"]}, 9, []),
         ({"==8": ["a"], "<10": ["b"]}, 9, ["b"]),

@@ -8,7 +8,9 @@ from odin.addon import AddonPath
 @dataclasses.dataclass
 class Location:
     path: pathlib.Path
-    line_numbers: typing.List[int] = dataclasses.field(default_factory=list)
+    line_numbers: typing.List[
+        typing.Union[int, typing.Tuple[int, int]]
+    ] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass

@@ -59,6 +59,13 @@ def get_addon_files(addon_path: AddonPath):
     yield from list_files(addon_path.path)
 
 
+def _fmt_line_no(line_no: typing.Union[int, typing.Tuple[int, int]]) -> str:
+    if isinstance(line_no, tuple):
+        return "%d, column: %d" % (line_no[0], line_no[1])
+    else:
+        return "%d" % line_no
+
+
 def format_issue(issue: Issue) -> str:
     locations = []
     if issue.locations:
@@ -68,10 +75,12 @@ def format_issue(issue: Issue) -> str:
             if location.line_numbers:
                 if len(location.line_numbers) > 1:
                     line_numbers = ", lines: %s" % (
-                        ", ".join(str(line_no) for line_no in location.line_numbers)
+                        ", ".join(
+                            _fmt_line_no(line_no) for line_no in location.line_numbers
+                        )
                     )
                 else:
-                    line_numbers = ", line: %s" % location.line_numbers[0]
+                    line_numbers = ", line: %s" % _fmt_line_no(location.line_numbers[0])
 
             locations.append(f"{relative_path!s}{line_numbers}")
 
@@ -136,7 +145,9 @@ def expand_version_list(
     return result
 
 
-def walk(node):
+def walk(
+    node: parso.tree.NodeOrLeaf
+) -> typing.Generator[parso.tree.NodeOrLeaf, None, None]:
     yield node
     try:
         children = node.children
@@ -147,7 +158,7 @@ def walk(node):
             yield from walk(child)
 
 
-def extract_func_name(node):
+def extract_func_name(node: parso.tree.NodeOrLeaf) -> typing.List[str]:
     name_parts = []
     for child in walk(node):
         if child.type == "operator" and child.value == "(":
