@@ -1,5 +1,6 @@
 import argparse
 import collections
+import logging
 import pathlib
 import typing
 
@@ -9,6 +10,8 @@ from odin.checks import AddonCheck, FileCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.typedefs import OdooVersion
 from odin.utils import format_issue, get_addon_files
+
+_LOG = logging.getLogger(__name__)
 
 
 def get_checks(
