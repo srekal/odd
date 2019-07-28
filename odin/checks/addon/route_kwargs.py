@@ -2,7 +2,7 @@ import parso
 from odin.checks import FileCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue, Location
-from odin.utils import expand_version_list, extract_func_name, lookup_version_list, walk
+from odin.utils import expand_version_list, extract_func_name, walk
 
 ROUTE_KWARG_VERSION_MAP = {
     ">=8": ["auth", "methods", "multilang", "type", "website"],
