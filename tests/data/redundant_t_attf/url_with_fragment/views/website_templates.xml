@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="foo" name="Foo">
+    <a t-attf-href="/web/login?redirect=1#login" class="mb-2">a</a>
+</template>
+
+</odoo>
