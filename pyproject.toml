@@ -46,6 +46,7 @@ dev = [
 odin = "odin.main:main"
 
 [tool.flit.entrypoints."odin.check"]
+attribute_override = "odin.checks.xml:AttributeOverride"
 button_classes = "odin.checks.addon:ButtonClasses"
 data_file_inclusion = "odin.checks.addon:DataFileInclusion"
 directory_permissions = "odin.checks.addon:DirectoryPermissions"
