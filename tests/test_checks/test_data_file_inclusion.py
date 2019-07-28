@@ -1,5 +1,4 @@
 import pytest
-from odin.checks.addon import DataFileInclusion
 
 from ..common import run_check_test
 
@@ -27,6 +26,5 @@ def test_data_file_inclusion(test_data_dir, addon_name, expected):
         "data_file_inclusion",
         (addon_name, "__manifest__.py"),
         12,
-        DataFileInclusion,
         expected,
     )

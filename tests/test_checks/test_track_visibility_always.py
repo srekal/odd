@@ -1,5 +1,4 @@
 import pytest
-from odin.checks.addon import TrackVisibilityAlways
 
 from ..common import run_check_test
 
@@ -31,6 +30,5 @@ def test_track_visibility_always(test_data_dir, addon_name, version, expected):
         "track_visibility_always",
         (addon_name, "__manifest__.py"),
         version,
-        TrackVisibilityAlways,
         expected,
     )

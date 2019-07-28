@@ -4,12 +4,10 @@ import yarl
 
 from odin.addon import AddonPath
 from odin.issue import Issue, Location
-from odin.main import check_addon
+from odin.main import check_addon, get_checks
 
 
-def run_check_test(
-    data_dir, check_name, manifest_path_parts, version, check_cls, issues
-):
+def run_check_test(data_dir, check_name, manifest_path_parts, version, issues):
     manifest_path = data_dir.joinpath(check_name, *manifest_path_parts)
     addon_path = AddonPath(manifest_path)
     expected_issues = []
@@ -36,7 +34,7 @@ def run_check_test(
         )
 
     actual_issues = list(
-        check_addon(manifest_path, {check_name: check_cls}, version=version)
+        check_addon(manifest_path, get_checks({check_name}), version=version)
     )
 
     assert expected_issues == actual_issues

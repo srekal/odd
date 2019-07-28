@@ -1,21 +1,11 @@
 import argparse
+import collections
 import pathlib
 import typing
 
+import pkg_resources
 from odin.addon import Addon, AddonPath, discover_addons, parse_manifest
 from odin.checks import AddonCheck, FileCheck
-from odin.checks.addon import (
-    ButtonClasses,
-    DataFileInclusion,
-    DirectoryPermissions,
-    FilePermissions,
-    IrModelAccessNoGroup,
-    ManifestFilename,
-    ManifestKeys,
-    RouteKwargs,
-    TrackVisibilityAlways,
-)
-from odin.checks.xml import NoUpdate, SearchString, TreeString
 from odin.const import SUPPORTED_VERSIONS
 from odin.typedefs import OdooVersion
 from odin.utils import format_issue, get_addon_files
@@ -24,25 +14,29 @@ from odin.utils import format_issue, get_addon_files
 def get_checks(
     whitelist: typing.Optional[typing.Iterable[str]] = None
 ) -> typing.Dict[str, typing.Union[AddonCheck, FileCheck]]:
-    checks = {
-        "button_classes": ButtonClasses,
-        "data_file_inclusion": DataFileInclusion,
-        "directory_permissions": DirectoryPermissions,
-        "file_permissions": FilePermissions,
-        "ir_model_access_no_group": IrModelAccessNoGroup,
-        "manifest_filename": ManifestFilename,
-        "manifest_keys": ManifestKeys,
-        "no_update": NoUpdate,
-        "route_kwargs": RouteKwargs,
-        "search_string": SearchString,
-        "track_visibility_always": TrackVisibilityAlways,
-        "tree_string": TreeString,
-    }
-    return (
-        {name: cls_ for name, cls_ in checks.items() if name in whitelist}
-        if whitelist
-        else checks
-    )
+    whitelist = set([] if whitelist is None else whitelist)
+    use_whitelist = bool(whitelist)
+    checks = collections.OrderedDict()
+    for entry_point in pkg_resources.iter_entry_points("odin.check"):
+        check_name = entry_point.name
+        if whitelist and check_name not in whitelist:
+            continue
+
+        try:
+            check_cls = entry_point.load()
+        except Exception:  # pylint: disable=broad-except
+            _LOG.exception('An error occured while loading check "%s".', check_name)
+        else:
+            checks[check_name] = check_cls
+        finally:
+            whitelist.discard(check_name)
+            if use_whitelist and not whitelist:
+                break
+
+    for check_name in whitelist:
+        raise KeyError(f'Check "{check_name}" not found.')
+
+    return checks
 
 
 def check_addon(

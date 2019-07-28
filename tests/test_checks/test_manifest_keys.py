@@ -1,5 +1,4 @@
 import pytest
-from odin.checks.addon import ManifestKeys
 
 from ..common import run_check_test
 
@@ -56,10 +55,5 @@ from ..common import run_check_test
 )
 def test_file_permissions(test_data_dir, addon_name, expected):
     run_check_test(
-        test_data_dir,
-        "manifest_keys",
-        (addon_name, "__manifest__.py"),
-        12,
-        ManifestKeys,
-        expected,
+        test_data_dir, "manifest_keys", (addon_name, "__manifest__.py"), 12, expected
     )

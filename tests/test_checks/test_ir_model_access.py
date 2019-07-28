@@ -1,7 +1,5 @@
 import pytest
 
-from odin.checks.addon import IrModelAccessNoGroup
-
 from ..common import run_check_test
 
 
@@ -27,6 +25,5 @@ def test_data_file_inclusion(test_data_dir, addon_name, expected):
         "ir_model_access_no_group",
         (addon_name, "__manifest__.py"),
         12,
-        IrModelAccessNoGroup,
         expected,
     )

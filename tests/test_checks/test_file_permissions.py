@@ -1,5 +1,4 @@
 import pytest
-from odin.checks.addon import FilePermissions
 
 from ..common import run_check_test
 
@@ -22,10 +21,5 @@ from ..common import run_check_test
 )
 def test_file_permissions(test_data_dir, addon_name, expected):
     run_check_test(
-        test_data_dir,
-        "file_permissions",
-        ("__manifest__.py",),
-        12,
-        FilePermissions,
-        expected,
+        test_data_dir, "file_permissions", ("__manifest__.py",), 12, expected
     )

@@ -1,5 +1,4 @@
 import pytest
-from odin.checks.addon import RouteKwargs
 
 from ..common import run_check_test
 
@@ -33,6 +32,5 @@ def test_route_kwargs(test_data_dir, addon_name, version, expected):
         "route_kwargs",
         (addon_name, "__manifest__.py"),
         version,
-        RouteKwargs,
         expected,
     )

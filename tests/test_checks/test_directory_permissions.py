@@ -1,5 +1,4 @@
 import pytest
-from odin.checks.addon import DirectoryPermissions
 
 from ..common import run_check_test
 
@@ -22,10 +21,5 @@ from ..common import run_check_test
 )
 def test_directory_permissions(test_data_dir, addon_name, expected):
     run_check_test(
-        test_data_dir,
-        "directory_permissions",
-        ("__manifest__.py",),
-        12,
-        DirectoryPermissions,
-        expected,
+        test_data_dir, "directory_permissions", ("__manifest__.py",), 12, expected
     )
