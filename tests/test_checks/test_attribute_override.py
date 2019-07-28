@@ -8,7 +8,7 @@ from ..common import run_check_test
     [
         (
             "in_openerp_data",
-            8,
+            9,
             [
                 {
                     "slug": "attribute_override",

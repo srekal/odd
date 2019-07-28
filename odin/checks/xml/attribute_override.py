@@ -5,7 +5,7 @@ from odin.xmlutils import get_root
 
 class AttributeOverride(FileCheck):
     def check(self, filename, addon):
-        if filename.suffix.lower() != ".xml":
+        if addon.version < 9 or filename.suffix.lower() != ".xml":
             return
         if filename not in addon.data_files and filename not in addon.demo_files:
             return
