@@ -1,5 +1,4 @@
 import pytest
-from odin.checks.xml import SearchString
 
 from ..common import run_check_test
 
@@ -21,6 +20,4 @@ from ..common import run_check_test
     ],
 )
 def test_search_string(test_data_dir, addon_name, expected):
-    run_check_test(
-        test_data_dir, "search_string", ("__manifest__.py",), 12, SearchString, expected
-    )
+    run_check_test(test_data_dir, "search_string", ("__manifest__.py",), 12, expected)

@@ -1,5 +1,4 @@
 import pytest
-from odin.checks.xml import TreeString
 
 from ..common import run_check_test
 
@@ -33,10 +32,5 @@ from ..common import run_check_test
 )
 def test_tree_string(test_data_dir, addon_name, expected):
     run_check_test(
-        test_data_dir,
-        "tree_string",
-        (addon_name, "__manifest__.py"),
-        12,
-        TreeString,
-        expected,
+        test_data_dir, "tree_string", (addon_name, "__manifest__.py"), 12, expected
     )

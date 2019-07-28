@@ -1,5 +1,4 @@
 import pytest
-from odin.checks.xml import NoUpdate
 
 from ..common import run_check_test
 
@@ -35,10 +34,5 @@ from ..common import run_check_test
 )
 def test_noupdate(test_data_dir, addon_name, expected):
     run_check_test(
-        test_data_dir,
-        "noupdate",
-        (addon_name, "__manifest__.py"),
-        12,
-        NoUpdate,
-        expected,
+        test_data_dir, "noupdate", (addon_name, "__manifest__.py"), 12, expected
     )

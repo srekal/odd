@@ -1,5 +1,4 @@
 import pytest
-from odin.checks.addon import ButtonClasses
 
 from ..common import run_check_test
 
@@ -33,11 +32,4 @@ from ..common import run_check_test
     ],
 )
 def test_button_classes(test_data_dir, addon_name, expected):
-    run_check_test(
-        test_data_dir,
-        "button_classes",
-        ("__manifest__.py",),
-        12,
-        ButtonClasses,
-        expected,
-    )
+    run_check_test(test_data_dir, "button_classes", ("__manifest__.py",), 12, expected)

@@ -44,3 +44,17 @@ dev = [
 
 [tool.flit.scripts]
 odin = "odin.main:main"
+
+[tool.flit.entrypoints."odin.check"]
+button_classes = "odin.checks.addon:ButtonClasses"
+data_file_inclusion = "odin.checks.addon:DataFileInclusion"
+directory_permissions = "odin.checks.addon:DirectoryPermissions"
+file_permissions = "odin.checks.addon:FilePermissions"
+ir_model_access_no_group = "odin.checks.addon:IrModelAccessNoGroup"
+manifest_filename = "odin.checks.addon:ManifestFilename"
+manifest_keys = "odin.checks.addon:ManifestKeys"
+noupdate = "odin.checks.xml:NoUpdate"
+route_kwargs = "odin.checks.addon:RouteKwargs"
+search_string = "odin.checks.xml:SearchString"
+track_visibility_always = "odin.checks.addon:TrackVisibilityAlways"
+tree_string = "odin.checks.xml:TreeString"

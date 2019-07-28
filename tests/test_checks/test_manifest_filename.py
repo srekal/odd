@@ -1,5 +1,4 @@
 import pytest
-from odin.checks.addon import ManifestFilename
 
 from ..common import run_check_test
 
@@ -25,10 +24,5 @@ from ..common import run_check_test
 )
 def test_manifest_filename(test_data_dir, addon_name, expected):
     run_check_test(
-        test_data_dir,
-        "manifest_filename",
-        ("__openerp__.py",),
-        10,
-        ManifestFilename,
-        expected,
+        test_data_dir, "manifest_filename", ("__openerp__.py",), 10, expected
     )
