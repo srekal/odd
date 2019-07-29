@@ -1,7 +1,4 @@
-import pathlib
-
-from odin.addon import Addon
-from odin.checks import FileCheck
+from odin.checks import XMLCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue, Location
 from odin.xmlutils import get_model_records, get_root, get_view_arch
@@ -52,7 +49,13 @@ SEMANTIC_ELEMENTS = {
 HTML_ELEMENTS = {
     "a",
     "abbr",
+    "address",
+    "area",
+    "base",
+    "bdi",
+    "bdo",
     "button",
+    "caption",
     "p",
     "div",
     "span",
@@ -86,7 +89,6 @@ HTML_ELEMENTS = {
     "script",
     "link",
     "iframe",
-    "address",
     "hr",
     "style",
     "audio",
@@ -123,8 +125,56 @@ HTML_ELEMENTS = {
     "picture",
     *SEMANTIC_ELEMENTS,
 }
-DEPRECATED_HTML_ELEMENTS = {"big", "font", "strike"}
+DEPRECATED_HTML_ELEMENTS = {
+    "acronym",
+    "applet",
+    "basefont",
+    "bgsound",
+    "big",
+    "blink",
+    "font",
+    "strike",
+}
 ODOO_ELEMENTS = {"xpath", "t", "attribute"}
+
+
+ODOO_ATTRS = {"position", "groups"}
+
+ODOO_ELEMENT_ATTR_VERSION_MAP = {
+    "xpath": {">=8": {"expr", "position"}},
+    "attribute": {">=8": {"name"}, ">=9": {"add", "remove", "separator"}},
+    "t": {
+        ">=8": {
+            "t-if",
+            "t-foreach",
+            "t-as",
+            "t-set",
+            "t-value",
+            "t-valuef",
+            "t-call",
+            "t-esc",
+            "t-esc-options",
+            "t-raw",
+            "t-lang",
+            "t-debug",
+            "t-call-assets",
+            "t-js",
+            "t-css",
+            "t-ignore",
+            "t-placeholder",
+            "t-translation",
+            # Extension
+            "position",
+        },
+        ">=9": {"t-snippet", "t-thumbnail"},
+        ">=10": {"t-else", "t-elif", "t-options"},
+        ">=11": {"t-install"},
+    },
+}
+ODOO_ELEMENT_ATTRS = {
+    tag: expand_version_list(version_map, *SUPPORTED_VERSIONS, result_cls=set)
+    for tag, version_map in ODOO_ELEMENT_ATTR_VERSION_MAP.items()
+}
 
 KNOWN_ATTRS = {
     "svg": {"height", "preserveAspectRatio", "viewBox", "width", "x", "y"},
@@ -216,7 +266,22 @@ KNOWN_ATTRS = {
         "target",
         "type",
     },
-    "p": {"t-field", "t-options"},
+    "area": {
+        "alt",
+        "coords",
+        "download",
+        "href",
+        "hreflang",
+        "ping",
+        "referrerpolicy",
+        "rel",
+        "shape",
+        "target",
+    },
+    "audio": {"autoplay", "controls", "crossorigin", "loop", "muted", "preload", "src"},
+    "base": {"href", "target"},
+    "bdo": {"dir"},
+    "caption": {"align"},
     "script": {
         "async",
         "charset",
@@ -228,8 +293,6 @@ KNOWN_ATTRS = {
         "src",
         "type",
     },
-    "h2": {"t-field"},
-    "xpath": {"expr", "position"},
     "link": {
         "as",
         "crossorigin",
@@ -245,10 +308,7 @@ KNOWN_ATTRS = {
     },
     "td": {"colspan", "headers", "rowspan"},
     "th": {"abbr", "colspan", "headers", "rowspan", "scope", "sorted"},
-    "div": {},
-    "span": {"t-field", "t-esc", "t-options"},
     "label": {"for", "form"},
-    "attribute": {"name"},
     "input": {
         "accept",
         "align",
@@ -291,6 +351,7 @@ DEPRECATED_ATTRIBUTES = {
     "body": {"alink", "background", "bgcolor", "link", "text", "vlink"},
     "img": {"align", "border", "hspace", "vspace"},
     "a": {"charset", "coords", "name", "rev", "shape"},
+    "area": {"accesskey", "name", "nohref", "tabindex", "type"},
     "table": {
         "align",
         "bgcolor",
@@ -379,37 +440,8 @@ ARIA_ATTRS = {
     "aria-current",
     "aria-selected",
     "aria-haspopup",
+    "aria-disabled",
 }
-
-ODOO_ATTRS = {"position", "groups"}
-
-T_ATTR_VERSION_MAP = {
-    ">=8": {
-        "t-if",
-        "t-foreach",
-        "t-as",
-        "t-set",
-        "t-value",
-        "t-valuef",
-        "t-call",
-        "t-esc",
-        "t-esc-options",
-        "t-raw",
-        "t-lang",
-        "t-debug",
-        "t-call-assets",
-        "t-js",
-        "t-css",
-        "t-ignore",
-        "t-placeholder",
-        # Extension
-        "position",
-    },
-    ">=9": {"t-snippet", "t-thumbnail"},
-    ">=10": {"t-else", "t-elif", "t-options"},
-    ">=11": {"t-install"},
-}
-T_ATTRS = expand_version_list(T_ATTR_VERSION_MAP, *SUPPORTED_VERSIONS, result_cls=set)
 
 HTML_ELEMENT_T_ATTRS_VERSION_MAP = {
     "t-if": {">=8": HTML_ELEMENTS},
@@ -432,6 +464,7 @@ HTML_ELEMENT_T_ATTRS_VERSION_MAP = {
             "p",
             "section",
             "label",
+            "dl",
         }
     },
     "t-as": {
@@ -451,7 +484,7 @@ HTML_ELEMENT_T_ATTRS_VERSION_MAP = {
         }
     },
     "t-options": {">=10": {"div", "h1", "h2", "h3", "h4", "h5", "h6", "b"}},
-    "t-ignore": {">=8": {"li", "link", "a", "div"}},
+    "t-ignore": {">=8": HTML_ELEMENTS},
 }
 HTML_ELEMENT_T_ATTRS = {}
 for attr, version_map in HTML_ELEMENT_T_ATTRS_VERSION_MAP.items():
@@ -460,14 +493,11 @@ for attr, version_map in HTML_ELEMENT_T_ATTRS_VERSION_MAP.items():
     )
 
 
-class Attrs(FileCheck):
-    def check(self, filename: pathlib.Path, addon: Addon):
-        if filename.suffix.lower() != ".xml":
-            return
+class Attrs(XMLCheck):
+    def check(self, addon, filename, tree):
         if filename not in addon.data_files and filename not in addon.demo_files:
             return
-        root = get_root(filename)
-        for template in root.xpath("//template"):
+        for template in tree.xpath("//template"):
             for el in template.xpath(".//*"):
                 tag = el.tag.lower()
 
@@ -480,6 +510,8 @@ class Attrs(FileCheck):
                             [Location(filename, [el.sourceline])],
                             categories=["deprecated", "correctness"],
                         )
+                    elif el.getparent().tag.lower() == "svg":
+                        pass
                     else:
                         yield Issue(
                             "unknown_html_element",
@@ -488,7 +520,7 @@ class Attrs(FileCheck):
                             [Location(filename, [el.sourceline])],
                             categories=["correctness"],
                         )
-                        continue
+                    continue
 
                 allowed_attrs = set()
                 if tag in HTML_ELEMENTS:
@@ -555,8 +587,17 @@ class Attrs(FileCheck):
                         continue
                     if attr.startswith("t-as-") and "t-foreach" in el.attrib:
                         continue
-                    if tag == "t" and attr in T_ATTRS[addon.version]:
-                        continue
+
+                    if tag in ODOO_ELEMENT_ATTRS:
+                        known_odoo_element_attrs = ODOO_ELEMENT_ATTRS[tag].get(
+                            addon.version, set()
+                        )
+                        # Extra `t-` attribute for snippets.
+                        if addon.version >= 11 and "t-thumbnail" in el.attrib:
+                            known_odoo_element_attrs.add("string")
+                        if attr in known_odoo_element_attrs:
+                            continue
+
                     if attr in ODOO_ATTRS:
                         continue
                     if (
@@ -570,7 +611,7 @@ class Attrs(FileCheck):
                 for unknown_attr in unknown_attrs:
                     yield Issue(
                         "unknown_attribute",
-                        f"`<{el.tag}>` has an unknown attribute `{unknown_attr}``",
+                        f"`<{el.tag}>` has an unknown attribute `{unknown_attr}`",
                         addon.addon_path,
                         [Location(filename, [el.sourceline])],
                         categories=["correctness"],
