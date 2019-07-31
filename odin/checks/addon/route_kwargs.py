@@ -1,5 +1,4 @@
-import parso
-from odin.checks import FileCheck
+from odin.checks import PythonCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue, Location
 from odin.utils import expand_version_list, extract_func_name, walk
@@ -16,36 +15,30 @@ ROUTE_KWARGS = expand_version_list(
 )
 
 
-class RouteKwargs(FileCheck):
-    def check(self, filename, addon):
-        if filename.suffix.lower() != ".py":
-            return
+class RouteKwargs(PythonCheck):
+    def check(self, filename, module, addon):
+        for node in walk(module):
+            if node.type != "decorator":
+                continue
 
-        with filename.open(mode="rt") as f:
-            module = parso.parse(f.read())
+            name_parts = extract_func_name(node)
+            if (len(name_parts) == 1 and name_parts[0] != "route") or (
+                len(name_parts) == 2
+                and (name_parts[0] != "http" or name_parts[1] != "route")
+            ):
+                continue
 
-            for node in walk(module):
-                if node.type != "decorator":
-                    continue
+            kwargs = {
+                c.children[0].value: (c.children[0].line, c.children[0].start_pos)
+                for c in walk(node)
+                if c.type == "argument"
+            }
 
-                name_parts = extract_func_name(node)
-                if (len(name_parts) == 1 and name_parts[0] != "route") or (
-                    len(name_parts) == 2
-                    and (name_parts[0] != "http" or name_parts[1] != "route")
-                ):
-                    continue
-
-                kwargs = {
-                    c.children[0].value: (c.children[0].line, c.children[0].start_pos)
-                    for c in walk(node)
-                    if c.type == "argument"
-                }
-
-                for kw in kwargs.keys() - ROUTE_KWARGS[addon.version]:
-                    yield Issue(
-                        "unknown_route_kwarg",
-                        f'Unknown `http.route()` keyword argument "{kw}"',
-                        addon.addon_path,
-                        [Location(filename, [kwargs[kw][0]])],
-                        categories=["correctness"],
-                    )
+            for kw in kwargs.keys() - ROUTE_KWARGS[addon.version]:
+                yield Issue(
+                    "unknown_route_kwarg",
+                    f'Unknown `http.route()` keyword argument "{kw}"',
+                    addon.addon_path,
+                    [Location(filename, [kwargs[kw][0]])],
+                    categories=["correctness"],
+                )

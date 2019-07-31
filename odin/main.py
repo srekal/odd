@@ -4,9 +4,10 @@ import logging
 import pathlib
 import typing
 
+import parso
 import pkg_resources
 from odin.addon import Addon, AddonPath, discover_addons, parse_manifest
-from odin.checks import AddonCheck, FileCheck
+from odin.checks import AddonCheck, FileCheck, PythonCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.typedefs import OdooVersion
 from odin.utils import format_issue, get_addon_files
@@ -16,7 +17,7 @@ _LOG = logging.getLogger(__name__)
 
 def get_checks(
     whitelist: typing.Optional[typing.Iterable[str]] = None
-) -> typing.Dict[str, typing.Union[AddonCheck, FileCheck]]:
+) -> typing.Dict[str, typing.Union[AddonCheck, FileCheck, PythonCheck]]:
     whitelist = set([] if whitelist is None else whitelist)
     use_whitelist = bool(whitelist)
     checks = collections.OrderedDict()
@@ -44,18 +45,22 @@ def get_checks(
 
 def check_addon(
     manifest_path: pathlib.Path,
-    checks: typing.Mapping[str, typing.Type[typing.Union[AddonCheck, FileCheck]]],
+    checks: typing.Mapping[
+        str, typing.Type[typing.Union[AddonCheck, FileCheck, PythonCheck]]
+    ],
     *,
     version: typing.Optional[OdooVersion] = None,
 ):
     addon_path = AddonPath(manifest_path)
-    addon_checks, file_checks = {}, {}
+    addon_checks, file_checks, python_checks = {}, {}, {}
 
     for check_name, check_cls in checks.items():
         if issubclass(check_cls, AddonCheck):
             addon_checks[check_name] = check_cls()
         elif issubclass(check_cls, FileCheck):
             file_checks[check_name] = check_cls()
+        elif issubclass(check_cls, PythonCheck):
+            python_checks[check_name] = check_cls()
         else:
             raise TypeError(f"Unsupported check class: {check_cls}")
 
@@ -68,6 +73,7 @@ def check_addon(
         )
 
     addon = Addon(manifest_path, manifest, version)
+    grammar = parso.load_grammar(version="2.7" if addon.version < 11 else "3.5")
 
     for addon_check in addon_checks.values():
         yield from addon_check.check(addon)
@@ -75,6 +81,12 @@ def check_addon(
     for file_path in get_addon_files(addon.addon_path):
         for file_check in file_checks.values():
             yield from file_check.check(file_path, addon)
+
+        if file_path.suffix.lower() == ".py":
+            with file_path.open(mode="rb") as f:
+                module = grammar.parse(f.read())
+            for python_check in python_checks.values():
+                yield from python_check.check(file_path, module, addon)
 
 
 def main():
