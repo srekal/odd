@@ -1,10 +1,10 @@
 import typing
 
 import parso
-from odin.checks import FileCheck
+from odin.checks import PythonCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue, Location
-from odin.utils import expand_version_list, get_string_node_value, odoo_commit_url, walk
+from odin.utils import expand_version_list, get_string_node_value
 
 FIELD_TYPE_VERSION_MAP = expand_version_list(
     {
@@ -211,7 +211,7 @@ def consume_name(
     return name_parts, leftover_nodes
 
 
-class FieldAttrs(FileCheck):
+class FieldAttrs(PythonCheck):
     def _check_field_node(
         self, filename, addon, node, model_name: str, field_name: str, field_type: str
     ):
@@ -268,59 +268,52 @@ class FieldAttrs(FileCheck):
                 categories=["correctness"],
             )
 
-    def check(self, filename, addon):
-        if filename.suffix.lower() != ".py":
-            return
+    def check(self, filename, module, addon):
+        for classdef in module.iter_classdefs():
+            model_name = get_model_name(classdef)
+            if model_name is None:
+                continue
 
-        with filename.open(mode="r") as f:
-            grammar = parso.load_grammar(version="2.7" if addon.version < 11 else "3.5")
-            module = grammar.parse(f.read())
-
-            for classdef in module.iter_classdefs():
-                model_name = get_model_name(classdef)
-                if model_name is None:
+            suite = classdef.get_suite()
+            for node in filter_child_nodes(suite, "simple_stmt"):
+                expr_stmt_node = first_child_type_node(node, "expr_stmt")
+                if expr_stmt_node is None:
                     continue
 
-                suite = classdef.get_suite()
-                for node in filter_child_nodes(suite, "simple_stmt"):
-                    expr_stmt_node = first_child_type_node(node, "expr_stmt")
-                    if expr_stmt_node is None:
+                if (
+                    expr_stmt_node.children[0].type == "name"
+                    and expr_stmt_node.children[1].type == "operator"
+                    and expr_stmt_node.children[2].type == "atom_expr"
+                ):
+                    field_name = expr_stmt_node.children[0].value
+
+                    # atom_expr
+                    field_node = expr_stmt_node.children[2]
+                    name_parts, leftover_nodes = consume_name(field_node)
+                    if (
+                        not name_parts
+                        or len(name_parts) > 3
+                        or len(leftover_nodes) != 1
+                    ):
                         continue
 
-                    if (
-                        expr_stmt_node.children[0].type == "name"
-                        and expr_stmt_node.children[1].type == "operator"
-                        and expr_stmt_node.children[2].type == "atom_expr"
+                    field_type = name_parts[-1]
+                    arglist = first_child_type_node(leftover_nodes[0], "arglist")
+
+                    if len(name_parts) == 3 and (
+                        name_parts[0] not in ("odoo", "openerp")
+                        or name_parts[1] != "fields"
                     ):
-                        field_name = expr_stmt_node.children[0].value
+                        continue
+                    elif len(name_parts) == 2 and name_parts[0] != "fields":
+                        continue
+                    elif len(
+                        name_parts
+                    ) == 1 and field_type not in FIELD_TYPE_VERSION_MAP.get(
+                        addon.version, set()
+                    ):
+                        continue
 
-                        # atom_expr
-                        field_node = expr_stmt_node.children[2]
-                        name_parts, leftover_nodes = consume_name(field_node)
-                        if (
-                            not name_parts
-                            or len(name_parts) > 3
-                            or len(leftover_nodes) != 1
-                        ):
-                            continue
-
-                        field_type = name_parts[-1]
-                        arglist = first_child_type_node(leftover_nodes[0], "arglist")
-
-                        if len(name_parts) == 3 and (
-                            name_parts[0] not in ("odoo", "openerp")
-                            or name_parts[1] != "fields"
-                        ):
-                            continue
-                        elif len(name_parts) == 2 and name_parts[0] != "fields":
-                            continue
-                        elif len(
-                            name_parts
-                        ) == 1 and field_type not in FIELD_TYPE_VERSION_MAP.get(
-                            addon.version, set()
-                        ):
-                            continue
-
-                        yield from self._check_field_node(
-                            filename, addon, arglist, model_name, field_name, field_type
-                        )
+                    yield from self._check_field_node(
+                        filename, addon, arglist, model_name, field_name, field_type
+                    )
