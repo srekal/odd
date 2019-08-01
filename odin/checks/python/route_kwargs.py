@@ -1,7 +1,8 @@
 from odin.checks import PythonCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue, Location
-from odin.utils import expand_version_list, extract_func_name, walk
+from odin.utils import expand_version_list
+from odin.parso_utils import extract_func_name, walk
 
 ROUTE_KWARG_VERSION_MAP = {
     ">=8": ["auth", "methods", "multilang", "type", "website"],

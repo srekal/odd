@@ -1,10 +1,8 @@
-import functools
 import operator
 import pathlib
 import typing
 
 import yarl
-import parso
 from odin.addon import AddonPath
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue
@@ -52,11 +50,6 @@ def list_files(
             yield from list_files(path, list_dirs=list_dirs, exclude_dirs=exclude_dirs)
         else:
             yield path
-
-
-@functools.lru_cache(maxsize=128)
-def get_addon_files(addon_path: AddonPath):
-    yield from list_files(addon_path.path)
 
 
 def _fmt_line_no(line_no: typing.Union[int, typing.Tuple[int, int]]) -> str:
@@ -143,30 +136,3 @@ def expand_version_list(
             version_map, version, result_cls=result_cls
         )
     return result
-
-
-def walk(
-    node: parso.tree.NodeOrLeaf
-) -> typing.Generator[parso.tree.NodeOrLeaf, None, None]:
-    yield node
-    try:
-        children = node.children
-    except AttributeError:
-        pass
-    else:
-        for child in children:
-            yield from walk(child)
-
-
-def extract_func_name(node: parso.tree.NodeOrLeaf) -> typing.List[str]:
-    name_parts = []
-    for child in walk(node):
-        if child.type == "operator" and child.value == "(":
-            break
-        elif child.type == "name":
-            name_parts.append(child.value)
-    return name_parts
-
-
-def get_string_node_value(node: parso.python.tree.String) -> str:
-    return node._get_payload()

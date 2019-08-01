@@ -21,7 +21,7 @@ class PathCheck(abc.ABC):
 class PythonCheck(abc.ABC):
     @abc.abstractmethod
     def check(
-        self, addon: Addon, filename: pathlib.Path, module: parso.tree.NodeOrLeaf
+        self, addon: Addon, filename: pathlib.Path, module: parso.python.tree.Module
     ):
         """Actual plugin"""
 

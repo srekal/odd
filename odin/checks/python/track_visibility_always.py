@@ -1,6 +1,7 @@
 from odin.checks import PythonCheck
 from odin.issue import Issue, Location
-from odin.utils import odoo_commit_url, walk, get_string_node_value
+from odin.utils import odoo_commit_url
+from odin.parso_utils import walk, get_string_node_value
 
 
 class TrackVisibilityAlways(PythonCheck):

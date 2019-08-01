@@ -10,7 +10,7 @@ from odin.addon import Addon, AddonPath, discover_addons, parse_manifest
 from odin.checks import AddonCheck, PathCheck, PythonCheck, XMLCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.typedefs import OdooVersion
-from odin.utils import format_issue, get_addon_files, list_files
+from odin.utils import format_issue, list_files
 from odin.xmlutils import get_root
 
 _LOG = logging.getLogger(__name__)

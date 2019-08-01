@@ -4,7 +4,14 @@ import parso
 from odin.checks import PythonCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue, Location
-from odin.utils import expand_version_list, get_string_node_value
+from odin.utils import expand_version_list
+from odin.parso_utils import (
+    filter_child_nodes,
+    first_child_type_node,
+    get_model_name,
+    get_string_node_value,
+)
+
 
 FIELD_TYPE_VERSION_MAP = expand_version_list(
     {
@@ -163,32 +170,6 @@ ATTRS_VERSION_MAP = {
     field_type: expand_version_list(version_map, *SUPPORTED_VERSIONS, result_cls=set)
     for field_type, version_map in FIELD_ATTRS_VERSION_MAPS.items()
 }
-
-
-def filter_child_nodes(node, *types: str):
-    types = set(types)
-    for child_node in node.children:
-        if child_node.type in types:
-            yield child_node
-
-
-def first_child_type_node(node, type: str):
-    return next(filter_child_nodes(node, type), None)
-
-
-def get_model_name(classdef_node) -> typing.Optional[str]:
-    model_params = {}
-    suite = classdef_node.get_suite()
-    for statement in filter_child_nodes(suite, "simple_stmt"):
-        expr_stmt = first_child_type_node(statement, "expr_stmt")
-        if expr_stmt is not None:
-            if expr_stmt.children[0].type == "name":
-                param = expr_stmt.children[0].value
-                if param in ("_name", "_inherit"):
-                    value_node = expr_stmt.children[2]
-                    if value_node.type == "string":
-                        model_params[param] = get_string_node_value(value_node)
-    return model_params.get("_name") or model_params.get("_inherit")
 
 
 def consume_name(
