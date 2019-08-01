@@ -213,7 +213,7 @@ def consume_name(
 
 class FieldAttrs(PythonCheck):
     def _check_field_node(
-        self, filename, addon, node, model_name: str, field_name: str, field_type: str
+        self, addon, filename, node, model_name: str, field_name: str, field_type: str
     ):
         assert node is None or node.type == "arglist"
 
@@ -268,7 +268,7 @@ class FieldAttrs(PythonCheck):
                 categories=["correctness"],
             )
 
-    def check(self, filename, module, addon):
+    def check(self, addon, filename, module):
         for classdef in module.iter_classdefs():
             model_name = get_model_name(classdef)
             if model_name is None:
@@ -315,5 +315,5 @@ class FieldAttrs(PythonCheck):
                         continue
 
                     yield from self._check_field_node(
-                        filename, addon, arglist, model_name, field_name, field_type
+                        addon, filename, arglist, model_name, field_name, field_type
                     )

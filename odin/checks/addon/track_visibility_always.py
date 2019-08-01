@@ -4,7 +4,7 @@ from odin.utils import odoo_commit_url, walk, get_string_node_value
 
 
 class TrackVisibilityAlways(PythonCheck):
-    def check(self, filename, module, addon):
+    def check(self, addon, filename, module):
         if addon.version < 12:
             return
 

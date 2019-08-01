@@ -1,6 +1,6 @@
-from odin.checks import FileCheck
+from odin.checks import XMLCheck
 from odin.issue import Issue, Location
-from odin.xmlutils import get_model_records, get_root, split_xml_id
+from odin.xmlutils import get_model_records, split_xml_id
 
 
 MODELS = frozenset(
@@ -31,11 +31,11 @@ def is_noupdate(record) -> bool:
             return False
 
 
-class NoUpdate(FileCheck):
-    def check(self, filename, addon):
-        if filename.suffix.lower() != ".xml" or filename not in addon.data_files:
+class NoUpdate(XMLCheck):
+    def check(self, addon, filename, tree):
+        if filename not in addon.data_files:
             return
-        for record in get_model_records(get_root(filename)):
+        for record in get_model_records(tree):
             addon_name, xml_id = split_xml_id(record.get("id"))
             if addon_name and addon_name != addon.name:
                 continue

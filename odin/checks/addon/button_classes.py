@@ -1,7 +1,4 @@
-import pathlib
-
-from odin.addon import Addon
-from odin.checks import FileCheck
+from odin.checks import XMLCheck
 from odin.issue import Issue, Location
 from odin.utils import odoo_source_url
 from odin.xmlutils import get_model_records, get_root, get_view_arch
@@ -30,13 +27,13 @@ def _get_issues(addon, filename, element, classes):
             )
 
 
-class ButtonClasses(FileCheck):
-    def check(self, filename: pathlib.Path, addon: Addon):
-        if addon.version < 12 or filename.suffix.lower() != ".xml":
+class ButtonClasses(XMLCheck):
+    def check(self, addon, filename, tree):
+        if addon.version < 12 or (
+            filename not in addon.data_files and filename not in addon.demo_files
+        ):
             return
-        if filename not in addon.data_files and filename not in addon.demo_files:
-            return
-        for record in get_model_records(get_root(filename), "ir.ui.view"):
+        for record in get_model_records(tree, "ir.ui.view"):
             arch = get_view_arch(record)
             if arch is None:
                 continue

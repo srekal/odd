@@ -1,23 +1,17 @@
-import pathlib
-
-from odin.addon import Addon
-from odin.checks import FileCheck
+from odin.checks import XMLCheck
 from odin.issue import Issue, Location
 from odin.xmlutils import (
     get_model_records,
-    get_root,
     get_view_arch,
     get_xpath_expr_target_element,
 )
 
 
-class TreeString(FileCheck):
-    def check(self, filename: pathlib.Path, addon: Addon):
-        if not addon.version >= 8 or filename.suffix.lower() != ".xml":
-            return
+class TreeString(XMLCheck):
+    def check(self, addon, filename, tree):
         if filename not in addon.data_files and filename not in addon.demo_files:
             return
-        for record in get_model_records(get_root(filename), "ir.ui.view"):
+        for record in get_model_records(tree, "ir.ui.view"):
             arch = get_view_arch(record)
             if arch is None:
                 continue

@@ -14,13 +14,19 @@ class AddonCheck(abc.ABC):
 
 class FileCheck(abc.ABC):
     @abc.abstractmethod
-    def check(self, filename: pathlib.Path, addon: Addon):
+    def check(self, addon: Addon, filename: pathlib.Path):
         """Actual plugin"""
 
 
 class PythonCheck(abc.ABC):
     @abc.abstractmethod
     def check(
-        self, filename: pathlib.Path, module: parso.tree.NodeOrLeaf, addon: Addon
+        self, addon: Addon, filename: pathlib.Path, module: parso.tree.NodeOrLeaf
     ):
+        """Actual plugin"""
+
+
+class XMLCheck(abc.ABC):
+    @abc.abstractmethod
+    def check(self, filename: pathlib.Path, tree, addon: Addon):
         """Actual plugin"""
