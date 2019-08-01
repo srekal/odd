@@ -4,6 +4,7 @@ import logging
 import pathlib
 import typing
 
+import lxml
 import parso
 import pkg_resources
 from odin.addon import Addon, AddonPath, discover_addons, parse_manifest
@@ -89,14 +90,17 @@ def check_addon(
         if not path.is_file():
             continue
 
-        if path.suffix.lower() == ".py":
+        if python_checks and path.suffix.lower() == ".py":
             with path.open(mode="rb") as f:
                 module = grammar.parse(f.read())
             for python_check in python_checks.values():
                 yield from python_check.check(addon, path, module)
 
-        if path.suffix.lower() == ".xml":
-            tree = get_root(path)
+        if xml_checks and path.suffix.lower() == ".xml":
+            try:
+                tree = get_root(path)
+            except lxml.etree.XMLSyntaxError:
+                _LOG.exception("Error while parsing XML file: %s", path)
             for xml_check in xml_checks.values():
                 yield from xml_check.check(addon, path, tree)
 
