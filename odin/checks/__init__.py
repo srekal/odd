@@ -12,10 +12,10 @@ class AddonCheck(abc.ABC):
         """Actual plugin"""
 
 
-class FileCheck(abc.ABC):
+class PathCheck(abc.ABC):
     @abc.abstractmethod
-    def check(self, addon: Addon, filename: pathlib.Path):
-        """Actual plugin"""
+    def check(self, addon: Addon, path: pathlib.Path):
+        """Receives paths (files or directories)."""
 
 
 class PythonCheck(abc.ABC):

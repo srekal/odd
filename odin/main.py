@@ -7,10 +7,10 @@ import typing
 import parso
 import pkg_resources
 from odin.addon import Addon, AddonPath, discover_addons, parse_manifest
-from odin.checks import AddonCheck, FileCheck, PythonCheck, XMLCheck
+from odin.checks import AddonCheck, PathCheck, PythonCheck, XMLCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.typedefs import OdooVersion
-from odin.utils import format_issue, get_addon_files
+from odin.utils import format_issue, get_addon_files, list_files
 from odin.xmlutils import get_root
 
 _LOG = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ _LOG = logging.getLogger(__name__)
 
 def get_checks(
     whitelist: typing.Optional[typing.Iterable[str]] = None
-) -> typing.Dict[str, typing.Union[AddonCheck, FileCheck, PythonCheck]]:
+) -> typing.Dict[str, typing.Union[AddonCheck, PathCheck, PythonCheck, XMLCheck]]:
     whitelist = set([] if whitelist is None else whitelist)
     use_whitelist = bool(whitelist)
     checks = collections.OrderedDict()
@@ -47,20 +47,20 @@ def get_checks(
 def check_addon(
     manifest_path: pathlib.Path,
     checks: typing.Mapping[
-        str, typing.Type[typing.Union[AddonCheck, FileCheck, PythonCheck]]
+        str, typing.Type[typing.Union[AddonCheck, PathCheck, PythonCheck, XMLCheck]]
     ],
     *,
     version: typing.Optional[OdooVersion] = None,
 ):
     addon_path = AddonPath(manifest_path)
     # FIXME: Make a function to do the separation.
-    addon_checks, file_checks, python_checks, xml_checks = {}, {}, {}, {}
+    addon_checks, path_checks, python_checks, xml_checks = {}, {}, {}, {}
 
     for check_name, check_cls in checks.items():
         if issubclass(check_cls, AddonCheck):
             addon_checks[check_name] = check_cls()
-        elif issubclass(check_cls, FileCheck):
-            file_checks[check_name] = check_cls()
+        elif issubclass(check_cls, PathCheck):
+            path_checks[check_name] = check_cls()
         elif issubclass(check_cls, PythonCheck):
             python_checks[check_name] = check_cls()
         elif issubclass(check_cls, XMLCheck):
@@ -82,20 +82,23 @@ def check_addon(
     for addon_check in addon_checks.values():
         yield from addon_check.check(addon)
 
-    for file_path in get_addon_files(addon.addon_path):
-        for file_check in file_checks.values():
-            yield from file_check.check(addon, file_path)
+    for path in list_files(addon.path, list_dirs=True):
+        for path_check in path_checks.values():
+            yield from path_check.check(addon, path)
 
-        if file_path.suffix.lower() == ".py":
-            with file_path.open(mode="rb") as f:
+        if not path.is_file():
+            continue
+
+        if path.suffix.lower() == ".py":
+            with path.open(mode="rb") as f:
                 module = grammar.parse(f.read())
             for python_check in python_checks.values():
-                yield from python_check.check(addon, file_path, module)
+                yield from python_check.check(addon, path, module)
 
-        if file_path.suffix.lower() == ".xml":
-            tree = get_root(file_path)
+        if path.suffix.lower() == ".xml":
+            tree = get_root(path)
             for xml_check in xml_checks.values():
-                yield from xml_check.check(addon, file_path, tree)
+                yield from xml_check.check(addon, path, tree)
 
 
 def main():
