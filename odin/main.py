@@ -7,10 +7,11 @@ import typing
 import parso
 import pkg_resources
 from odin.addon import Addon, AddonPath, discover_addons, parse_manifest
-from odin.checks import AddonCheck, FileCheck, PythonCheck
+from odin.checks import AddonCheck, FileCheck, PythonCheck, XMLCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.typedefs import OdooVersion
 from odin.utils import format_issue, get_addon_files
+from odin.xmlutils import get_root
 
 _LOG = logging.getLogger(__name__)
 
@@ -52,7 +53,8 @@ def check_addon(
     version: typing.Optional[OdooVersion] = None,
 ):
     addon_path = AddonPath(manifest_path)
-    addon_checks, file_checks, python_checks = {}, {}, {}
+    # FIXME: Make a function to do the separation.
+    addon_checks, file_checks, python_checks, xml_checks = {}, {}, {}, {}
 
     for check_name, check_cls in checks.items():
         if issubclass(check_cls, AddonCheck):
@@ -61,6 +63,8 @@ def check_addon(
             file_checks[check_name] = check_cls()
         elif issubclass(check_cls, PythonCheck):
             python_checks[check_name] = check_cls()
+        elif issubclass(check_cls, XMLCheck):
+            xml_checks[check_name] = check_cls()
         else:
             raise TypeError(f"Unsupported check class: {check_cls}")
 
@@ -80,13 +84,18 @@ def check_addon(
 
     for file_path in get_addon_files(addon.addon_path):
         for file_check in file_checks.values():
-            yield from file_check.check(file_path, addon)
+            yield from file_check.check(addon, file_path)
 
         if file_path.suffix.lower() == ".py":
             with file_path.open(mode="rb") as f:
                 module = grammar.parse(f.read())
             for python_check in python_checks.values():
-                yield from python_check.check(file_path, module, addon)
+                yield from python_check.check(addon, file_path, module)
+
+        if file_path.suffix.lower() == ".xml":
+            tree = get_root(file_path)
+            for xml_check in xml_checks.values():
+                yield from xml_check.check(addon, file_path, tree)
 
 
 def main():

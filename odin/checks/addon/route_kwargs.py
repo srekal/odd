@@ -16,7 +16,7 @@ ROUTE_KWARGS = expand_version_list(
 
 
 class RouteKwargs(PythonCheck):
-    def check(self, filename, module, addon):
+    def check(self, addon, filename, module):
         for node in walk(module):
             if node.type != "decorator":
                 continue

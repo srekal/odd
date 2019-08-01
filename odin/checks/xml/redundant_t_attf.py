@@ -1,17 +1,12 @@
-from odin.addon import Addon
-from odin.checks import FileCheck
+from odin.checks import XMLCheck
 from odin.issue import Issue, Location
-from odin.xmlutils import get_root
 
 
-class RedundantTAttf(FileCheck):
-    def check(self, filename, addon: Addon):
-        if filename.suffix.lower() != ".xml":
-            return
+class RedundantTAttf(XMLCheck):
+    def check(self, addon, filename, tree):
         if filename not in addon.data_files and filename not in addon.demo_files:
             return
-        root = get_root(filename)
-        for template in root.xpath("//template"):
+        for template in tree.xpath("//template"):
             for el in template.xpath(".//*/@*[starts-with(name(), 't-attf-')]/.."):
                 for name, value in el.attrib.iteritems():
                     if not name.startswith("t-attf-"):
