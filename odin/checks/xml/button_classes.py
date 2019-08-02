@@ -1,7 +1,7 @@
 from odin.checks import XMLCheck
 from odin.issue import Issue, Location
 from odin.utils import odoo_source_url
-from odin.xmlutils import get_model_records, get_root, get_view_arch
+from odin.xmlutils import get_model_records, get_view_arch
 
 CLASS_MAP = {"oe_highlight": "btn-primary", "oe_link": "btn-link"}
 

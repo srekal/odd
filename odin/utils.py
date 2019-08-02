@@ -3,7 +3,6 @@ import pathlib
 import typing
 
 import yarl
-from odin.addon import AddonPath
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue
 

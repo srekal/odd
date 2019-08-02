@@ -5,12 +5,7 @@ from odin.checks import PythonCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue, Location
 from odin.utils import expand_version_list
-from odin.parso_utils import (
-    filter_child_nodes,
-    first_child_type_node,
-    get_model_name,
-    get_string_node_value,
-)
+from odin.parso_utils import filter_child_nodes, first_child_type_node, get_model_name
 
 
 FIELD_TYPE_VERSION_MAP = expand_version_list(
