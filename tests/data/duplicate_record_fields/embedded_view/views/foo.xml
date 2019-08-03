@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="view_foo_form" model="ir.ui.view">
+    <field name="name">foo.form</field>
+    <field name="model">foo</field>
+    <field name="arch" type="xml">
+        <form string="Foo">
+            <sheet>
+                <field name="bar_id">
+                    <tree>
+                        <field name="name"/>
+                    </tree>
+                    <form>
+                        <field name="name"/>
+                    </form>
+                </field>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+</odoo>
