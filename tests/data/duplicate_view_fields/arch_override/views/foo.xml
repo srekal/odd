@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="other_addon.foo_view_form" model="ir.ui.view">
+    <field name="name">foo_view_form form arch override</field>
+    <field name="model">foo</field>
+    <field name="arch" type="xml">
+
+        <field name="name" position="before">
+            <field name="baz"/>
+        </field>
+
+        <field name="name" position="after">
+            <field name="bar"/>
+        </field>
+
+    </field>
+</record>
+
+</odoo>

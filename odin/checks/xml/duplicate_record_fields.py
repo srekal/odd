@@ -20,9 +20,6 @@ class DuplicateRecordFields(XMLCheck):
             record_fields = get_fields(record)
             for field_name, line_nos in record_fields.items():
                 model, record_id = record.attrib["model"], record.attrib["id"]
-                # TODO: Add support for duplicated fields inside views.
-                # if model == "ir.ui.view" and "inherit_id" in record_fields:
-                #    continue
                 if len(line_nos) > 1:
                     yield Issue(
                         "duplicate_record_field",

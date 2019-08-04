@@ -30,7 +30,7 @@ def get_model_records(
 
 
 def get_view_arch(record: Element) -> typing.Optional[Element]:
-    for field in record.iter("field"):
+    for field in record.iterchildren(tag="field"):
         if field.get("name") == "arch":
             return field
 

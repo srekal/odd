@@ -1,6 +1,7 @@
 from .attribute_override import AttributeOverride
 from .button_classes import ButtonClasses
 from .duplicate_record_fields import DuplicateRecordFields
+from .duplicate_view_fields import DuplicateViewFields
 from .ir_cron_state_code import IrCronStateCode
 from .search_string import SearchString
 from .tree_string import TreeString
@@ -11,6 +12,7 @@ __all__ = [
     "AttributeOverride",
     "ButtonClasses",
     "DuplicateRecordFields",
+    "DuplicateViewFields",
     "IrCronStateCode",
     "NoUpdate",
     "RedundantTAttf",

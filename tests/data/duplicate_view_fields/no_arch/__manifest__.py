@@ -1,5 +1,5 @@
 {
-    "name": "View inherit",
+    "name": "No `arch`",
     "data": [
         "views/foo.xml",
     ],

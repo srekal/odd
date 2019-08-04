@@ -19,9 +19,7 @@ from ..common import run_check_test
                     "categories": ["correctness", "maintainability"],
                 }
             ],
-        ),
-        ("view_inherit", []),
-        ("embedded_view", []),
+        )
     ],
 )
 def test_duplicate_record_fields(test_data_dir, addon_name, expected):
