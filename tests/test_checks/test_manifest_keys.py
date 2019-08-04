@@ -13,7 +13,18 @@ from ..common import run_check_test
                     "slug": "unknown_manifest_key",
                     "description": 'Unknown manifest key "foo"',
                     "categories": ["correctness"],
-                    "locations": [(["__manifest__.py"], [])],
+                    "locations": [(["__manifest__.py"], [(1, 46)])],
+                }
+            ],
+        ),
+        (
+            "manifest_keys_unknown_keys_complex",
+            [
+                {
+                    "slug": "unknown_manifest_key",
+                    "description": 'Unknown manifest key "foo"',
+                    "categories": ["correctness"],
+                    "locations": [(["__manifest__.py"], [(13, 4)])],
                 }
             ],
         ),
@@ -24,7 +35,7 @@ from ..common import run_check_test
                     "slug": "deprecated_manifest_key",
                     "description": '"active" manifest key was renamed to "auto_install"',
                     "categories": ["correctness", "deprecated"],
-                    "locations": [(["__manifest__.py"], [])],
+                    "locations": [(["__manifest__.py"], [(1, 40)])],
                 }
             ],
         ),
@@ -35,7 +46,7 @@ from ..common import run_check_test
                     "slug": "deprecated_manifest_key",
                     "description": '"demo_xml" manifest key was deprecated in favor of "demo"',
                     "categories": ["correctness", "deprecated"],
-                    "locations": [(["__manifest__.py"], [])],
+                    "locations": [(["__manifest__.py"], [(1, 48)])],
                 }
             ],
         ),
@@ -46,7 +57,7 @@ from ..common import run_check_test
                     "slug": "deprecated_manifest_key",
                     "description": '"init_xml" manifest key was deprecated in favor of "data"',
                     "categories": ["correctness", "deprecated"],
-                    "locations": [(["__manifest__.py"], [])],
+                    "locations": [(["__manifest__.py"], [(1, 57)])],
                 }
             ],
         ),

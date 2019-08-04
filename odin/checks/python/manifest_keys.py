@@ -1,6 +1,9 @@
-from odin.checks import AddonCheck
-from odin.issue import Issue, Location
+import collections
 
+from odin.checks import PythonCheck
+from odin.const import MANIFEST_FILENAMES
+from odin.issue import Issue, Location
+from odin.parso_utils import get_string_node_value, walk
 
 KNOWN_KEYS = {
     "name",
@@ -51,10 +54,10 @@ KNOWN_KEYS = {
 }
 
 
-class ManifestKeys(AddonCheck):
+class ManifestKeys(PythonCheck):
     def _check_active(self, manifest):
         if "active" in manifest:
-            yield {
+            yield "active", {
                 "slug": "deprecated_manifest_key",
                 "description": '"active" manifest key was renamed to "auto_install"',
                 "categories": ["correctness", "deprecated"],
@@ -68,7 +71,7 @@ class ManifestKeys(AddonCheck):
                     if not any(fn.endswith(".xml") for fn in files):
                         continue
                 correct_key = "demo" if key == "demo_xml" else "data"
-                yield {
+                yield key, {
                     "slug": "deprecated_manifest_key",
                     "description": f'"{key}" manifest key was deprecated in favor of "{correct_key}"',
                     "categories": ["correctness", "deprecated"],
@@ -77,18 +80,37 @@ class ManifestKeys(AddonCheck):
     def _check_unknown_keys(self, manifest):
         unknown_keys = manifest.keys() - KNOWN_KEYS
         for key in unknown_keys:
-            yield {
+            yield key, {
                 "slug": "unknown_manifest_key",
                 "description": f'Unknown manifest key "{key}"',
                 "categories": ["correctness"],
             }
 
-    def check(self, addon):
+    def _get_key_locations(self, module):
+        key_locations = collections.defaultdict(list)
+        for node in walk(module):
+            if node.type == "dictorsetmaker":
+                for child in node.children[::4]:
+                    if child.type == "string":
+                        key_locations[get_string_node_value(child)].append(
+                            child.start_pos
+                        )
+                break
+        return key_locations
+
+    def check(self, addon, filename, module):
+        if filename.name.lower() not in MANIFEST_FILENAMES:
+            return
+        key_locations = None
         for check in ("active", "deprecated_xml", "unknown_keys"):
-            for issue in getattr(self, f"_check_{check}")(addon.manifest):
+            for key, issue in getattr(self, f"_check_{check}")(addon.manifest):
+                if key_locations is None:
+                    key_locations = self._get_key_locations(module)
                 yield Issue(
                     **{
-                        "locations": [Location(addon.manifest_path)],
+                        "locations": [
+                            Location(addon.manifest_path, key_locations[key])
+                        ],
                         "addon_path": addon.addon_path,
                         **issue,
                     }
