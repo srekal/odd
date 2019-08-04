@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="foo_view_kanban" model="ir.ui.view">
+    <field name="name">foo.kanban</field>
+    <field name="model">foo</field>
+    <field name="arch" type="xml">
+        <kanban>
+            <field name="sequence" widget="handle"/>
+            <field name="name"/>
+            <templates>
+                <t t-name="kanban-box">
+                    <div>
+                        <table>
+                            <tr>
+                                <td>
+                                    <span>
+                                        <field name="name"/>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Foo</td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </templates>
+        </kanban>
+    </field>
+</record>
+
+</odoo>

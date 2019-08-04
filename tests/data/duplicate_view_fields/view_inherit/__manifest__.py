@@ -1,5 +1,5 @@
 {
-    "name": "Embedded view",
+    "name": "View inherit should be skipped",
     "data": [
         "views/foo.xml",
     ],

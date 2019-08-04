@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="bar_view_form" model="ir.ui.view">
+    <field name="name">bar.form</field>
+    <field name="model">bar</field>
+    <field name="arch" type="xml">
+        <form>
+            <field name="a"/>
+        </form>
+    </field>
+</record>
+
+</odoo>
