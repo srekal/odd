@@ -40,10 +40,14 @@ class Field:
 
 @dataclasses.dataclass
 class Model:
-    name: str
     class_name: str
-    bases: typing.Set = dataclasses.field(default_factory=set)
+    params: typing.Dict[str, typing.Any] = dataclasses.field(default_factory=dict)
+    bases: typing.List = dataclasses.field(default_factory=list)
     fields: typing.List[Field] = dataclasses.field(default_factory=list)
+
+    @property
+    def name(self):
+        return self.params.get("_name") or self.params.get("_inherit")
 
 
 def walk(
@@ -70,19 +74,42 @@ def first_child_type_node(node: parso.python.tree.Node, type: str):
     return next(filter_child_nodes(node, type), None)
 
 
-def get_model_name(classdef_node: parso.python.tree.Class) -> typing.Optional[str]:
+def get_node_value(node: parso.tree.NodeOrLeaf) -> typing.Any:
+    if node.type == "string" or node.type == "strings":
+        return get_string_node_value(node)
+    else:
+        if hasattr(node, "value"):
+            return node.value
+        else:
+            try:
+                return ast.literal_eval(node.get_code().strip())
+            except ValueError:
+                return UNKNOWN
+
+
+def get_model_params(
+    classdef_node: parso.python.tree.Class
+) -> typing.Dict[str, typing.Any]:
     model_params = {}
     suite = classdef_node.get_suite()
-    for statement in filter_child_nodes(suite, "simple_stmt"):
-        expr_stmt = first_child_type_node(statement, "expr_stmt")
-        if expr_stmt is not None:
-            if expr_stmt.children[0].type == "name":
-                param = expr_stmt.children[0].value
-                if param in ("_name", "_inherit"):
-                    value_node = expr_stmt.children[2]
-                    if value_node.type == "string":
-                        model_params[param] = get_string_node_value(value_node)
-    return model_params.get("_name") or model_params.get("_inherit")
+    for child in suite.children:
+        if child.type == "simple_stmt":
+            expr_stmt = first_child_type_node(child, "expr_stmt")
+        elif child.type == "expr_stmt":
+            expr_stmt = child
+        else:
+            continue
+
+        if expr_stmt is None:
+            continue
+        if expr_stmt.children[0].type != "name":
+            continue
+        param = expr_stmt.children[0].value
+        if not param.startswith("_"):
+            continue
+        value_node = expr_stmt.children[2]
+        model_params[param] = get_node_value(value_node)
+    return model_params
 
 
 def extract_func_name(node: parso.tree.NodeOrLeaf) -> typing.List[str]:
@@ -95,13 +122,13 @@ def extract_func_name(node: parso.tree.NodeOrLeaf) -> typing.List[str]:
     return name_parts
 
 
-def get_string_node_value(node: parso.tree.Node) -> str:
+def get_string_node_value(node: parso.tree.NodeOrLeaf) -> str:
     if node.type == "strings":
         return "".join(get_string_node_value(c) for c in node.children)
     return node._get_payload()
 
 
-def _get_base(node) -> typing.Tuple[str]:
+def _get_base(node: parso.tree.NodeOrLeaf) -> typing.Tuple[str]:
     name_parts = []
     for child in [node] if node.type == "name" else node.children:
         if child.type == "operator" and child.value == ".":
@@ -115,10 +142,15 @@ def _get_base(node) -> typing.Tuple[str]:
     return tuple(name_parts)
 
 
-def get_bases(node) -> typing.List[typing.Tuple[str]]:
-    if node.type == "arglist":
+def get_bases(
+    node: typing.Optional[parso.tree.NodeOrLeaf]
+) -> typing.List[typing.Tuple[str]]:
+    if node is None:
+        return []
+    elif node.type == "arglist":
         return [_get_base(c) for c in node.children if c.type in ("name", "atom_expr")]
-    return [_get_base(node)]
+    else:
+        return [_get_base(node)]
 
 
 def consume_name(
@@ -181,21 +213,10 @@ def _get_model_fields(suite):
                         arg for arg in child.children if arg.type == "argument"
                     ]
                     break
-                elif child.type == "string" or child.type == "strings":
-                    args.append(
-                        FieldArg(
-                            get_string_node_value(child), child.start_pos, child.end_pos
-                        )
-                    )
                 else:
-                    if hasattr(child, "value"):
-                        arg_value = child.value
-                    else:
-                        try:
-                            arg_value = ast.literal_eval(child.get_code())
-                        except ValueError:
-                            arg_value = UNKNOWN
-                    args.append(FieldArg(arg_value, child.start_pos, child.end_pos))
+                    args.append(
+                        FieldArg(get_node_value(child), child.start_pos, child.end_pos)
+                    )
 
             for arg_node in arg_node_list:
                 if arg_node.children[0].type == "name":
@@ -228,13 +249,11 @@ def _get_model_fields(suite):
 def get_model_definition(classdef_node, *, extract_fields: bool = True):
     assert classdef_node.type == "classdef"
 
-    model_name = get_model_name(classdef_node)
-    if model_name is None:
-        return
+    model_params = get_model_params(classdef_node)
 
     model = Model(
-        name=model_name,
         class_name=classdef_node.name.value,
+        params=model_params,
         bases=get_bases(classdef_node.get_super_arglist()),
     )
 

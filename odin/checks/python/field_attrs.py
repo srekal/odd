@@ -169,7 +169,7 @@ class FieldAttrs(PythonCheck):
         common_field_attrs = COMMON_ATTRS_VERSION_MAP.get(addon.version, set())
         for classdef in module.iter_classdefs():
             model = get_model_definition(classdef, extract_fields=True)
-            if model is None:
+            if not model.name:
                 continue
 
             for field in model.fields:
