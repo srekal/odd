@@ -1,4 +1,5 @@
 import typing
+import ast
 import dataclasses
 
 import parso
@@ -10,6 +11,13 @@ UNKNOWN = object()
 class Position(typing.NamedTuple):
     line: int
     column: int
+
+
+@dataclasses.dataclass
+class FieldArg:
+    value: typing.Any
+    start_pos: Position
+    end_pos: Position
 
 
 @dataclasses.dataclass
@@ -26,6 +34,7 @@ class Field:
     class_name: str
     start_pos: Position
     end_pos: Position
+    args: typing.List[FieldArg] = dataclasses.field(default_factory=list)
     kwargs: typing.List[FieldKwarg] = dataclasses.field(default_factory=list)
 
 
@@ -151,11 +160,37 @@ def _get_model_fields(suite):
                 continue
 
             field_class = name_parts[-1]
-            arglist = first_child_type_node(leftover_nodes[0], "arglist")
+            args, kwargs = [], []
+            arg_node_list = []
+            for child in leftover_nodes[0].children:
+                if child.type == "operator":
+                    continue
+                elif child.type == "argument":
+                    arg_node_list = [child]
+                    break
+                elif child.type == "arglist":
+                    arg_node_list = [
+                        arg for arg in child.children if arg.type == "argument"
+                    ]
+                    break
+                elif child.type == "string" or child.type == "strings":
+                    args.append(
+                        FieldArg(
+                            get_string_node_value(child), child.start_pos, child.end_pos
+                        )
+                    )
+                else:
+                    if hasattr(child, "value"):
+                        arg_value = child.value
+                    else:
+                        try:
+                            arg_value = ast.literal_eval(child.get_code())
+                        except ValueError:
+                            arg_value = UNKNOWN
+                    args.append(FieldArg(arg_value, child.start_pos, child.end_pos))
 
-            kwargs = []
-            for arg_node in [] if arglist is None else arglist.children:
-                if arg_node.type == "argument" and arg_node.children[0].type == "name":
+            for arg_node in arg_node_list:
+                if arg_node.children[0].type == "name":
                     kwarg_name = arg_node.children[0].value
 
                     if arg_node.children[2].type in ("string", "strings"):
@@ -177,6 +212,7 @@ def _get_model_fields(suite):
                 class_name=field_class,
                 start_pos=field_node.start_pos,
                 end_pos=field_node.end_pos,
+                args=args,
                 kwargs=kwargs,
             )
 

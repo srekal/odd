@@ -33,6 +33,7 @@ FIELD_TYPE_VERSION_MAP = expand_version_list(
     *SUPPORTED_VERSIONS,
     result_cls=set,
 )
+FIELD_TYPE_STRING_INDEX_MAP = {"One2many": 2, "Many2one": 1, "Many2many": 4}
 
 
 def get_odoo_string_compute_func(version: int) -> typing.Callable[[str], str]:
@@ -69,14 +70,33 @@ class FieldAttrStringRedundant(PythonCheck):
                     _LOG.warning("Unknown field type: %s", field.class_name)
                     continue
 
+                string_kwarg = None
                 for kwarg in field.kwargs:
-                    if kwarg.name != "string":
+                    if kwarg.name == "string":
+                        string_kwarg = kwarg
+                        break
+                if string_kwarg and string_kwarg.value == get_odoo_string(field.name):
+                    yield Issue(
+                        "redundant_field_attribute",
+                        f'Redundant field attribute `string="{string_kwarg.value}"` for field "{field.name}". The same value will be computed by Odoo automatically.',
+                        addon.addon_path,
+                        [Location(filename, [string_kwarg.start_pos])],
+                        categories=["redundancy"],
+                    )
+                    continue
+
+                if field.args:
+                    arg_index = FIELD_TYPE_STRING_INDEX_MAP.get(field.class_name, 0)
+                    if len(field.args) < arg_index + 1:
                         continue
-                    if kwarg.value == get_odoo_string(field.name):
+                    string_arg = field.args[arg_index]
+
+                    if string_arg.value == get_odoo_string(field.name):
                         yield Issue(
                             "redundant_field_attribute",
-                            f'Redundant field attribute `string="{kwarg.value}"` for field "{field.name}". The same value will be computed by Odoo automatically.',
+                            f'Redundant implied field attribute `string` "{string_arg.value}"` for field "{field.name}". The same value will be computed by Odoo automatically.',
                             addon.addon_path,
-                            [Location(filename, [kwarg.start_pos])],
+                            [Location(filename, [string_arg.start_pos])],
                             categories=["redundancy"],
                         )
+                        continue
