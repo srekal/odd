@@ -45,7 +45,7 @@ class DuplicateViewFields(XMLCheck):
     def check(self, addon, filename, tree):
         if filename not in addon.data_files and filename not in addon.demo_files:
             return
-        for record in get_model_records(tree):
+        for record in get_model_records(tree, model="ir.ui.view"):
             view_xml_id = record.attrib["id"]
 
             # Skip inherited views.
