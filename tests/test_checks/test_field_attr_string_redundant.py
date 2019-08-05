@@ -19,6 +19,19 @@ from ..common import run_check_test
             ],
         ),
         (
+            "redundant_string_12_arg",
+            12,
+            [
+                {
+                    "slug": "redundant_field_attribute",
+                    "description": 'Redundant implied field attribute `string` "Some Value"` for field "some_value". The same value will be computed by Odoo automatically.',
+                    "categories": ["redundancy"],
+                    "locations": [(["models", "foo.py"], [(8, 29)])],
+                }
+            ],
+        ),
+        ("arg_no_string", 12, []),
+        (
             "redundant_string_8",
             8,
             [
