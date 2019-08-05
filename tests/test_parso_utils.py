@@ -8,25 +8,29 @@ from odin.parso_utils import get_model_definition, Model, Field, FieldKwarg, UNK
     "python_module, extract_fields, expected",
     [
         ("simple_class.py", True, None),
-        ("simple_model.py", True, Model("foo", "Foo", type="model")),
+        ("simple_model.py", True, Model("foo", "Foo", bases=[("models", "Model")])),
         (
             "simple_model_with_field.py",
             True,
             Model(
                 "foo",
                 "Foo",
-                type="model",
+                bases=[("models", "Model")],
                 fields=[Field("bar", "Char", (8, 10), (8, 23))],
             ),
         ),
-        ("simple_model_with_field.py", False, Model("foo", "Foo", type="model")),
+        (
+            "simple_model_with_field.py",
+            False,
+            Model("foo", "Foo", bases=[("models", "Model")]),
+        ),
         (
             "simple_model_one_field_direct_import.py",
             True,
             Model(
                 "foo",
                 "Foo",
-                type="model",
+                bases=[("models", "Model")],
                 fields=[Field("bar", "Char", (9, 10), (9, 16))],
             ),
         ),
@@ -36,19 +40,27 @@ from odin.parso_utils import get_model_definition, Model, Field, FieldKwarg, UNK
             Model(
                 "foo",
                 "Foo",
-                type="model",
+                bases=[("odoo", "models", "Model")],
                 fields=[Field("bar", "Char", (8, 10), (8, 28))],
             ),
         ),
-        ("some_other_field_class.py", True, Model("foo", "Foo", type="model")),
-        ("some_other_field_class_2.py", True, Model("foo", "Foo", type="model")),
+        (
+            "some_other_field_class.py",
+            True,
+            Model("foo", "Foo", bases=[("models", "Model")]),
+        ),
+        (
+            "some_other_field_class_2.py",
+            True,
+            Model("foo", "Foo", bases=[("models", "Model")]),
+        ),
         (
             "simple_model_with_field_one_kwarg.py",
             True,
             Model(
                 "foo",
                 "Foo",
-                type="model",
+                bases=[("models", "Model")],
                 fields=[
                     Field(
                         "bar",
@@ -70,7 +82,7 @@ from odin.parso_utils import get_model_definition, Model, Field, FieldKwarg, UNK
             Model(
                 "foo",
                 "Foo",
-                type="model",
+                bases=[("models", "Model")],
                 fields=[
                     Field(
                         "bar",
@@ -92,7 +104,7 @@ from odin.parso_utils import get_model_definition, Model, Field, FieldKwarg, UNK
             Model(
                 "foo",
                 "Foo",
-                type="model",
+                bases=[("models", "Model")],
                 fields=[
                     Field(
                         "bar",
@@ -111,15 +123,32 @@ from odin.parso_utils import get_model_definition, Model, Field, FieldKwarg, UNK
                 ],
             ),
         ),
-        ("simple_abstract_model.py", True, Model("afoo", "BaseFoo", type="abstract")),
+        (
+            "simple_abstract_model.py",
+            True,
+            Model("afoo", "BaseFoo", bases=[("models", "AbstractModel")]),
+        ),
         (
             "simple_transient_model.py",
             True,
-            Model("foo.wizard", "FooWizard", type="transient"),
+            Model("foo.wizard", "FooWizard", bases=[("models", "TransientModel")]),
         ),
-        ("unknown_model_class.py", True, Model("foo", "Foo", type="unknown")),
-        ("django_fields.py", True, Model("foo", "Foo", type="model")),
-        ("django_fields_2.py", True, Model("foo", "Foo", type="model")),
+        (
+            "unknown_model_class.py",
+            True,
+            Model("foo", "Foo", bases=[("models", "AwesomeModel")]),
+        ),
+        ("django_fields.py", True, Model("foo", "Foo", bases=[("models", "Model")])),
+        (
+            "django_fields_2.py",
+            True,
+            Model("foo", "Foo", bases=[("django", "db", "models", "Model")]),
+        ),
+        (
+            "model_multi_base_class.py",
+            True,
+            Model("ir.qweb", "IrQWeb", bases=[("models", "AbstractModel"), ("QWeb",)]),
+        ),
     ],
 )
 def test_get_model_definition(test_data_dir, python_module, extract_fields, expected):

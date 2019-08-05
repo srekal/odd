@@ -42,7 +42,7 @@ class Field:
 class Model:
     name: str
     class_name: str
-    type: str = "unknown"  # 'model', 'transient', 'abstract'
+    bases: typing.Set = dataclasses.field(default_factory=set)
     fields: typing.List[Field] = dataclasses.field(default_factory=list)
 
 
@@ -101,16 +101,27 @@ def get_string_node_value(node: parso.tree.Node) -> str:
     return node._get_payload()
 
 
-def flatten_name(node):
+def _get_base(node) -> typing.Tuple[str]:
     name_parts = []
     for child in [node] if node.type == "name" else node.children:
-        if child.type == "name" or child.type == "operator":
+        if child.type == "operator" and child.value == ".":
+            continue
+        if child.type == "name":
             name_parts.append(child.value)
         elif child.type == "trailer":
-            name_parts.extend(flatten_name(child))
+            name_parts.extend(_get_base(child))
         else:
+            import pdb
+
+            pdb.set_trace()
             raise ValueError(f"Unexpected node type: {child.type}")
-    return name_parts
+    return tuple(name_parts)
+
+
+def get_bases(node) -> typing.List[typing.Tuple[str]]:
+    if node.type == "arglist":
+        return [_get_base(c) for c in node.children if c.type in ("name", "atom_expr")]
+    return [_get_base(node)]
 
 
 def consume_name(
@@ -224,19 +235,14 @@ def get_model_definition(classdef_node, *, extract_fields: bool = True):
     if model_name is None:
         return
 
-    class_name_parts = flatten_name(classdef_node.get_super_arglist())
-    if class_name_parts[-1] == "Model":
-        model_type = "model"
-    elif class_name_parts[-1] == "TransientModel":
-        model_type = "transient"
-    elif class_name_parts[-1] == "AbstractModel":
-        model_type = "abstract"
-    else:
-        model_type = "unknown"
-
-    model = Model(name=model_name, class_name=classdef_node.name.value, type=model_type)
+    model = Model(
+        name=model_name,
+        class_name=classdef_node.name.value,
+        bases=get_bases(classdef_node.get_super_arglist()),
+    )
 
     if extract_fields:
         for field in _get_model_fields(classdef_node.get_suite()):
             model.fields.append(field)
+
     return model
