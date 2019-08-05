@@ -7,6 +7,7 @@ from ..common import run_check_test
     "addon_name, version, expected",
     [
         ("lambda_in_default", 12, []),
+        ("model_specific_attr", 12, []),
         (
             "typo_1",
             12,
@@ -15,7 +16,7 @@ from ..common import run_check_test
                     "slug": "unknown_field_attribute",
                     "description": 'Unknown field attribute "String" for field type "Many2one"',
                     "categories": ["correctness"],
-                    "locations": [(["models", "foo.py"], [(9, 8)])],
+                    "locations": [(["models", "foo.py"], [(10, 8)])],
                 }
             ],
         ),
@@ -39,7 +40,7 @@ from ..common import run_check_test
                     "slug": "unknown_field_attribute",
                     "description": 'Unknown field attribute "translate" for field type "Many2one"',
                     "categories": ["correctness"],
-                    "locations": [(["models", "foo.py"], [(10, 8)])],
+                    "locations": [(["models", "foo.py"], [(11, 8)])],
                 }
             ],
         ),
@@ -51,7 +52,7 @@ from ..common import run_check_test
                     "slug": "unknown_field_attribute",
                     "description": 'Unknown field attribute "selection" for field type "Many2one"',
                     "categories": ["correctness"],
-                    "locations": [(["models", "foo.py"], [(9, 8)])],
+                    "locations": [(["models", "foo.py"], [(10, 8)])],
                 }
             ],
         ),
@@ -63,7 +64,7 @@ from ..common import run_check_test
                     "slug": "unknown_field_type",
                     "description": 'Unknown field type "Foobar"',
                     "categories": ["correctness"],
-                    "locations": [(["models", "foo.py"], [(9, 8)])],
+                    "locations": [(["models", "foo.py"], [(8, 10)])],
                 }
             ],
         ),

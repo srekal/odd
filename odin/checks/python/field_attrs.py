@@ -1,12 +1,8 @@
-import typing
-
-import parso
 from odin.checks import PythonCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue, Location
+from odin.parso_utils import get_model_definition
 from odin.utils import expand_version_list
-from odin.parso_utils import filter_child_nodes, first_child_type_node, get_model_name
-
 
 FIELD_TYPE_VERSION_MAP = expand_version_list(
     {
@@ -167,129 +163,60 @@ ATTRS_VERSION_MAP = {
 }
 
 
-def consume_name(
-    node: parso.tree.Node
-) -> typing.Tuple[typing.List[str], typing.List[parso.tree.NodeOrLeaf]]:
-    name_parts, leftover_nodes = [], []
-    for child in node.children:
-        if child.type == "name":
-            name_parts.append(child.value)
-        elif (
-            child.type == "trailer"
-            and len(child.children) == 2
-            and child.children[0].type == "operator"
-            and child.children[0].value == "."
-            and child.children[1].type == "name"
-        ):
-            name_parts.append(child.children[1].value)
-        else:
-            leftover_nodes.append(child)
-    return name_parts, leftover_nodes
-
-
 class FieldAttrs(PythonCheck):
-    def _check_field_node(
-        self, addon, filename, node, model_name: str, field_name: str, field_type: str
-    ):
-        assert node is None or node.type == "arglist"
-
-        kwargs = {}
-        if node is not None:
-            for arg_node in node.children:
-                if arg_node.type == "argument" and arg_node.children[0].type == "name":
-                    kwargs[arg_node.children[0].value] = arg_node.start_pos
-
-        if field_type not in FIELD_TYPE_VERSION_MAP.get(addon.version, set()):
-            yield Issue(
-                "unknown_field_type",
-                f'Unknown field type "{field_type}"',
-                addon.addon_path,
-                [Location(filename, [node.start_pos])],
-                categories=["correctness"],
-            )
-            return
-
-        model_attrs = MODEL_ATTR_VERSION_MAP.get(model_name, {}).get(
-            addon.version, set()
-        )
-        deprecated_attrs = DEPRECATED_ATTR_VERSION_MAP.get(field_type, {}).get(
-            addon.version, set()
-        )
-        expected_attrs = (
-            ATTRS_VERSION_MAP.get(field_type, {}).get(addon.version, set())
-            | COMMON_ATTRS_VERSION_MAP.get(addon.version, set())
-            | model_attrs
-        )
-        if "compute" in kwargs:
-            expected_attrs |= COMPUTE_ATTRS
-        if "related" in kwargs:
-            expected_attrs |= RELATED_ATTRS
-        unknown_attrs = kwargs.keys() - expected_attrs
-
-        for attr in unknown_attrs:
-            if attr in deprecated_attrs:
-                yield Issue(
-                    "deprecated_field_attribute",
-                    f'Deprecated field attribute "{attr}" for field type "{field_type}"',
-                    addon.addon_path,
-                    [Location(filename, [node.start_pos])],
-                    categories=["deprecated"],
-                )
-                continue
-            yield Issue(
-                "unknown_field_attribute",
-                f'Unknown field attribute "{attr}" for field type "{field_type}"',
-                addon.addon_path,
-                [Location(filename, [node.start_pos])],
-                categories=["correctness"],
-            )
-
     def check(self, addon, filename, module):
+        known_fields = FIELD_TYPE_VERSION_MAP.get(addon.version, set())
+        common_field_attrs = COMMON_ATTRS_VERSION_MAP.get(addon.version, set())
         for classdef in module.iter_classdefs():
-            model_name = get_model_name(classdef)
-            if model_name is None:
+            model = get_model_definition(classdef, extract_fields=True)
+            if model is None:
                 continue
 
-            suite = classdef.get_suite()
-            for node in filter_child_nodes(suite, "simple_stmt"):
-                expr_stmt_node = first_child_type_node(node, "expr_stmt")
-                if expr_stmt_node is None:
+            for field in model.fields:
+                if field.class_name not in known_fields:
+                    yield Issue(
+                        "unknown_field_type",
+                        f'Unknown field type "{field.class_name}"',
+                        addon.addon_path,
+                        [Location(filename, [field.start_pos])],
+                        categories=["correctness"],
+                    )
                     continue
 
-                if (
-                    expr_stmt_node.children[0].type == "name"
-                    and expr_stmt_node.children[1].type == "operator"
-                    and expr_stmt_node.children[2].type == "atom_expr"
-                ):
-                    field_name = expr_stmt_node.children[0].value
-
-                    # atom_expr
-                    field_node = expr_stmt_node.children[2]
-                    name_parts, leftover_nodes = consume_name(field_node)
-                    if (
-                        not name_parts
-                        or len(name_parts) > 3
-                        or len(leftover_nodes) != 1
-                    ):
-                        continue
-
-                    field_type = name_parts[-1]
-                    arglist = first_child_type_node(leftover_nodes[0], "arglist")
-
-                    if len(name_parts) == 3 and (
-                        name_parts[0] not in ("odoo", "openerp")
-                        or name_parts[1] != "fields"
-                    ):
-                        continue
-                    elif len(name_parts) == 2 and name_parts[0] != "fields":
-                        continue
-                    elif len(
-                        name_parts
-                    ) == 1 and field_type not in FIELD_TYPE_VERSION_MAP.get(
+                kwargs = {kw.name: kw for kw in field.kwargs}
+                model_attrs = MODEL_ATTR_VERSION_MAP.get(model.name, {}).get(
+                    addon.version, set()
+                )
+                deprecated_attrs = DEPRECATED_ATTR_VERSION_MAP.get(
+                    field.class_name, {}
+                ).get(addon.version, set())
+                expected_attrs = (
+                    ATTRS_VERSION_MAP.get(field.class_name, {}).get(
                         addon.version, set()
-                    ):
-                        continue
+                    )
+                    | common_field_attrs
+                    | model_attrs
+                )
+                if "compute" in kwargs:
+                    expected_attrs |= COMPUTE_ATTRS
+                if "related" in kwargs:
+                    expected_attrs |= RELATED_ATTRS
+                unknown_attrs = kwargs.keys() - expected_attrs
 
-                    yield from self._check_field_node(
-                        addon, filename, arglist, model_name, field_name, field_type
+                for attr in unknown_attrs:
+                    if attr in deprecated_attrs:
+                        yield Issue(
+                            "deprecated_field_attribute",
+                            f'Deprecated field attribute "{attr}" for field type "{field.class_name}"',
+                            addon.addon_path,
+                            [Location(filename, [kwargs[attr].start_pos])],
+                            categories=["deprecated"],
+                        )
+                        continue
+                    yield Issue(
+                        "unknown_field_attribute",
+                        f'Unknown field attribute "{attr}" for field type "{field.class_name}"',
+                        addon.addon_path,
+                        [Location(filename, [kwargs[attr].start_pos])],
+                        categories=["correctness"],
                     )

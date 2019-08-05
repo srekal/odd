@@ -24,6 +24,8 @@ class FieldKwarg:
 class Field:
     name: str
     class_name: str
+    start_pos: Position
+    end_pos: Position
     kwargs: typing.List[FieldKwarg] = dataclasses.field(default_factory=list)
 
 
@@ -170,7 +172,13 @@ def _get_model_fields(suite):
                         )
                     )
 
-            yield Field(name=field_name, class_name=field_class, kwargs=kwargs)
+            yield Field(
+                name=field_name,
+                class_name=field_class,
+                start_pos=field_node.start_pos,
+                end_pos=field_node.end_pos,
+                kwargs=kwargs,
+            )
 
 
 def get_model_definition(classdef_node, *, extract_fields: bool = True):
