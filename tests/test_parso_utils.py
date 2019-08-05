@@ -12,18 +12,33 @@ from odin.parso_utils import get_model_definition, Model, Field, FieldKwarg, UNK
         (
             "simple_model_with_field.py",
             True,
-            Model("foo", "Foo", type="model", fields=[Field("bar", "Char")]),
+            Model(
+                "foo",
+                "Foo",
+                type="model",
+                fields=[Field("bar", "Char", (8, 10), (8, 23))],
+            ),
         ),
         ("simple_model_with_field.py", False, Model("foo", "Foo", type="model")),
         (
             "simple_model_one_field_direct_import.py",
             True,
-            Model("foo", "Foo", type="model", fields=[Field("bar", "Char")]),
+            Model(
+                "foo",
+                "Foo",
+                type="model",
+                fields=[Field("bar", "Char", (9, 10), (9, 16))],
+            ),
         ),
         (
             "full_import_path.py",
             True,
-            Model("foo", "Foo", type="model", fields=[Field("bar", "Char")]),
+            Model(
+                "foo",
+                "Foo",
+                type="model",
+                fields=[Field("bar", "Char", (8, 10), (8, 28))],
+            ),
         ),
         ("some_other_field_class.py", True, Model("foo", "Foo", type="model")),
         ("some_other_field_class_2.py", True, Model("foo", "Foo", type="model")),
@@ -38,6 +53,8 @@ from odin.parso_utils import get_model_definition, Model, Field, FieldKwarg, UNK
                     Field(
                         "bar",
                         "Char",
+                        (8, 10),
+                        (10, 5),
                         kwargs=[
                             FieldKwarg(
                                 "string", "Bar", start_pos=(9, 8), end_pos=(9, 20)
@@ -58,6 +75,8 @@ from odin.parso_utils import get_model_definition, Model, Field, FieldKwarg, UNK
                     Field(
                         "bar",
                         "Char",
+                        (8, 10),
+                        (10, 5),
                         kwargs=[
                             FieldKwarg(
                                 "baz", UNKNOWN, start_pos=(9, 8), end_pos=(9, 14)
@@ -78,6 +97,8 @@ from odin.parso_utils import get_model_definition, Model, Field, FieldKwarg, UNK
                     Field(
                         "bar",
                         "Char",
+                        (8, 10),
+                        (11, 5),
                         kwargs=[
                             FieldKwarg(
                                 "string",
