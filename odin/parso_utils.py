@@ -106,7 +106,7 @@ def _get_base(node) -> typing.Tuple[str]:
     for child in [node] if node.type == "name" else node.children:
         if child.type == "operator" and child.value == ".":
             continue
-        if child.type == "name":
+        elif child.type == "name":
             name_parts.append(child.value)
         elif child.type == "trailer":
             name_parts.extend(_get_base(child))
