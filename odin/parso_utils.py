@@ -111,9 +111,6 @@ def _get_base(node) -> typing.Tuple[str]:
         elif child.type == "trailer":
             name_parts.extend(_get_base(child))
         else:
-            import pdb
-
-            pdb.set_trace()
             raise ValueError(f"Unexpected node type: {child.type}")
     return tuple(name_parts)
 
