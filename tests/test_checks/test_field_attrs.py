@@ -14,7 +14,9 @@ from ..common import run_check_test
             [
                 {
                     "slug": "unknown_field_attribute",
-                    "description": 'Unknown field attribute "String" for field type "Many2one"',
+                    "description": (
+                        'Unknown field attribute "String" for field type "Many2one"'
+                    ),
                     "categories": ["correctness"],
                     "locations": [(["models", "foo.py"], [(10, 9)])],
                 }
@@ -26,7 +28,9 @@ from ..common import run_check_test
             [
                 {
                     "slug": "deprecated_field_attribute",
-                    "description": 'Deprecated field attribute "size" for field type "Char"',
+                    "description": (
+                        'Deprecated field attribute "size" for field type "Char"'
+                    ),
                     "categories": ["deprecated"],
                     "locations": [(["models", "foo.py"], [(9, 9)])],
                 }
@@ -38,7 +42,10 @@ from ..common import run_check_test
             [
                 {
                     "slug": "unknown_field_attribute",
-                    "description": 'Unknown field attribute "translate" for field type "Many2one"',
+                    "description": (
+                        'Unknown field attribute "translate" for field type '
+                        '"Many2one"'
+                    ),
                     "categories": ["correctness"],
                     "locations": [(["models", "foo.py"], [(11, 9)])],
                 }
@@ -50,7 +57,10 @@ from ..common import run_check_test
             [
                 {
                     "slug": "unknown_field_attribute",
-                    "description": 'Unknown field attribute "selection" for field type "Many2one"',
+                    "description": (
+                        'Unknown field attribute "selection" for field type '
+                        '"Many2one"'
+                    ),
                     "categories": ["correctness"],
                     "locations": [(["models", "foo.py"], [(10, 9)])],
                 }

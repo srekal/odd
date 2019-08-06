@@ -12,7 +12,11 @@ from ..common import run_check_test
             [
                 {
                     "slug": "incorrect_cron_record",
-                    "description": '`ir.cron` record "foo_cron_compute_pi" has `code` set, but no `state` set - code will not be executed when the cron job runs',
+                    "description": (
+                        '`ir.cron` record "foo_cron_compute_pi" has `code` set, '
+                        "but no `state` set - code will not be executed when the "
+                        "cron job runs"
+                    ),
                     "categories": ["correctness"],
                     "locations": [(["data", "ir_cron.xml"], [7])],
                 }
@@ -25,7 +29,11 @@ from ..common import run_check_test
             [
                 {
                     "slug": "incorrect_cron_record",
-                    "description": '`ir.cron` record "foo_cron_compute_pi" has `code` set, but `state` is not "code" - code will not be executed when the cron job runs',
+                    "description": (
+                        '`ir.cron` record "foo_cron_compute_pi" has `code` set, '
+                        'but `state` is not "code" - code will not be executed when '
+                        "the cron job runs"
+                    ),
                     "categories": ["correctness"],
                     "locations": [
                         (["data", "ir_cron.xml"], [7]),
@@ -40,7 +48,10 @@ from ..common import run_check_test
             [
                 {
                     "slug": "incorrect_cron_record",
-                    "description": '`ir.cron` record "foo_cron_compute_pi" has `state` set to "code", but `code` is not set',
+                    "description": (
+                        '`ir.cron` record "foo_cron_compute_pi" has `state` set to '
+                        '"code", but `code` is not set'
+                    ),
                     "categories": ["correctness"],
                     "locations": [(["data", "ir_cron.xml"], [7])],
                 }

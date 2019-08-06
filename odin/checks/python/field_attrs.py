@@ -207,7 +207,8 @@ class FieldAttrs(PythonCheck):
                     if attr in deprecated_attrs:
                         yield Issue(
                             "deprecated_field_attribute",
-                            f'Deprecated field attribute "{attr}" for field type "{field.class_name}"',
+                            f'Deprecated field attribute "{attr}" '
+                            f'for field type "{field.class_name}"',
                             addon.addon_path,
                             [
                                 Location(
@@ -219,7 +220,8 @@ class FieldAttrs(PythonCheck):
                         continue
                     yield Issue(
                         "unknown_field_attribute",
-                        f'Unknown field attribute "{attr}" for field type "{field.class_name}"',
+                        f'Unknown field attribute "{attr}" '
+                        f'for field type "{field.class_name}"',
                         addon.addon_path,
                         [Location(filename, [column_index_1(kwargs[attr].start_pos)])],
                         categories=["correctness"],

@@ -11,7 +11,10 @@ from ..common import run_check_test
             [
                 {
                     "slug": "tree_view_string_attribute_deprecated",
-                    "description": "`<tree>` `string` attribute is deprecated (no longer displayed) since version 8.0",
+                    "description": (
+                        "`<tree>` `string` attribute is deprecated "
+                        "(no longer displayed) since version 8.0"
+                    ),
                     "locations": [(["views", "foo.xml"], [7])],
                     "categories": ["maintainability", "deprecated"],
                 }
@@ -22,7 +25,10 @@ from ..common import run_check_test
             [
                 {
                     "slug": "tree_view_string_attribute_deprecated",
-                    "description": "`<tree>` `string` attribute is deprecated (no longer displayed) since version 8.0",
+                    "description": (
+                        "`<tree>` `string` attribute is deprecated "
+                        "(no longer displayed) since version 8.0"
+                    ),
                     "locations": [(["views", "foo.xml"], [10])],
                     "categories": ["maintainability", "deprecated"],
                 }

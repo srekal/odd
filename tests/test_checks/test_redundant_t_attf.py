@@ -13,7 +13,10 @@ from ..common import run_check_test
             [
                 {
                     "slug": "redundant_t_attf",
-                    "description": "Element `<a>` has a redundant `t-attf-$name` attribute `t-attf-href`: /web/login?redirect=1#login",
+                    "description": (
+                        "Element `<a>` has a redundant `t-attf-$name` attribute "
+                        "`t-attf-href`: /web/login?redirect=1#login"
+                    ),
                     "categories": ["correctness", "performance"],
                     "locations": [(["views", "website_templates.xml"], [5])],
                 }

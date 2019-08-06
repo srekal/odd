@@ -73,7 +73,10 @@ class ManifestKeys(PythonCheck):
                 correct_key = "demo" if key == "demo_xml" else "data"
                 yield key, {
                     "slug": "deprecated_manifest_key",
-                    "description": f'"{key}" manifest key was deprecated in favor of "{correct_key}"',
+                    "description": (
+                        f'"{key}" manifest key was deprecated '
+                        f'in favor of "{correct_key}"'
+                    ),
                     "categories": ["correctness", "deprecated"],
                 }
 

@@ -11,7 +11,9 @@ from ..common import run_check_test
             [
                 {
                     "slug": "duplicate_record_field",
-                    "description": '`foo` record "foo_1" has duplicated values for field "a"',
+                    "description": (
+                        '`foo` record "foo_1" has duplicated values for field "a"'
+                    ),
                     "locations": [
                         (["data", "foo.xml"], [5]),
                         (["data", "foo.xml"], [7]),

@@ -18,7 +18,8 @@ class RedundantTAttf(XMLCheck):
                     if not is_format_string:
                         yield Issue(
                             "redundant_t_attf",
-                            f"Element `<{el.tag}>` has a redundant `t-attf-$name` attribute `{name}`: {value}",
+                            f"Element `<{el.tag}>` has a redundant `t-attf-$name` "
+                            f"attribute `{name}`: {value}",
                             addon.addon_path,
                             [Location(filename, [el.sourceline])],
                             categories=["correctness", "performance"],

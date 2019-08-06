@@ -44,7 +44,8 @@ class NoUpdate(XMLCheck):
             if model in MODELS and not is_noupdate(record):
                 yield Issue(
                     "expected_noupdate_flag",
-                    f'`{model}` model records should be declared in a `noupdate="1"` XML data section to allow user modifications',
+                    f'`{model}` model records should be declared in a `noupdate="1"` '
+                    f"XML data section to allow user modifications",
                     addon.addon_path,
                     [
                         Location(

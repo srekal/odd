@@ -8,7 +8,8 @@ class ManifestFilename(AddonCheck):
         if addon.version >= 10 and addon.manifest_path.name != "__manifest__.py":
             yield Issue(
                 "deprecated_manifest_filename",
-                'Starting with Odoo 10, addon manifest files should be named "__manifest__.py"',
+                "Starting with Odoo 10, addon manifest files should be named "
+                '"__manifest__.py"',
                 addon.addon_path,
                 [Location(addon.manifest_path)],
                 categories=["deprecated"],

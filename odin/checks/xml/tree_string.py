@@ -19,7 +19,8 @@ class TreeString(XMLCheck):
                 if "string" in search.attrib:
                     yield Issue(
                         "tree_view_string_attribute_deprecated",
-                        "`<tree>` `string` attribute is deprecated (no longer displayed) since version 8.0",
+                        "`<tree>` `string` attribute is deprecated "
+                        "(no longer displayed) since version 8.0",
                         addon.addon_path,
                         [Location(filename, [search.sourceline])],
                         categories=["maintainability", "deprecated"],
@@ -34,7 +35,8 @@ class TreeString(XMLCheck):
                 for attr in xpath.xpath('.//attribute[@name="string"]'):
                     yield Issue(
                         "tree_view_string_attribute_deprecated",
-                        "`<tree>` `string` attribute is deprecated (no longer displayed) since version 8.0",
+                        "`<tree>` `string` attribute is deprecated "
+                        "(no longer displayed) since version 8.0",
                         addon.addon_path,
                         [Location(filename, [attr.sourceline])],
                         categories=["maintainability", "deprecated"],

@@ -1,0 +1,20 @@
+.job_template: &test_job
+    image:
+        name: python:3.7-stretch
+    before_script:
+        - apt-get -qq update && apt-get -qqy install python3-pip
+        - pip3 install tox
+    script:
+        - tox -e $TOX_ENV
+tests:
+    <<: *test_job
+    variables:
+        FLIT_ROOT_INSTALL: 1
+        TOX_ENV: py37
+    coverage: '/\d+\%\s*$/'
+
+qa:
+    <<: *test_job
+    variables:
+        FLIT_ROOT_INSTALL: 1
+        TOX_ENV: qa
