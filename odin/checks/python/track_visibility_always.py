@@ -1,7 +1,7 @@
 from odin.checks import PythonCheck
 from odin.issue import Issue, Location
 from odin.utils import odoo_commit_url
-from odin.parso_utils import walk, get_string_node_value
+from odin.parso_utils import column_index_1, walk, get_string_node_value
 
 
 class TrackVisibilityAlways(PythonCheck):
@@ -24,7 +24,7 @@ class TrackVisibilityAlways(PythonCheck):
                     "track_visibility_always_deprecated",
                     'Field `track_visibility` attribute value "always" is deprecated since version 12.0',
                     addon.addon_path,
-                    [Location(filename, [node.start_pos])],
+                    [Location(filename, [column_index_1(node.start_pos)])],
                     categories=["deprecated"],
                     sources=[
                         odoo_commit_url("c99de4551583e801ecc6669ac456c4f7e2eef1da")

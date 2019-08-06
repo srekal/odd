@@ -4,7 +4,7 @@ import typing
 from odin.checks import PythonCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue, Location
-from odin.parso_utils import get_model_definition
+from odin.parso_utils import column_index_1, get_model_definition
 from odin.utils import expand_version_list
 
 _LOG = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ class FieldAttrStringRedundant(PythonCheck):
                         "redundant_field_attribute",
                         f'Redundant field attribute `string="{string_kwarg.value}"` for field "{field.name}". The same value will be computed by Odoo automatically.',
                         addon.addon_path,
-                        [Location(filename, [string_kwarg.start_pos])],
+                        [Location(filename, [column_index_1(string_kwarg.start_pos)])],
                         categories=["redundancy"],
                     )
                     continue
@@ -96,7 +96,11 @@ class FieldAttrStringRedundant(PythonCheck):
                             "redundant_field_attribute",
                             f'Redundant implied field attribute `string` "{string_arg.value}"` for field "{field.name}". The same value will be computed by Odoo automatically.',
                             addon.addon_path,
-                            [Location(filename, [string_arg.start_pos])],
+                            [
+                                Location(
+                                    filename, [column_index_1(string_arg.start_pos)]
+                                )
+                            ],
                             categories=["redundancy"],
                         )
                         continue

@@ -1,7 +1,7 @@
 from odin.checks import PythonCheck
 from odin.const import SUPPORTED_VERSIONS
 from odin.issue import Issue, Location
-from odin.parso_utils import get_model_definition
+from odin.parso_utils import column_index_1, get_model_definition
 from odin.utils import expand_version_list
 
 FIELD_TYPE_VERSION_MAP = expand_version_list(
@@ -178,7 +178,7 @@ class FieldAttrs(PythonCheck):
                         "unknown_field_type",
                         f'Unknown field type "{field.class_name}"',
                         addon.addon_path,
-                        [Location(filename, [field.start_pos])],
+                        [Location(filename, [column_index_1(field.start_pos)])],
                         categories=["correctness"],
                     )
                     continue
@@ -209,7 +209,11 @@ class FieldAttrs(PythonCheck):
                             "deprecated_field_attribute",
                             f'Deprecated field attribute "{attr}" for field type "{field.class_name}"',
                             addon.addon_path,
-                            [Location(filename, [kwargs[attr].start_pos])],
+                            [
+                                Location(
+                                    filename, [column_index_1(kwargs[attr].start_pos)]
+                                )
+                            ],
                             categories=["deprecated"],
                         )
                         continue
@@ -217,6 +221,6 @@ class FieldAttrs(PythonCheck):
                         "unknown_field_attribute",
                         f'Unknown field attribute "{attr}" for field type "{field.class_name}"',
                         addon.addon_path,
-                        [Location(filename, [kwargs[attr].start_pos])],
+                        [Location(filename, [column_index_1(kwargs[attr].start_pos)])],
                         categories=["correctness"],
                     )
