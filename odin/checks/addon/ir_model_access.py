@@ -22,7 +22,9 @@ class IrModelAccessNoGroup(AddonCheck):
                 ]
                 yield Issue(
                     "ir_model_access_without_group",
-                    f"`ir.model.access` record ({row['id']}) allows the following operations to users without group: {', '.join(permissions)}",
+                    f"`ir.model.access` record ({row['id']}) allows the "
+                    f"following operations to users without group: "
+                    f"{', '.join(permissions)}",
                     addon.addon_path,
                     [Location(csv_path, [line_no])],
                     categories=["security", "correctness"],

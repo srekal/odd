@@ -18,7 +18,9 @@ class AttributeOverride(XMLCheck):
             if is_override:
                 yield Issue(
                     "attribute_override",
-                    f"`<attribute>` overrides the `{el.get('name')}` attribute value, consider using `add=\"...\"` or `remove=\"...\"` instead of overriding",
+                    f"`<attribute>` overrides the `{el.get('name')}` attribute value, "
+                    f'consider using `add="..."` or `remove="..."` instead of '
+                    f"overriding",
                     addon.addon_path,
                     [Location(filename, [el.sourceline])],
                     categories=["correctness", "maintainability"],

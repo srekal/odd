@@ -30,7 +30,9 @@ class IrCronStateCode(XMLCheck):
             if code and not state:
                 yield Issue(
                     "incorrect_cron_record",
-                    f"`ir.cron` record \"{record.attrib['id']}\" has `code` set, but no `state` set - code will not be executed when the cron job runs",
+                    f"`ir.cron` record \"{record.attrib['id']}\" has `code` set, "
+                    f"but no `state` set - code will not be executed when the "
+                    f"cron job runs",
                     addon.addon_path,
                     [Location(filename, [code_line_no])],
                     categories=["correctness"],
@@ -38,7 +40,9 @@ class IrCronStateCode(XMLCheck):
             elif code and state != "code":
                 yield Issue(
                     "incorrect_cron_record",
-                    f"`ir.cron` record \"{record.attrib['id']}\" has `code` set, but `state` is not \"code\" - code will not be executed when the cron job runs",
+                    f"`ir.cron` record \"{record.attrib['id']}\" has `code` set, "
+                    f'but `state` is not "code" - code will not be executed '
+                    f"when the cron job runs",
                     addon.addon_path,
                     [
                         Location(filename, [code_line_no]),
@@ -49,7 +53,8 @@ class IrCronStateCode(XMLCheck):
             elif not code and state == "code":
                 yield Issue(
                     "incorrect_cron_record",
-                    f"`ir.cron` record \"{record.attrib['id']}\" has `state` set to \"code\", but `code` is not set",
+                    f"`ir.cron` record \"{record.attrib['id']}\" has `state` set "
+                    f'to "code", but `code` is not set',
                     addon.addon_path,
                     [Location(filename, [state_line_no])],
                     categories=["correctness"],

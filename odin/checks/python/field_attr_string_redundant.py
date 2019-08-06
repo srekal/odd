@@ -78,7 +78,9 @@ class FieldAttrStringRedundant(PythonCheck):
                 if string_kwarg and string_kwarg.value == get_odoo_string(field.name):
                     yield Issue(
                         "redundant_field_attribute",
-                        f'Redundant field attribute `string="{string_kwarg.value}"` for field "{field.name}". The same value will be computed by Odoo automatically.',
+                        f'Redundant field attribute `string="{string_kwarg.value}"` '
+                        f'for field "{field.name}". The same value will be computed '
+                        f"by Odoo automatically.",
                         addon.addon_path,
                         [Location(filename, [column_index_1(string_kwarg.start_pos)])],
                         categories=["redundancy"],
@@ -94,7 +96,9 @@ class FieldAttrStringRedundant(PythonCheck):
                     if string_arg.value == get_odoo_string(field.name):
                         yield Issue(
                             "redundant_field_attribute",
-                            f'Redundant implied field attribute `string` "{string_arg.value}"` for field "{field.name}". The same value will be computed by Odoo automatically.',
+                            f"Redundant implied field attribute `string` "
+                            f'"{string_arg.value}"` for field "{field.name}". '
+                            f"The same value will be computed by Odoo automatically.",
                             addon.addon_path,
                             [
                                 Location(

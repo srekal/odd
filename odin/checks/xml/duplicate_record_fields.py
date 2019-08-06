@@ -23,7 +23,8 @@ class DuplicateRecordFields(XMLCheck):
                 if len(line_nos) > 1:
                     yield Issue(
                         "duplicate_record_field",
-                        f'`{model}` record "{record_id}" has duplicated values for field "{field_name}"',
+                        f'`{model}` record "{record_id}" has duplicated values '
+                        f'for field "{field_name}"',
                         addon.addon_path,
                         [Location(filename, [line_no]) for line_no in line_nos],
                         categories=["correctness", "maintainability"],

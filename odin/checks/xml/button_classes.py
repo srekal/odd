@@ -12,7 +12,8 @@ def _get_issues(addon, filename, element, classes):
         if old_class in classes:
             yield Issue(
                 "deprecated_button_class",
-                f"`{old_class}` button class is deprecated since v12.0 in favor of `{new_class}`",
+                f"`{old_class}` button class is deprecated since v12.0 "
+                f"in favor of `{new_class}`",
                 addon.addon_path,
                 [Location(filename, [element.sourceline])],
                 categories=["maintainability", "deprecated"],

@@ -33,7 +33,9 @@ from ..common import run_check_test
             [
                 {
                     "slug": "deprecated_manifest_key",
-                    "description": '"active" manifest key was renamed to "auto_install"',
+                    "description": (
+                        '"active" manifest key was renamed to "auto_install"'
+                    ),
                     "categories": ["correctness", "deprecated"],
                     "locations": [(["__manifest__.py"], [(1, 41)])],
                 }
@@ -44,7 +46,9 @@ from ..common import run_check_test
             [
                 {
                     "slug": "deprecated_manifest_key",
-                    "description": '"demo_xml" manifest key was deprecated in favor of "demo"',
+                    "description": (
+                        '"demo_xml" manifest key was deprecated in favor of "demo"'
+                    ),
                     "categories": ["correctness", "deprecated"],
                     "locations": [(["__manifest__.py"], [(1, 49)])],
                 }
@@ -55,7 +59,9 @@ from ..common import run_check_test
             [
                 {
                     "slug": "deprecated_manifest_key",
-                    "description": '"init_xml" manifest key was deprecated in favor of "data"',
+                    "description": (
+                        '"init_xml" manifest key was deprecated in favor of "data"'
+                    ),
                     "categories": ["correctness", "deprecated"],
                     "locations": [(["__manifest__.py"], [(1, 58)])],
                 }

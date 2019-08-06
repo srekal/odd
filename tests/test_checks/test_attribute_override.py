@@ -12,7 +12,11 @@ from ..common import run_check_test
             [
                 {
                     "slug": "attribute_override",
-                    "description": '`<attribute>` overrides the `class` attribute value, consider using `add="..."` or `remove="..."` instead of overriding',
+                    "description": (
+                        "`<attribute>` overrides the `class` attribute value, "
+                        'consider using `add="..."` or `remove="..."` instead '
+                        "of overriding"
+                    ),
                     "categories": ["correctness", "maintainability"],
                     "locations": [(["views", "foo.xml"], [11])],
                 }
@@ -24,7 +28,11 @@ from ..common import run_check_test
             [
                 {
                     "slug": "attribute_override",
-                    "description": '`<attribute>` overrides the `class` attribute value, consider using `add="..."` or `remove="..."` instead of overriding',
+                    "description": (
+                        "`<attribute>` overrides the `class` attribute value, "
+                        'consider using `add="..."` or `remove="..."` instead '
+                        "of overriding"
+                    ),
                     "categories": ["correctness", "maintainability"],
                     "locations": [(["views", "foo.xml"], [11])],
                 }
@@ -36,7 +44,11 @@ from ..common import run_check_test
             [
                 {
                     "slug": "attribute_override",
-                    "description": '`<attribute>` overrides the `class` attribute value, consider using `add="..."` or `remove="..."` instead of overriding',
+                    "description": (
+                        "`<attribute>` overrides the `class` attribute value, "
+                        'consider using `add="..."` or `remove="..."` instead '
+                        "of overriding"
+                    ),
                     "categories": ["correctness", "maintainability"],
                     "locations": [(["views", "foo.xml"], [10])],
                 }

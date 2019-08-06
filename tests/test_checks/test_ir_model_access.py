@@ -11,7 +11,11 @@ from ..common import run_check_test
             [
                 {
                     "slug": "ir_model_access_without_group",
-                    "description": "`ir.model.access` record (access_foo_no_group) allows the following operations to users without group: read, unlink",
+                    "description": (
+                        "`ir.model.access` record (access_foo_no_group) "
+                        "allows the following operations to users without group: "
+                        "read, unlink"
+                    ),
                     "categories": ["security", "correctness"],
                     "locations": [(["security", "ir.model.access.csv"], [3])],
                 }

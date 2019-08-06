@@ -12,7 +12,10 @@ from ..common import run_check_test
             [
                 {
                     "slug": "data_file_missing_in_manifest",
-                    "description": "Data file is not included in `demo` or `data` sections in the manifest file",
+                    "description": (
+                        "Data file is not included in `demo` or `data` "
+                        "sections in the manifest file"
+                    ),
                     "categories": ["correctness"],
                     "locations": [(["views", "foo.xml"], [])],
                 }

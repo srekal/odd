@@ -11,7 +11,9 @@ from ..common import run_check_test
             [
                 {
                     "slug": "duplicate_view_field",
-                    "description": '"foo_view_form" `ir.ui.view` has duplicate field "a"',
+                    "description": (
+                        '"foo_view_form" `ir.ui.view` has duplicate field "a"'
+                    ),
                     "locations": [
                         (["views", "foo.xml"], [9]),
                         (["views", "foo.xml"], [11]),
@@ -27,7 +29,9 @@ from ..common import run_check_test
             [
                 {
                     "slug": "duplicate_view_field",
-                    "description": '"foo_view_form" `ir.ui.view` has duplicate field "name"',
+                    "description": (
+                        '"foo_view_form" `ir.ui.view` has duplicate field "name"'
+                    ),
                     "locations": [
                         (["views", "foo.xml"], [16]),
                         (["views", "foo.xml"], [18]),

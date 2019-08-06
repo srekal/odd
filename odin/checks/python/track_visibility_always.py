@@ -22,7 +22,8 @@ class TrackVisibilityAlways(PythonCheck):
             ):
                 yield Issue(
                     "track_visibility_always_deprecated",
-                    'Field `track_visibility` attribute value "always" is deprecated since version 12.0',
+                    'Field `track_visibility` attribute value "always" is '
+                    "deprecated since version 12.0",
                     addon.addon_path,
                     [Location(filename, [column_index_1(node.start_pos)])],
                     categories=["deprecated"],

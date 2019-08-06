@@ -86,7 +86,8 @@ class DuplicateViewFields(XMLCheck):
                     field_name = path.split("/")[-1]
                     yield Issue(
                         "duplicate_view_field",
-                        f'"{view_xml_id}" `ir.ui.view` has duplicate field "{field_name}"',
+                        f'"{view_xml_id}" `ir.ui.view` has duplicate field '
+                        f'"{field_name}"',
                         addon.addon_path,
                         [Location(filename, [line_no]) for line_no in line_nos],
                         categories=["correctness"],

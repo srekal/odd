@@ -20,6 +20,7 @@ from ..common import run_check_test
     ],
 )
 def test_file_permissions(test_data_dir, addon_name, expected):
+    (test_data_dir / "file_permissions" / "__manifest__.py").chmod(0o664)
     run_check_test(
         test_data_dir, "file_permissions", ("__manifest__.py",), 12, expected
     )

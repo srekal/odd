@@ -21,7 +21,8 @@ class DataFileInclusion(AddonCheck):
             if file_path not in combined_data_files:
                 yield Issue(
                     "data_file_missing_in_manifest",
-                    f"Data file is not included in `demo` or `data` sections in the manifest file",
+                    "Data file is not included in `demo` or `data` "
+                    "sections in the manifest file",
                     addon.addon_path,
                     [Location(file_path)],
                     categories=["correctness"],

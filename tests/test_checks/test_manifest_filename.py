@@ -11,11 +11,15 @@ from ..common import run_check_test
             [
                 {
                     "slug": "deprecated_manifest_filename",
-                    "description": 'Starting with Odoo 10, addon manifest files should be named "__manifest__.py"',
+                    "description": (
+                        "Starting with Odoo 10, addon manifest files "
+                        'should be named "__manifest__.py"'
+                    ),
                     "locations": [(["__openerp__.py"], [])],
                     "categories": ["deprecated"],
                     "sources": [
-                        "https://github.com/odoo/odoo/commit/4339196e5231aa734a0154e2f4e88b2e54f27d48"
+                        "https://github.com/odoo/odoo/commit/"
+                        "4339196e5231aa734a0154e2f4e88b2e54f27d48"
                     ],
                 }
             ],

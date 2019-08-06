@@ -11,7 +11,11 @@ from ..common import run_check_test
             [
                 {
                     "slug": "expected_noupdate_flag",
-                    "description": '`ir.cron` model records should be declared in a `noupdate="1"` XML data section to allow user modifications',
+                    "description": (
+                        "`ir.cron` model records should be declared in a "
+                        '`noupdate="1"` XML data section to allow user '
+                        "modifications"
+                    ),
                     "categories": ["correctness"],
                     "locations": [(["data", "ir_cron.xml"], [5, 3])],
                 }
@@ -24,7 +28,11 @@ from ..common import run_check_test
             [
                 {
                     "slug": "expected_noupdate_flag",
-                    "description": '`ir.cron` model records should be declared in a `noupdate="1"` XML data section to allow user modifications',
+                    "description": (
+                        "`ir.cron` model records should be declared in a "
+                        '`noupdate="1"` XML data section to allow user '
+                        "modifications"
+                    ),
                     "categories": ["correctness"],
                     "locations": [(["data", "ir_cron.xml"], [5, 3])],
                 }
