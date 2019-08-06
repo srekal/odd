@@ -19,6 +19,13 @@ from ..common import run_check_test
                     ),
                     "categories": ["redundancy"],
                     "locations": [(["models", "foo.py"], [(10, 9)])],
+                    "sources": [
+                        (
+                            "https://github.com/odoo/odoo/blob"
+                            "/ff9ddfdacc9581361b555fd5f69e2da61800acad"
+                            "/odoo/fields.py#L461-L466"
+                        )
+                    ],
                 }
             ],
         ),
@@ -35,6 +42,13 @@ from ..common import run_check_test
                     ),
                     "categories": ["redundancy"],
                     "locations": [(["models", "foo.py"], [(8, 30)])],
+                    "sources": [
+                        (
+                            "https://github.com/odoo/odoo/blob"
+                            "/ff9ddfdacc9581361b555fd5f69e2da61800acad"
+                            "/odoo/fields.py#L461-L466"
+                        )
+                    ],
                 }
             ],
         ),
@@ -51,6 +65,13 @@ from ..common import run_check_test
                     ),
                     "categories": ["redundancy"],
                     "locations": [(["models", "foo.py"], [(9, 9)])],
+                    "sources": [
+                        (
+                            "https://github.com/odoo/odoo/blob"
+                            "/9e8f70e4849b0eeaca8b5cf51372ecfa23dc561b"
+                            "/openerp/fields.py#L403-L405"
+                        )
+                    ],
                 }
             ],
         ),
