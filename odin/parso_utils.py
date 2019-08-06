@@ -63,6 +63,10 @@ def walk(
             yield from walk(child)
 
 
+def column_index_1(position: typing.Tuple[int, int]) -> typing.Tuple[int, int]:
+    return position[0], position[1] + 1
+
+
 def filter_child_nodes(node: parso.tree.Node, *types: str):
     types = set(types)
     for child_node in node.children:

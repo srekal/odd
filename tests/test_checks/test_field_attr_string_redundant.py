@@ -14,7 +14,7 @@ from ..common import run_check_test
                     "slug": "redundant_field_attribute",
                     "description": 'Redundant field attribute `string="Partner"` for field "partner_id". The same value will be computed by Odoo automatically.',
                     "categories": ["redundancy"],
-                    "locations": [(["models", "foo.py"], [(10, 8)])],
+                    "locations": [(["models", "foo.py"], [(10, 9)])],
                 }
             ],
         ),
@@ -26,7 +26,7 @@ from ..common import run_check_test
                     "slug": "redundant_field_attribute",
                     "description": 'Redundant implied field attribute `string` "Some Value"` for field "some_value". The same value will be computed by Odoo automatically.',
                     "categories": ["redundancy"],
-                    "locations": [(["models", "foo.py"], [(8, 29)])],
+                    "locations": [(["models", "foo.py"], [(8, 30)])],
                 }
             ],
         ),
@@ -39,7 +39,7 @@ from ..common import run_check_test
                     "slug": "redundant_field_attribute",
                     "description": 'Redundant field attribute `string="Name"` for field "name". The same value will be computed by Odoo automatically.',
                     "categories": ["redundancy"],
-                    "locations": [(["models", "foo.py"], [(9, 8)])],
+                    "locations": [(["models", "foo.py"], [(9, 9)])],
                 }
             ],
         ),

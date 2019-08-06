@@ -3,7 +3,7 @@ import collections
 from odin.checks import PythonCheck
 from odin.const import MANIFEST_FILENAMES
 from odin.issue import Issue, Location
-from odin.parso_utils import get_string_node_value, walk
+from odin.parso_utils import column_index_1, get_string_node_value, walk
 
 KNOWN_KEYS = {
     "name",
@@ -93,7 +93,7 @@ class ManifestKeys(PythonCheck):
                 for child in node.children[::4]:
                     if child.type == "string":
                         key_locations[get_string_node_value(child)].append(
-                            child.start_pos
+                            column_index_1(child.start_pos)
                         )
                 break
         return key_locations
