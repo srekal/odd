@@ -67,7 +67,7 @@ class DuplicateViewFields(XMLCheck):
                 )
                 continue
 
-            children = [c for c in arch.getchildren() if not c.tag is etree.Comment]
+            children = [c for c in arch.getchildren() if c.tag is not etree.Comment]
             if len(children) != 1:
                 _LOG.warning(
                     "Unexpected number of children in `ir.ui.view` "
