@@ -1,0 +1,3 @@
+{
+    'name': 'Inherit (no description)',
+}

@@ -151,7 +151,7 @@ def get_bases(
 ) -> typing.List[typing.Tuple[str]]:
     if node is None:
         return []
-    elif node.type == "arglist":
+    elif node.type == "arglist" or node.type == "testlist":
         return [_get_base(c) for c in node.children if c.type in ("name", "atom_expr")]
     else:
         return [_get_base(node)]
