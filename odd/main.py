@@ -107,8 +107,8 @@ def check_addon(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("paths", type=pathlib.Path, nargs="+")
-    parser.add_argument("-w", "--whitelist", metavar="CHECKS", nargs="*")
+    parser.add_argument("paths", metavar="PATH", type=pathlib.Path, nargs="+")
+    parser.add_argument("-w", "--whitelist", metavar="CHECK", nargs="*")
     parser.add_argument("version", type=int, choices=SUPPORTED_VERSIONS)
     args = parser.parse_args()
 
