@@ -1,6 +1,6 @@
 import pytest
 
-from odin.main import get_checks
+from odd.main import get_checks
 
 
 def test_get_checks_unknown_check_raises_error():

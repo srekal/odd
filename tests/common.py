@@ -2,9 +2,9 @@ import pathlib
 
 import yarl
 
-from odin.addon import AddonPath
-from odin.issue import Issue, Location
-from odin.main import check_addon, get_checks
+from odd.addon import AddonPath
+from odd.issue import Issue, Location
+from odd.main import check_addon, get_checks
 
 
 def run_check_test(

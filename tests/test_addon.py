@@ -1,5 +1,5 @@
 import pytest
-from odin.addon import Addon, AddonPath, discover_addons, parse_manifest
+from odd.addon import Addon, AddonPath, discover_addons, parse_manifest
 
 
 @pytest.mark.parametrize(

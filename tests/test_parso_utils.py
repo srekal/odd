@@ -1,7 +1,7 @@
 import pytest
 import parso
 
-from odin.parso_utils import get_model_definition, Model, Field, FieldKwarg, UNKNOWN
+from odd.parso_utils import get_model_definition, Model, Field, FieldKwarg, UNKNOWN
 
 
 @pytest.mark.parametrize(

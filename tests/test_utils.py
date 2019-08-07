@@ -2,9 +2,9 @@ import pathlib
 
 import pytest
 
-from odin.addon import AddonPath
-from odin.issue import Issue, Location
-from odin.utils import format_issue, lookup_version_list
+from odd.addon import AddonPath
+from odd.issue import Issue, Location
+from odd.utils import format_issue, lookup_version_list
 
 TEST_MANIFEST_PATH = pathlib.Path("/addons/baz/__manifest__.py")
 TEST_ADDON_PATH = AddonPath(TEST_MANIFEST_PATH)
