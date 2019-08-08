@@ -93,8 +93,6 @@ class FieldAttrStringRedundant(PythonCheck):
         )
         for classdef in module.iter_classdefs():
             model = get_model_definition(classdef, extract_fields=True)
-            if model is None:
-                continue
 
             for field in model.fields:
                 if field.class_name not in known_fields:
