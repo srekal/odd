@@ -111,9 +111,14 @@ def main():
     parser.add_argument("-w", "--whitelist", metavar="CHECK", nargs="*")
     parser.add_argument("version", type=int, choices=SUPPORTED_VERSIONS)
     args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO)
 
     checks = get_checks(whitelist=args.whitelist)
+    num_issues = 0
     for path in args.paths:
         for manifest_path in discover_addons(path):
             for issue in check_addon(manifest_path, checks, version=args.version):
+                num_issues += 1
                 print(format_issue(issue))
+    if not num_issues:
+        _LOG.info("That's odd, no issues were found")
