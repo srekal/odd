@@ -14,6 +14,12 @@ class Position(typing.NamedTuple):
 
 
 @dataclasses.dataclass
+class ModuleImport:
+    from_names: typing.Tuple[str] = dataclasses.field(default_factory=tuple)
+    names: typing.Tuple[str] = dataclasses.field(default_factory=tuple)
+
+
+@dataclasses.dataclass
 class FieldArg:
     value: typing.Any
     start_pos: Position
@@ -266,3 +272,12 @@ def get_model_definition(classdef_node, *, extract_fields: bool = True):
             model.fields.append(field)
 
     return model
+
+
+def get_imports(module) -> typing.List[ModuleImport]:
+    from_names, names = (), ()
+    for imp in module.iter_imports():
+        names = tuple(n.value for n in imp.get_defined_names())
+        if imp.type == "import_from":
+            from_names = tuple(n.value for n in imp.get_from_names())
+        yield ModuleImport(from_names, names)
