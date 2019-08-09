@@ -42,6 +42,7 @@ from ..common import run_check_test
             ],
         ),
         ("simple_class_12", 12, []),
+        ("abstract_component", 12, []),
     ],
 )
 def test_new_model_description(test_data_dir, addon_name, version, expected):

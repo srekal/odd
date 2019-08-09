@@ -1,12 +1,20 @@
 from odd.checks import PythonCheck
 from odd.issue import Issue, Location
-from odd.parso_utils import column_index_1, get_model_definition
+from odd.parso_utils import (
+    UNKNOWN,
+    column_index_1,
+    get_model_definition,
+    get_model_type,
+)
 from odd.utils import odoo_source_url
 
 
 class NewModelDescription(PythonCheck):
     def check(self, addon, filename, module):
         for classdef in module.iter_classdefs():
+            if get_model_type(classdef) == UNKNOWN:
+                continue
+
             model = get_model_definition(classdef, extract_fields=True)
 
             model_name = model.params.get("_name")

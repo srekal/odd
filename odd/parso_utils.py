@@ -274,6 +274,23 @@ def get_model_definition(classdef_node, *, extract_fields: bool = True):
     return model
 
 
+def get_model_type(classdef_node) -> str:
+    bases = get_bases(classdef_node.get_super_arglist())
+    for type_, class_ in [
+        ("model", "Model"),
+        ("transient", "TransientModel"),
+        ("abstract", "AbstractModel"),
+    ]:
+        if (
+            (class_,) in bases
+            or ("models", class_) in bases
+            or ("odoo", "models", class_) in bases
+            or ("openerp", "models", class_) in bases
+        ):
+            return type_
+    return UNKNOWN
+
+
 def get_imports(module) -> typing.List[ModuleImport]:
     from_names, names = (), ()
     for imp in module.iter_imports():
