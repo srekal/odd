@@ -1,6 +1,7 @@
 from odd.checks import PythonCheck
 from odd.issue import Issue, Location
 from odd.parso_utils import column_index_1, extract_func_name, get_bases, get_imports
+from odd.utils import odoo_commit_url
 
 
 class UnitTestTestCaseTagged(PythonCheck):
@@ -38,5 +39,7 @@ class UnitTestTestCaseTagged(PythonCheck):
                     addon.addon_path,
                     [Location(filename, [column_index_1(classdef.start_pos)])],
                     categories=["correctness"],
-                    sources=[],
+                    sources=[
+                        odoo_commit_url("b356b190338e3ee032b9e3a7f670f76468965006")
+                    ],
                 )

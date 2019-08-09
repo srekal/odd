@@ -18,6 +18,10 @@ from ..common import run_check_test
                     ),
                     "categories": ["correctness"],
                     "locations": [(["tests", "test_foo.py"], [(4, 1)])],
+                    "sources": [
+                        "https://github.com/odoo/odoo/commit/"
+                        "b356b190338e3ee032b9e3a7f670f76468965006"
+                    ],
                 }
             ],
         ),
@@ -33,6 +37,10 @@ from ..common import run_check_test
                     ),
                     "categories": ["correctness"],
                     "locations": [(["tests", "test_foo.py"], [(4, 1)])],
+                    "sources": [
+                        "https://github.com/odoo/odoo/commit/"
+                        "b356b190338e3ee032b9e3a7f670f76468965006"
+                    ],
                 }
             ],
         ),
