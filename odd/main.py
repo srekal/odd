@@ -53,7 +53,9 @@ def check_addon(
 ):
     addon_path = AddonPath(manifest_path)
     # FIXME: Make a function to do the separation.
-    checks_by_type = collections.defaultdict(dict)
+    checks_by_type: typing.DefaultDict[
+        str, typing.Dict[str, Check]
+    ] = collections.defaultdict(dict)
 
     for check_name, check_cls in checks.items():
         for method_name, _ in inspect.getmembers(
