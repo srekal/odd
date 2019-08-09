@@ -1,7 +1,7 @@
 import logging
 import typing
 
-from odd.checks import PythonCheck
+from odd.check import Check
 from odd.const import SUPPORTED_VERSIONS
 from odd.issue import Issue, Location
 from odd.parso_utils import column_index_1, get_model_definition
@@ -82,8 +82,8 @@ def get_odoo_string_compute_func(version: int) -> typing.Callable[[str], str]:
     return _func_gt_11 if version >= 11 else _func_lt_11
 
 
-class FieldAttrStringRedundant(PythonCheck):
-    def check(self, addon, filename, module):
+class FieldAttrStringRedundant(Check):
+    def on_python_module(self, addon, filename, module):
         known_fields = FIELD_TYPE_VERSION_MAP.get(addon.version, set())
         get_odoo_string = get_odoo_string_compute_func(addon.version)
         sources = (

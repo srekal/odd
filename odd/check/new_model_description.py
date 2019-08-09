@@ -1,4 +1,4 @@
-from odd.checks import PythonCheck
+from odd.check import Check
 from odd.issue import Issue, Location
 from odd.parso_utils import (
     UNKNOWN,
@@ -9,8 +9,8 @@ from odd.parso_utils import (
 from odd.utils import odoo_source_url
 
 
-class NewModelDescription(PythonCheck):
-    def check(self, addon, filename, module):
+class NewModelDescription(Check):
+    def on_python_module(self, addon, filename, module):
         for classdef in module.iter_classdefs():
             if get_model_type(classdef) == UNKNOWN:
                 continue

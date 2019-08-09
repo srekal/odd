@@ -1,6 +1,6 @@
 import collections
 
-from odd.checks import PythonCheck
+from odd.check import Check
 from odd.const import MANIFEST_FILENAMES
 from odd.issue import Issue, Location
 from odd.parso_utils import column_index_1, get_string_node_value, walk
@@ -54,7 +54,7 @@ KNOWN_KEYS = {
 }
 
 
-class ManifestKeys(PythonCheck):
+class ManifestKeys(Check):
     def _check_active(self, manifest):
         if "active" in manifest:
             yield "active", {
@@ -101,7 +101,7 @@ class ManifestKeys(PythonCheck):
                 break
         return key_locations
 
-    def check(self, addon, filename, module):
+    def on_python_module(self, addon, filename, module):
         if filename.name.lower() not in MANIFEST_FILENAMES:
             return
         key_locations = None

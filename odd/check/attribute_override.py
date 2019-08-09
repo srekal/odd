@@ -1,9 +1,9 @@
-from odd.checks import XMLCheck
+from odd.check.base import Check
 from odd.issue import Issue, Location
 
 
-class AttributeOverride(XMLCheck):
-    def check(self, addon, filename, tree):
+class AttributeOverride(Check):
+    def on_xml_tree(self, addon, filename, tree):
         if addon.version < 9 or (
             filename not in addon.data_files and filename not in addon.demo_files
         ):

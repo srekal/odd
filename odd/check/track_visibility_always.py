@@ -1,11 +1,11 @@
-from odd.checks import PythonCheck
+from odd.check import Check
 from odd.issue import Issue, Location
 from odd.utils import odoo_commit_url
 from odd.parso_utils import column_index_1, walk, get_string_node_value
 
 
-class TrackVisibilityAlways(PythonCheck):
-    def check(self, addon, filename, module):
+class TrackVisibilityAlways(Check):
+    def on_python_module(self, addon, filename, module):
         if addon.version < 12:
             return
 

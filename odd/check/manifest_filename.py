@@ -1,10 +1,10 @@
-from odd.checks import AddonCheck
+from odd.check import Check
 from odd.issue import Issue, Location
 from odd.utils import odoo_commit_url
 
 
-class ManifestFilename(AddonCheck):
-    def check(self, addon):
+class ManifestFilename(Check):
+    def on_addon(self, addon):
         if addon.version >= 10 and addon.manifest_path.name != "__manifest__.py":
             yield Issue(
                 "deprecated_manifest_filename",
