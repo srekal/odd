@@ -33,6 +33,7 @@ def get_view_arch(record: Element) -> typing.Optional[Element]:
     for field in record.iterchildren(tag="field"):
         if field.get("name") == "arch":
             return field
+    return None
 
 
 def get_xpath_expr_target_element(xpath_expr: str) -> typing.Optional[str]:

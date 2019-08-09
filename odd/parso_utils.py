@@ -15,8 +15,8 @@ class Position(typing.NamedTuple):
 
 @dataclasses.dataclass
 class ModuleImport:
-    from_names: typing.Tuple[str] = dataclasses.field(default_factory=tuple)
-    names: typing.Tuple[str] = dataclasses.field(default_factory=tuple)
+    from_names: typing.Tuple[str, ...] = dataclasses.field(default_factory=tuple)
+    names: typing.Tuple[str, ...] = dataclasses.field(default_factory=tuple)
 
 
 @dataclasses.dataclass
@@ -74,9 +74,9 @@ def column_index_1(position: typing.Tuple[int, int]) -> typing.Tuple[int, int]:
 
 
 def filter_child_nodes(node: parso.tree.Node, *types: str):
-    types = set(types)
+    unique_types = set(types)
     for child_node in node.children:
-        if child_node.type in types:
+        if child_node.type in unique_types:
             yield child_node
 
 
@@ -138,13 +138,13 @@ def get_string_node_value(node: parso.tree.NodeOrLeaf) -> str:
     return node._get_payload()
 
 
-def _get_base(node: parso.tree.NodeOrLeaf) -> typing.Tuple[str]:
+def _get_base(node: parso.tree.NodeOrLeaf) -> typing.Tuple[str, ...]:
     name_parts = []
     for child in [node] if node.type == "name" else node.children:
         if child.type == "operator" and child.value == ".":
             continue
         elif child.type == "name":
-            name_parts.append(child.value)
+            name_parts.append(str(child.value))
         elif child.type == "trailer":
             name_parts.extend(_get_base(child))
         else:
@@ -154,7 +154,7 @@ def _get_base(node: parso.tree.NodeOrLeaf) -> typing.Tuple[str]:
 
 def get_bases(
     node: typing.Optional[parso.tree.NodeOrLeaf]
-) -> typing.List[typing.Tuple[str]]:
+) -> typing.List[typing.Tuple[str, ...]]:
     if node is None:
         return []
     elif node.type == "arglist" or node.type == "testlist":
@@ -274,7 +274,7 @@ def get_model_definition(classdef_node, *, extract_fields: bool = True):
     return model
 
 
-def get_model_type(classdef_node) -> str:
+def get_model_type(classdef_node) -> typing.Union[str, object]:
     bases = get_bases(classdef_node.get_super_arglist())
     for type_, class_ in [
         ("model", "Model"),
@@ -291,8 +291,9 @@ def get_model_type(classdef_node) -> str:
     return UNKNOWN
 
 
-def get_imports(module) -> typing.List[ModuleImport]:
-    from_names, names = (), ()
+def get_imports(module) -> typing.Generator[ModuleImport, None, None]:
+    from_names: typing.Tuple[str, ...] = ()
+    names: typing.Tuple[str, ...] = ()
     for imp in module.iter_imports():
         names = tuple(n.value for n in imp.get_defined_names())
         if imp.type == "import_from":

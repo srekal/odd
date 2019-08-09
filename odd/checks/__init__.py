@@ -28,5 +28,5 @@ class PythonCheck(abc.ABC):
 
 class XMLCheck(abc.ABC):
     @abc.abstractmethod
-    def check(self, filename: pathlib.Path, tree, addon: Addon):
+    def check(self, addon: Addon, filename: pathlib.Path, tree):
         """Actual plugin"""

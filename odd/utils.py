@@ -1,6 +1,6 @@
 import operator
 import pathlib
-import typing
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Set, Tuple, Union
 
 import yarl
 from odd.const import SUPPORTED_VERSIONS
@@ -12,16 +12,12 @@ def odoo_commit_url(commit: str) -> yarl.URL:
 
 
 def odoo_source_url(
-    commit: str,
-    path: str,
-    *,
-    start: typing.Optional[int] = None,
-    end: typing.Optional[int] = None,
+    commit: str, path: str, *, start: Optional[int] = None, end: Optional[int] = None
 ) -> yarl.URL:
     if end and not start:
         raise ValueError("`start` must be provided if `end` is provided")
 
-    fragment = None
+    fragment = ""
     if start is not None:
         fragment = f"L{start:d}" if end is None else f"L{start:d}-L{end:d}"
 
@@ -37,7 +33,7 @@ def list_files(
     dir: pathlib.Path,
     *,
     list_dirs: bool = False,
-    exclude_dirs: typing.Optional[typing.Iterable[pathlib.Path]] = None,
+    exclude_dirs: Optional[Iterable[pathlib.Path]] = None,
 ):
     exclude_dirs = set(exclude_dirs) if exclude_dirs else set()
     for path in dir.iterdir():
@@ -51,7 +47,7 @@ def list_files(
             yield path
 
 
-def _fmt_line_no(line_no: typing.Union[int, typing.Tuple[int, int]]) -> str:
+def _fmt_line_no(line_no: Union[int, Tuple[int, int]]) -> str:
     if isinstance(line_no, tuple):
         return "%d, column: %d" % (line_no[0], line_no[1])
     else:
@@ -100,11 +96,11 @@ def _get_operator(version_spec: str, version_cls):
 
 
 def lookup_version_list(
-    version_map: typing.Mapping[str, typing.List[typing.Any]],
+    version_map: Mapping[str, Union[List[Any], Set[Any]]],
     version: int,
     *,
     result_cls=list,
-) -> typing.Union[typing.List[typing.Any], typing.Set[typing.Any]]:
+) -> Union[List[Any], Set[Any]]:
     if not isinstance(version, int):
         raise TypeError(
             f"Invalid version, expected an integer, got {version} ({type(version)})"
@@ -125,10 +121,10 @@ def lookup_version_list(
 
 
 def expand_version_list(
-    version_map: typing.Mapping[str, typing.List[typing.Any]],
+    version_map: Mapping[str, Union[List[Any], Set[Any]]],
     *versions: int,
     result_cls=list,
-) -> typing.Dict[int, typing.Union[typing.List[typing.Any], typing.Set[typing.Any]]]:
+) -> Dict[int, Union[List[Any], Set[Any]]]:
     result = {}
     for version in versions:
         result[version] = lookup_version_list(

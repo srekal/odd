@@ -16,13 +16,15 @@ from odd.xmlutils import get_root
 
 _LOG = logging.getLogger(__name__)
 
+AddonType = typing.Type[typing.Union[AddonCheck, PathCheck, PythonCheck, XMLCheck]]
+
 
 def get_checks(
     whitelist: typing.Optional[typing.Iterable[str]] = None
-) -> typing.Dict[str, typing.Union[AddonCheck, PathCheck, PythonCheck, XMLCheck]]:
+) -> typing.Dict[str, AddonType]:
     whitelist = set([] if whitelist is None else whitelist)
     use_whitelist = bool(whitelist)
-    checks = collections.OrderedDict()
+    checks: typing.Dict[str, AddonType] = collections.OrderedDict()
     for entry_point in pkg_resources.iter_entry_points("odd.check"):
         check_name = entry_point.name
         if whitelist and check_name not in whitelist:
@@ -51,7 +53,7 @@ def check_addon(
         str, typing.Type[typing.Union[AddonCheck, PathCheck, PythonCheck, XMLCheck]]
     ],
     *,
-    version: typing.Optional[OdooVersion] = None,
+    version: OdooVersion,
 ):
     addon_path = AddonPath(manifest_path)
     # FIXME: Make a function to do the separation.

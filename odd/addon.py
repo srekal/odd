@@ -49,7 +49,7 @@ class Addon(AddonPath):
         return files
 
 
-def parse_manifest(addon_path: AddonPath):
+def parse_manifest(addon_path: AddonPath) -> typing.Any:
     # FIXME: Check for manifest file size.
     with addon_path.manifest_path.open(mode="r") as f:
         return ast.literal_eval(f.read())
@@ -59,6 +59,7 @@ def find_manifest(path: pathlib.Path) -> typing.Optional[pathlib.Path]:
     for child in path.iterdir():
         if child.is_file() and child.name in MANIFEST_FILENAMES:
             return child
+    return None
 
 
 def discover_addons(
