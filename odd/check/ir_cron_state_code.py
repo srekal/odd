@@ -1,4 +1,4 @@
-from odd.checks import XMLCheck
+from odd.check import Check
 from odd.issue import Issue, Location
 from odd.xmlutils import get_model_records
 
@@ -17,8 +17,8 @@ def collect_fields(record):
     return fields
 
 
-class IrCronStateCode(XMLCheck):
-    def check(self, addon, filename, tree):
+class IrCronStateCode(Check):
+    def on_xml_tree(self, addon, filename, tree):
         if addon.version < 11 or (
             filename not in addon.data_files and filename not in addon.demo_files
         ):

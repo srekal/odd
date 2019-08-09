@@ -3,7 +3,7 @@ import logging
 
 from lxml import etree
 
-from odd.checks import XMLCheck
+from odd.check import Check
 from odd.issue import Issue, Location
 from odd.xmlutils import get_model_records, split_xml_id, get_view_arch
 
@@ -41,8 +41,8 @@ def find_fields(el, path):
     return result
 
 
-class DuplicateViewFields(XMLCheck):
-    def check(self, addon, filename, tree):
+class DuplicateViewFields(Check):
+    def on_xml_tree(self, addon, filename, tree):
         if filename not in addon.data_files and filename not in addon.demo_files:
             return
         for record in get_model_records(tree, model="ir.ui.view"):

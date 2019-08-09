@@ -1,4 +1,4 @@
-from odd.checks import PythonCheck
+from odd.check import Check
 from odd.const import SUPPORTED_VERSIONS
 from odd.issue import Issue, Location
 from odd.parso_utils import column_index_1, get_model_definition
@@ -163,8 +163,8 @@ ATTRS_VERSION_MAP = {
 }
 
 
-class FieldAttrs(PythonCheck):
-    def check(self, addon, filename, module):
+class FieldAttrs(Check):
+    def on_python_module(self, addon, filename, module):
         known_fields = FIELD_TYPE_VERSION_MAP.get(addon.version, set())
         common_field_attrs = COMMON_ATTRS_VERSION_MAP.get(addon.version, set())
         for classdef in module.iter_classdefs():

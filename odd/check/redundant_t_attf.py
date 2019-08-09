@@ -1,9 +1,9 @@
-from odd.checks import XMLCheck
+from odd.check import Check
 from odd.issue import Issue, Location
 
 
-class RedundantTAttf(XMLCheck):
-    def check(self, addon, filename, tree):
+class RedundantTAttf(Check):
+    def on_xml_tree(self, addon, filename, tree):
         if filename not in addon.data_files and filename not in addon.demo_files:
             return
         for template in tree.xpath("//template"):

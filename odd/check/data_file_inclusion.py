@@ -1,12 +1,12 @@
-from odd.checks import AddonCheck
+from odd.check import Check
 from odd.issue import Issue, Location
 from odd.utils import list_files, lookup_version_list
 
 EXT_VERSION_MAP = {">=8": ["csv", "xml", "sql"], ">=8,<12": ["yml"]}
 
 
-class DataFileInclusion(AddonCheck):
-    def check(self, addon):
+class DataFileInclusion(Check):
+    def on_addon(self, addon):
         extensions = {
             f".{ext}" for ext in lookup_version_list(EXT_VERSION_MAP, addon.version)
         }

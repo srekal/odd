@@ -1,11 +1,11 @@
 import csv
 import pathlib
 
-from odd.checks import AddonCheck
+from odd.check import Check
 from odd.issue import Issue, Location
 
 
-class IrModelAccessNoGroup(AddonCheck):
+class IrModelAccessNoGroup(Check):
     def _check_csv(self, addon, csv_path: pathlib.Path):
         with csv_path.open(mode="r") as f:
             reader = csv.DictReader(f)
@@ -30,7 +30,7 @@ class IrModelAccessNoGroup(AddonCheck):
                     categories=["security", "correctness"],
                 )
 
-    def check(self, addon):
+    def on_addon(self, addon):
         for data_file_path in addon.data_files:
             if data_file_path.name == "ir.model.access.csv":
                 yield from self._check_csv(addon, data_file_path)

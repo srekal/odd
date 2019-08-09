@@ -1,11 +1,11 @@
-from odd.checks import PythonCheck
+from odd.check import Check
 from odd.issue import Issue, Location
 from odd.parso_utils import column_index_1, extract_func_name, get_bases, get_imports
 from odd.utils import odoo_commit_url
 
 
-class UnitTestTestCaseTagged(PythonCheck):
-    def check(self, addon, filename, module):
+class UnitTestTestCaseTagged(Check):
+    def on_python_module(self, addon, filename, module):
         if addon.version < 12 or not filename.name.startswith("test_"):
             return
 

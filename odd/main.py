@@ -1,5 +1,6 @@
 import argparse
 import collections
+import inspect
 import logging
 import pathlib
 import typing
@@ -8,7 +9,7 @@ import lxml
 import parso
 import pkg_resources
 from odd.addon import Addon, AddonPath, discover_addons, parse_manifest
-from odd.checks import AddonCheck, PathCheck, PythonCheck, XMLCheck
+from odd.check import Check
 from odd.const import SUPPORTED_VERSIONS
 from odd.typedefs import OdooVersion
 from odd.utils import format_issue, list_files
@@ -16,20 +17,17 @@ from odd.xmlutils import get_root
 
 _LOG = logging.getLogger(__name__)
 
-AddonType = typing.Type[typing.Union[AddonCheck, PathCheck, PythonCheck, XMLCheck]]
-
 
 def get_checks(
     whitelist: typing.Optional[typing.Iterable[str]] = None
-) -> typing.Dict[str, AddonType]:
+) -> typing.Dict[str, typing.Type[Check]]:
     whitelist = set([] if whitelist is None else whitelist)
     use_whitelist = bool(whitelist)
-    checks: typing.Dict[str, AddonType] = collections.OrderedDict()
+    checks: typing.Dict[str, typing.Type[Check]] = collections.OrderedDict()
     for entry_point in pkg_resources.iter_entry_points("odd.check"):
         check_name = entry_point.name
         if whitelist and check_name not in whitelist:
             continue
-
         try:
             check_cls = entry_point.load()
         except Exception:  # pylint: disable=broad-except
@@ -49,27 +47,23 @@ def get_checks(
 
 def check_addon(
     manifest_path: pathlib.Path,
-    checks: typing.Mapping[
-        str, typing.Type[typing.Union[AddonCheck, PathCheck, PythonCheck, XMLCheck]]
-    ],
+    checks: typing.Mapping[str, typing.Type[Check]],
     *,
     version: OdooVersion,
 ):
     addon_path = AddonPath(manifest_path)
     # FIXME: Make a function to do the separation.
-    addon_checks, path_checks, python_checks, xml_checks = {}, {}, {}, {}
+    checks_by_type = collections.defaultdict(dict)
 
     for check_name, check_cls in checks.items():
-        if issubclass(check_cls, AddonCheck):
-            addon_checks[check_name] = check_cls()
-        elif issubclass(check_cls, PathCheck):
-            path_checks[check_name] = check_cls()
-        elif issubclass(check_cls, PythonCheck):
-            python_checks[check_name] = check_cls()
-        elif issubclass(check_cls, XMLCheck):
-            xml_checks[check_name] = check_cls()
-        else:
-            raise TypeError(f"Unsupported check class: {check_cls}")
+        for method_name, _ in inspect.getmembers(
+            check_cls, predicate=inspect.isfunction
+        ):
+            if not method_name.startswith("on_"):
+                continue
+            checks_by_type[method_name][check_name] = check_cls()
+
+    # TODO: Validate check types.
 
     try:
         manifest = parse_manifest(addon_path)
@@ -82,29 +76,31 @@ def check_addon(
     addon = Addon(manifest_path, manifest, version)
     grammar = parso.load_grammar(version="2.7" if addon.version < 11 else "3.5")
 
-    for addon_check in addon_checks.values():
-        yield from addon_check.check(addon)
+    for addon_check in checks_by_type["on_addon"].values():
+        yield from getattr(addon_check, "on_addon")(addon)
 
     for path in list_files(addon.path, list_dirs=True):
-        for path_check in path_checks.values():
-            yield from path_check.check(addon, path)
+        for path_check in checks_by_type["on_path"].values():
+            yield from getattr(path_check, "on_path")(addon, path)
 
         if not path.is_file():
             continue
 
-        if python_checks and path.suffix.lower() == ".py":
+        if checks_by_type["on_python_module"] and path.suffix.lower() == ".py":
             with path.open(mode="rb") as f:
                 module = grammar.parse(f.read())
-            for python_check in python_checks.values():
-                yield from python_check.check(addon, path, module)
+            for python_check in checks_by_type["on_python_module"].values():
+                yield from getattr(python_check, "on_python_module")(
+                    addon, path, module
+                )
 
-        if xml_checks and path.suffix.lower() == ".xml":
+        if checks_by_type["on_xml_tree"] and path.suffix.lower() == ".xml":
             try:
                 tree = get_root(path)
             except lxml.etree.XMLSyntaxError:
                 _LOG.exception("Error while parsing XML file: %s", path)
-            for xml_check in xml_checks.values():
-                yield from xml_check.check(addon, path, tree)
+            for xml_check in checks_by_type["on_xml_tree"].values():
+                yield from getattr(xml_check, "on_xml_tree")(addon, path, tree)
 
 
 def main():

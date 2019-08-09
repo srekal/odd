@@ -1,4 +1,4 @@
-from odd.checks import XMLCheck
+from odd.check import Check
 from odd.issue import Issue, Location
 from odd.utils import odoo_source_url
 from odd.xmlutils import get_model_records, get_view_arch
@@ -28,8 +28,8 @@ def _get_issues(addon, filename, element, classes):
             )
 
 
-class ButtonClasses(XMLCheck):
-    def check(self, addon, filename, tree):
+class ButtonClasses(Check):
+    def on_xml_tree(self, addon, filename, tree):
         if addon.version < 12 or (
             filename not in addon.data_files and filename not in addon.demo_files
         ):
