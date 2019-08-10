@@ -30,7 +30,7 @@ class IrModelAccessNoGroup(Check):
                     categories=["security", "correctness"],
                 )
 
-    def on_addon(self, addon):
+    def on_before(self, addon):
         for data_file_path in addon.data_files:
-            if data_file_path.name == "ir.model.access.csv":
+            if data_file_path.name.lower() == "ir.model.access.csv":
                 yield from self._check_csv(addon, data_file_path)

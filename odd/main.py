@@ -58,12 +58,13 @@ def check_addon(
     ] = collections.defaultdict(dict)
 
     for check_name, check_cls in checks.items():
+        check = check_cls()
         for method_name, _ in inspect.getmembers(
             check_cls, predicate=inspect.isfunction
         ):
             if not method_name.startswith("on_"):
                 continue
-            checks_by_type[method_name][check_name] = check_cls()
+            checks_by_type[method_name][check_name] = check
 
     # TODO: Validate check types.
 
@@ -78,8 +79,8 @@ def check_addon(
     addon = Addon(manifest_path, manifest, version)
     grammar = parso.load_grammar(version="2.7" if addon.version < 11 else "3.5")
 
-    for addon_check in checks_by_type["on_addon"].values():
-        yield from getattr(addon_check, "on_addon")(addon)
+    for before_check in checks_by_type["on_before"].values():
+        yield from getattr(before_check, "on_before")(addon)
 
     for path in list_files(addon.path, list_dirs=True):
         for path_check in checks_by_type["on_path"].values():
@@ -103,6 +104,9 @@ def check_addon(
                 _LOG.exception("Error while parsing XML file: %s", path)
             for xml_check in checks_by_type["on_xml_tree"].values():
                 yield from getattr(xml_check, "on_xml_tree")(addon, path, tree)
+
+    for after_check in checks_by_type["on_after"].values():
+        yield from getattr(after_check, "on_after")(addon)
 
 
 def main():

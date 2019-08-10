@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="ir_model_access_foo_1" model="ir.model.access">
+    <field name="name">Foo User</field>
+    <field name="model_id" ref="has_ir_model_access_in_xml_full_external_id.model_foo"/>
+    <field name="group_id" ref="base.group_user"/>
+    <field name="perm_read">1</field>
+</record>
+
+</odoo>

@@ -11,6 +11,7 @@ from .ir_model_access import IrModelAccessNoGroup
 from .manifest_filename import ManifestFilename
 from .manifest_keys import ManifestKeys
 from .new_model_description import NewModelDescription
+from .new_model_no_ir_model_access import NewModelNoIrModelAccess
 from .noupdate import NoUpdate
 from .permissions import DirectoryPermissions, FilePermissions
 from .redundant_t_attf import RedundantTAttf
@@ -37,6 +38,7 @@ __all__ = [
     "ManifestFilename",
     "ManifestKeys",
     "NewModelDescription",
+    "NewModelNoIrModelAccess",
     "NoUpdate",
     "RedundantTAttf",
     "RouteKwargs",
