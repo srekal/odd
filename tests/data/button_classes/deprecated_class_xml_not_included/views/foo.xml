@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="foo_view_form_1" model="ir.ui.view">
+    <field name="model">foo</field>
+    <field name="arch" type="xml">
+        <form>
+            <sheet>
+                <button name="action_do_foo"
+                    string="Do Foo"
+                    type="object" icon="fa-img" class="oe_highlight"/>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+</odoo>

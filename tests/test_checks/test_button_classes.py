@@ -7,7 +7,7 @@ from ..common import run_check_test
     "addon_name, expected",
     [
         (
-            "button_classes",
+            "deprecated_class",
             [
                 {
                     "slug": "deprecated_button_class",
@@ -38,8 +38,12 @@ from ..common import run_check_test
                     ],
                 },
             ],
-        )
+        ),
+        ("no_arch", []),
+        ("deprecated_class_xml_not_included", []),
     ],
 )
 def test_button_classes(test_data_dir, addon_name, expected):
-    run_check_test(test_data_dir, "button_classes", ("__manifest__.py",), 12, expected)
+    run_check_test(
+        test_data_dir, "button_classes", (addon_name, "__manifest__.py"), 12, expected
+    )

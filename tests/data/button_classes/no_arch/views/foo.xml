@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="foo_view_form_1" model="ir.ui.view">
+    <field name="model">foo</field>
+</record>
+
+</odoo>
