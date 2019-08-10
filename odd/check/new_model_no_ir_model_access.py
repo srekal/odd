@@ -3,7 +3,7 @@ import csv
 from odd.check import Check
 from odd.issue import Issue, Location
 from odd.parso_utils import column_index_1, get_model_definition, get_model_type
-from odd.xmlutils import split_xml_id
+from odd.utils import split_external_id
 
 
 class NewModelNoIrModelAccess(Check):
@@ -20,6 +20,9 @@ class NewModelNoIrModelAccess(Check):
             model = get_model_definition(classdef, extract_fields=False)
 
             model_name = model.params.get("_name")
+            # In case the model name is e.g. evaluated via function.
+            if not isinstance(model_name, str):
+                continue
             if model_name and not model.params.get("_inherit"):
                 self._models[model_name] = filename, classdef.start_pos
         yield from ()
@@ -36,7 +39,7 @@ class NewModelNoIrModelAccess(Check):
             for row in csv.DictReader(f):
                 external_id = row.get("model_id:id") or row.get("model_id/id")
                 if external_id:
-                    _, record_id = split_xml_id(external_id)
+                    _, record_id = split_external_id(external_id)
                     self._access_rules.add(record_id)
         yield from ()
 
@@ -48,7 +51,7 @@ class NewModelNoIrModelAccess(Check):
         ):
             external_id = model_el.attrib.get("ref")
             if external_id:
-                _, record_id = split_xml_id(external_id)
+                _, record_id = split_external_id(external_id)
                 self._access_rules.add(record_id)
         yield from ()
 
