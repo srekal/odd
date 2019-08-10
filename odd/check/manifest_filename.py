@@ -4,7 +4,7 @@ from odd.utils import odoo_commit_url
 
 
 class ManifestFilename(Check):
-    def on_addon(self, addon):
+    def on_before(self, addon):
         if addon.version >= 10 and addon.manifest_path.name != "__manifest__.py":
             yield Issue(
                 "deprecated_manifest_filename",

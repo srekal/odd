@@ -6,7 +6,7 @@ EXT_VERSION_MAP = {">=8": ["csv", "xml", "sql"], ">=8,<12": ["yml"]}
 
 
 class DataFileInclusion(Check):
-    def on_addon(self, addon):
+    def on_before(self, addon):
         extensions = {
             f".{ext}" for ext in lookup_version_list(EXT_VERSION_MAP, addon.version)
         }
