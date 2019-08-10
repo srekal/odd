@@ -1,7 +1,7 @@
 from odd.check import Check
 from odd.issue import Issue, Location
-from odd.xmlutils import get_model_records, split_xml_id
-
+from odd.utils import split_external_id
+from odd.xmlutils import get_model_records
 
 MODELS = frozenset(
     (
@@ -36,7 +36,7 @@ class NoUpdate(Check):
         if filename not in addon.data_files:
             return
         for record in get_model_records(tree):
-            addon_name, xml_id = split_xml_id(record.get("id"))
+            addon_name, _ = split_external_id(record.get("id"))
             if addon_name and addon_name != addon.name:
                 continue
 

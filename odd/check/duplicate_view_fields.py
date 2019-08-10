@@ -2,10 +2,10 @@ import collections
 import logging
 
 from lxml import etree
-
 from odd.check import Check
 from odd.issue import Issue, Location
-from odd.xmlutils import get_model_records, split_xml_id, get_view_arch
+from odd.utils import split_external_id
+from odd.xmlutils import get_model_records, get_view_arch
 
 _LOG = logging.getLogger(__name__)
 VIEW_TAGS = frozenset(
@@ -54,7 +54,7 @@ class DuplicateViewFields(Check):
                 continue
 
             # Skip `arch` override in an extending addon.
-            addon_name, _ = split_xml_id(view_xml_id)
+            addon_name, _ = split_external_id(view_xml_id)
             if addon_name and addon_name != addon.name:
                 continue
 

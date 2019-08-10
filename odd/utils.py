@@ -136,3 +136,15 @@ def expand_version_list(
             version_map, version, result_cls=result_cls
         )
     return result
+
+
+def split_external_id(external_id: str) -> Tuple[Optional[str], str]:
+    if not external_id:
+        raise ValueError(
+            f'Expected non-empty string, got: "{external_id}"'
+            f" (type: {type(external_id)})"
+        )
+    addon_name, record_id = None, external_id
+    if "." in external_id:
+        addon_name, record_id = external_id.split(".")[:2]
+    return addon_name, record_id
