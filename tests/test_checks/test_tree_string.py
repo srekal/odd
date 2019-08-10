@@ -34,6 +34,10 @@ from ..common import run_check_test
                 }
             ],
         ),
+        ("tree_string_deprecated_xml_not_included", []),
+        ("view_no_arch", []),
+        ("xpath_no_expr", []),
+        ("xpath_node_not_tree", []),
     ],
 )
 def test_tree_string(test_data_dir, addon_name, expected):

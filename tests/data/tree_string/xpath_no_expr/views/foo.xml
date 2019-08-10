@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="foo_view_tree_1" model="ir.ui.view">
+    <field name="model">foo</field>
+    <field name="inherit_id" ref="other_addon.foo_view_tree_1"/>
+    <field name="arch" type="xml">
+
+        <xpath position="attributes">
+            <attribute name="expr">//</attribute>
+        </xpath>
+
+    </field>
+</record>
+
+</odoo>
