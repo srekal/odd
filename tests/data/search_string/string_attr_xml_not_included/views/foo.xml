@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="foo_view_search_1" model="ir.ui.view">
+    <field name="model">foo</field>
+    <field name="arch" type="xml">
+        <search string="Foo">
+            <field name="bar"/>
+        </search>
+    </field>
+</record>
+
+</odoo>

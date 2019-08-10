@@ -22,10 +22,7 @@ class TreeString(Check):
                         categories=["maintainability", "deprecated"],
                     )
             for xpath in arch.xpath('.//xpath[@position="attributes"]'):
-                expr = xpath.get("expr")
-                if not expr:
-                    continue
-                nodename = get_xpath_expr_target_element(expr)
+                nodename = get_xpath_expr_target_element(xpath.get("expr"))
                 if nodename != "tree":
                     continue
                 for attr in xpath.xpath('.//attribute[@name="string"]'):

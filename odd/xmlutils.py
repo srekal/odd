@@ -36,7 +36,11 @@ def get_view_arch(record: Element) -> typing.Optional[Element]:
     return None
 
 
-def get_xpath_expr_target_element(xpath_expr: str) -> typing.Optional[str]:
+def get_xpath_expr_target_element(
+    xpath_expr: typing.Optional[str]
+) -> typing.Optional[str]:
+    if not xpath_expr:
+        return None
     last_part = xpath_expr.split("/")[-1]
     m = re.search(r"(?P<modifier>[^:]+::)?(?<!@)(?P<nodename>[^\[]+)", last_part)
     nodename = None
