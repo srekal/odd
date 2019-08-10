@@ -15,6 +15,8 @@ class Position(typing.NamedTuple):
 
 @dataclasses.dataclass
 class ModuleImport:
+    start_pos: Position
+    end_pos: Position
     from_names: typing.Tuple[str, ...] = dataclasses.field(default_factory=tuple)
     names: typing.Tuple[str, ...] = dataclasses.field(default_factory=tuple)
 
@@ -292,10 +294,9 @@ def get_model_type(classdef_node) -> typing.Union[str, object]:
 
 
 def get_imports(module) -> typing.Generator[ModuleImport, None, None]:
-    from_names: typing.Tuple[str, ...] = ()
-    names: typing.Tuple[str, ...] = ()
     for imp in module.iter_imports():
-        names = tuple(n.value for n in imp.get_defined_names())
+        from_names = ()
         if imp.type == "import_from":
             from_names = tuple(n.value for n in imp.get_from_names())
-        yield ModuleImport(from_names, names)
+        names = tuple(n.value for path in imp.get_paths() for n in path)
+        yield ModuleImport(imp.start_pos, imp.end_pos, from_names, names)

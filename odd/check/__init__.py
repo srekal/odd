@@ -8,6 +8,7 @@ from .field_attr_string_redundant import FieldAttrStringRedundant
 from .field_attrs import FieldAttrs
 from .ir_cron_state_code import IrCronStateCode
 from .ir_model_access import IrModelAccessNoGroup
+from .legacy_import import LegacyImport
 from .manifest_filename import ManifestFilename
 from .manifest_keys import ManifestKeys
 from .new_model_description import NewModelDescription
@@ -35,6 +36,7 @@ __all__ = [
     "FilePermissions",
     "IrCronStateCode",
     "IrModelAccessNoGroup",
+    "LegacyImport",
     "ManifestFilename",
     "ManifestKeys",
     "NewModelDescription",

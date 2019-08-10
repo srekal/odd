@@ -96,11 +96,11 @@ def _get_operator(version_spec: str, version_cls):
 
 
 def lookup_version_list(
-    version_map: Mapping[str, Union[List[Any], Set[Any]]],
+    version_map: Mapping[str, Union[List[Any], Set[Any], Dict[Any, Any]]],
     version: int,
     *,
     result_cls=list,
-) -> Union[List[Any], Set[Any]]:
+) -> Union[List[Any], Set[Any], Dict[Any, Any]]:
     if not isinstance(version, int):
         raise TypeError(
             f"Invalid version, expected an integer, got {version} ({type(version)})"
@@ -111,7 +111,12 @@ def lookup_version_list(
         )
 
     result = result_cls()
-    extend = result.extend if result_cls == list else result.update
+    if result_cls == list:
+        extend = result.extend
+    elif result_cls == set or result_cls == dict:
+        extend = result.update
+    else:
+        raise TypeError(f"Unknown type for `result_cls`: {type(result_cls)}")
     for version_ranges, values in version_map.items():
         for version_spec in version_ranges.split(","):
             op, v2 = _get_operator(version_spec, version_cls=int)
@@ -121,10 +126,10 @@ def lookup_version_list(
 
 
 def expand_version_list(
-    version_map: Mapping[str, Union[List[Any], Set[Any]]],
+    version_map: Mapping[str, Union[List[Any], Set[Any], Dict[Any, Any]]],
     *versions: int,
     result_cls=list,
-) -> Dict[int, Union[List[Any], Set[Any]]]:
+) -> Dict[int, Union[List[Any], Set[Any], Dict[Any, Any]]]:
     result = {}
     for version in versions:
         result[version] = lookup_version_list(
