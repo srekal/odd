@@ -294,8 +294,9 @@ def get_model_type(classdef_node) -> typing.Union[str, object]:
 
 def get_imports(module) -> typing.Generator[ModuleImport, None, None]:
     for imp in module.iter_imports():
-        from_names = ()
         if imp.type == "import_from":
             from_names = tuple(n.value for n in imp.get_from_names())
+        else:
+            from_names = ()
         names = tuple(n.value for path in imp.get_paths() for n in path)
         yield ModuleImport(imp.start_pos, imp.end_pos, from_names, names)
