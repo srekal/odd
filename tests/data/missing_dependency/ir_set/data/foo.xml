@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<ir_set>
+    <field name="name">Foobar</field>
+    <field name="key" eval="'action'"/>
+    <field name="key2" eval="'client_action_multi'"/>
+    <field name="models" eval="['sale.order']"/>
+    <field name="value" eval="'ir.actions.act_window,' + str(action2)"/>
+    <field name="isobject" eval="True"/>
+    <field name="replace" eval="True"/>
+</ir_set>
+
+</odoo>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<delete model="foo" search="[('some_field_id', '=', ref('mail.some_record'))]"/>
+
+</odoo>

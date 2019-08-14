@@ -1,0 +1,2 @@
+name,perm_read,perm_write,perm_create,perm_unlink
+Foo Group,1,0,0,0

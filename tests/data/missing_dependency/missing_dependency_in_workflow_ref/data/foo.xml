@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+<workflow action="some_action" model="sale.order" ref="fleet.test_order_1"/>
+
+</data>
+</openerp>
