@@ -4,8 +4,7 @@ import dataclasses
 
 import parso
 
-
-UNKNOWN = object()
+from odd.const import UNKNOWN
 
 
 class Position(typing.NamedTuple):
