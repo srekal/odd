@@ -10,8 +10,9 @@ home-page = "https://naglis.me/"
 classifiers = [
     "Development Status :: 1 - Planning",
     "Environment :: Console",
-    "Intended Audience :: Other Audience",
-    "License :: OSI Approved :: MIT License",
+    "Framework :: Odoo",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License"
     "Natural Language :: English",
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python :: 3 :: Only",
@@ -20,6 +21,8 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python",
     "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+    "Topic :: Software Development :: Quality Assurance",
+    "Typing :: Typed",
 ]
 requires = [
     "lxml==4.4.0",
