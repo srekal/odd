@@ -102,8 +102,9 @@ def check_addon(
                 tree = get_root(path)
             except lxml.etree.XMLSyntaxError:
                 _LOG.exception("Error while parsing XML file: %s", path)
-            for xml_check in checks_by_type["on_xml_tree"].values():
-                yield from getattr(xml_check, "on_xml_tree")(addon, path, tree)
+            else:
+                for xml_check in checks_by_type["on_xml_tree"].values():
+                    yield from getattr(xml_check, "on_xml_tree")(addon, path, tree)
 
     for after_check in checks_by_type["on_after"].values():
         yield from getattr(after_check, "on_after")(addon)
