@@ -16,6 +16,7 @@ from .new_model_no_ir_model_access import NewModelNoIrModelAccess
 from .noupdate import NoUpdate
 from .permissions import DirectoryPermissions, FilePermissions
 from .redundant_t_attf import RedundantTAttf
+from .relaxng import RelaxNG
 from .route_kwargs import RouteKwargs
 from .search_string import SearchString
 from .track_visibility_always import TrackVisibilityAlways
@@ -43,6 +44,7 @@ __all__ = [
     "NewModelNoIrModelAccess",
     "NoUpdate",
     "RedundantTAttf",
+    "RelaxNG",
     "RouteKwargs",
     "SearchString",
     "TrackVisibilityAlways",
