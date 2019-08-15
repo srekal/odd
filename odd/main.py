@@ -111,11 +111,20 @@ def check_addon(
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--debug",
+        dest="loglevel",
+        action="store_const",
+        const=logging.DEBUG,
+        help="output debugging messages",
+        default=logging.INFO,
+    )
     parser.add_argument("paths", metavar="PATH", type=pathlib.Path, nargs="+")
     parser.add_argument("-w", "--whitelist", metavar="CHECK", nargs="*")
     parser.add_argument("version", type=int, choices=SUPPORTED_VERSIONS)
     args = parser.parse_args()
-    logging.basicConfig(level=logging.INFO)
+
+    logging.basicConfig(level=args.loglevel)
 
     checks = get_checks(whitelist=args.whitelist)
     num_issues = 0
