@@ -6,6 +6,8 @@ import parso
 
 from odd.const import UNKNOWN
 
+STRING_NODE_TYPES = frozenset(("string", "strings"))
+
 
 class Position(typing.NamedTuple):
     line: int
@@ -86,7 +88,7 @@ def first_child_type_node(node: parso.python.tree.Node, type: str):
 
 
 def get_node_value(node: parso.tree.NodeOrLeaf) -> typing.Any:
-    if node.type == "string" or node.type == "strings":
+    if node.type in STRING_NODE_TYPES:
         return get_string_node_value(node)
     else:
         if hasattr(node, "value"):
@@ -134,9 +136,72 @@ def extract_func_name(node: parso.tree.NodeOrLeaf) -> typing.List[str]:
 
 
 def get_string_node_value(node: parso.tree.NodeOrLeaf) -> str:
-    if node.type == "strings":
-        return "".join(get_string_node_value(c) for c in node.children)
-    return node._get_payload()
+    if node.type in ("strings", "atom_expr", "atom"):
+        if node.type == "atom_expr":
+            children = node.children[::2]
+        elif node.type == "atom":
+            children = node.children[1:-1]
+        else:
+            children = node.children
+        return "".join(get_string_node_value(child) for child in children)
+    elif node.type == "string":
+        return node._get_payload()
+    else:
+        raise TypeError(f"Unexpected node type: {node.type}")
+
+
+def is_string_arith_expr(node: parso.tree.NodeOrLeaf) -> bool:
+    """Returns True if `node` is `"a" + [... +] "z"`."""
+    if node.type != "arith_expr":
+        return False
+
+    if len(node.children) % 2 != 1:
+        return False
+
+    for string_node in node.children[::2]:
+        if string_node.type not in STRING_NODE_TYPES:
+            return False
+
+    for op_node in node.children[1::2]:
+        if op_node.type != "operator" or op_node.value != "+":
+            return False
+
+    return True
+
+
+def is_parenthesized(node: parso.tree.Node) -> bool:
+    if len(node.children) < 2:
+        return False
+    head, tail = node.children[0], node.children[-1]
+    return (
+        head.type == "operator"
+        and tail.type == "operator"
+        and head.value == "("
+        and tail.value == ")"
+    )
+
+
+def is_string_atom(node: parso.tree.NodeOrLeaf) -> bool:
+    """Returns True if `node` is `("a" [...] "z")`."""
+    if node.type != "atom":
+        return False
+
+    if not is_parenthesized(node):
+        return False
+
+    for child in node.children[1:-1]:
+        if child.type not in STRING_NODE_TYPES:
+            return False
+
+    return True
+
+
+def is_string_node(node: parso.tree.NodeOrLeaf) -> bool:
+    return (
+        node.type in STRING_NODE_TYPES
+        or is_string_arith_expr(node)
+        or is_string_atom(node)
+    )
 
 
 def _get_base(node: parso.tree.NodeOrLeaf) -> typing.Tuple[str, ...]:
@@ -233,7 +298,7 @@ def _get_model_fields(suite):
                 if arg_node.children[0].type == "name":
                     kwarg_name = arg_node.children[0].value
 
-                    if arg_node.children[2].type in ("string", "strings"):
+                    if arg_node.children[2].type in STRING_NODE_TYPES:
                         kwarg_value = get_string_node_value(arg_node.children[2])
                     else:
                         kwarg_value = UNKNOWN
