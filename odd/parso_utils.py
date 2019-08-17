@@ -88,8 +88,12 @@ def first_child_type_node(node: parso.python.tree.Node, type: str):
 
 
 def get_node_value(node: parso.tree.NodeOrLeaf) -> typing.Any:
-    if node.type in STRING_NODE_TYPES:
+    if is_string_node(node):
         return get_string_node_value(node)
+    elif node.type == "keyword" and node.value in ("True", "False"):
+        return node.value == "True"
+    elif node.type == "numeric":
+        return ast.literal_eval(node.value)
     else:
         if hasattr(node, "value"):
             return node.value
