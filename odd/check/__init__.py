@@ -11,6 +11,7 @@ from .ir_model_access import IrModelAccessNoGroup
 from .legacy_import import LegacyImport
 from .manifest_filename import ManifestFilename
 from .manifest_keys import ManifestKeys
+from .missing_dependency import MissingDependency
 from .new_model_description import NewModelDescription
 from .new_model_no_ir_model_access import NewModelNoIrModelAccess
 from .noupdate import NoUpdate
@@ -40,6 +41,7 @@ __all__ = [
     "LegacyImport",
     "ManifestFilename",
     "ManifestKeys",
+    "MissingDependency",
     "NewModelDescription",
     "NewModelNoIrModelAccess",
     "NoUpdate",

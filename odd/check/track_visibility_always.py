@@ -1,7 +1,7 @@
 from odd.check import Check
 from odd.issue import Issue, Location
+from odd.parso_utils import column_index_1, get_string_node_value, is_string_node, walk
 from odd.utils import odoo_commit_url
-from odd.parso_utils import column_index_1, walk, get_string_node_value
 
 
 class TrackVisibilityAlways(Check):
@@ -17,7 +17,7 @@ class TrackVisibilityAlways(Check):
                 and node.children[0].value == "track_visibility"
                 and node.children[1].type == "operator"
                 and node.children[1].value == "="
-                and node.children[2].type == "string"
+                and is_string_node(node.children[2])
                 and get_string_node_value(node.children[2]) == "always"
             ):
                 yield Issue(

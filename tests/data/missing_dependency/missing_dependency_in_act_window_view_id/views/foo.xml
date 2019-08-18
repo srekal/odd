@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<act_window name="Foo"
+    res_model="foo"
+    src_model="bar"
+    view_id="sale.some_view"
+    id="action_foo"/>
+
+</odoo>

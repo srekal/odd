@@ -1,0 +1,5 @@
+{
+    "data": [
+        "views/foo.xml",
+    ],
+}

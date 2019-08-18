@@ -3,7 +3,7 @@ import collections
 from odd.check import Check
 from odd.const import MANIFEST_FILENAMES
 from odd.issue import Issue, Location
-from odd.parso_utils import column_index_1, get_string_node_value, walk
+from odd.parso_utils import column_index_1, get_string_node_value, is_string_node, walk
 
 KNOWN_KEYS = {
     "name",
@@ -94,7 +94,7 @@ class ManifestKeys(Check):
         for node in walk(module):
             if node.type == "dictorsetmaker":
                 for child in node.children[::4]:
-                    if child.type == "string":
+                    if is_string_node(child):
                         key_locations[get_string_node_value(child)].append(
                             column_index_1(child.start_pos)
                         )

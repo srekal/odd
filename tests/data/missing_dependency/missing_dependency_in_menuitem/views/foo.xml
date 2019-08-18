@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="action_foo" model="ir.actions.act_window">
+    <field name="name">Foo</field>
+    <field name="res_model">foo</field>
+    <field name="view_mode">tree,form</field>
+</record>
+
+<menuitem id="menu_foo"
+    name="Foo"
+    action="action_foo"
+    parent="stock.bar"
+/>
+
+</odoo>

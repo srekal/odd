@@ -6,11 +6,11 @@ import pathlib
 import typing
 
 import lxml
-import parso
 import pkg_resources
 from odd.addon import Addon, AddonPath, discover_addons, parse_manifest
 from odd.check import Check
 from odd.const import SUPPORTED_VERSIONS
+from odd.parso_utils import get_parso_grammar
 from odd.typedefs import OdooVersion
 from odd.utils import format_issue, list_files
 from odd.xmlutils import get_root
@@ -77,7 +77,7 @@ def check_addon(
         )
 
     addon = Addon(manifest_path, manifest, version)
-    grammar = parso.load_grammar(version="2.7" if addon.version < 11 else "3.5")
+    grammar = get_parso_grammar(addon)
 
     for before_check in checks_by_type["on_before"].values():
         yield from getattr(before_check, "on_before")(addon)
