@@ -23,6 +23,7 @@ from .search_string import SearchString
 from .track_visibility_always import TrackVisibilityAlways
 from .tree_string import TreeString
 from .unittest_testcase_tagged import UnitTestTestCaseTagged
+from .xml_eval import XMLEval
 
 
 __all__ = [
@@ -52,4 +53,5 @@ __all__ = [
     "TrackVisibilityAlways",
     "TreeString",
     "UnitTestTestCaseTagged",
+    "XMLEval",
 ]
