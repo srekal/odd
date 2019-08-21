@@ -1,12 +1,17 @@
 [build-system]
-requires = ["flit"]
-build-backend = "flit.buildapi"
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
 
-[tool.flit.metadata]
-module = "odd"
-author = "Naglis Jonaitis"
-author-email = "naglis@mailbox.org"
-home-page = "https://naglis.me/"
+[tool.poetry]
+name = "odd"
+version = "0.0.1a1"
+description = "odd, the Odoo linter"
+license = "Apache-2.0"
+authors = ["Naglis Jonaitis <naglis@mailbox.org>"]
+readme = "README.rst"
+homepage = "https://naglis.me/"
+repository = "https://gitlab.com/naglis/odd"
+keywords = ["Odoo", "static code analysis", "linter"]
 classifiers = [
     "Development Status :: 1 - Planning",
     "Environment :: Console",
@@ -24,30 +29,25 @@ classifiers = [
     "Topic :: Software Development :: Quality Assurance",
     "Typing :: Typed",
 ]
-requires = [
-    "lxml==4.4.0",
-    "defusedxml==0.6.0",
-    "yarl==1.3.0",
-    "parso==0.5.1",
-]
-requires-python="~=3.7"
-description-file="README.rst"
 
-[tool.flit.metadata.requires-extra]
-test = [
-    "pytest-cov==2.7.1",
-    "flake8==3.7.8",
-    "flake8-comprehensions==2.1.0",
-    "mypy==0.720",
-]
-dev = [
-    "pre-commit==1.17.0",
-]
+[tool.poetry.dependencies]
+python = "~=3.7"
+lxml = "==4.4.0"
+defusedxml = "==0.6.0"
+yarl = "==1.3.0"
+parso = "==0.5.1"
 
-[tool.flit.scripts]
+[tool.poetry.dev-dependencies]
+pytest-cov = "==2.7.1"
+flake8 = "==3.7.8"
+flake8-comprehensions = "==2.1.0"
+mypy = "==0.720"
+pre-commit = "==1.17.0"
+
+[tool.poetry.scripts]
 odd = "odd.main:main"
 
-[tool.flit.entrypoints."odd.check"]
+[tool.poetry.plugins."odd.check"]
 attribute_override = "odd.check:AttributeOverride"
 button_classes = "odd.check:ButtonClasses"
 data_file_inclusion = "odd.check:DataFileInclusion"
