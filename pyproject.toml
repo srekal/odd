@@ -43,6 +43,7 @@ flake8 = "==3.7.8"
 flake8-comprehensions = "==2.1.0"
 mypy = "==0.720"
 pre-commit = "==1.17.0"
+bandit = "^1.6"
 
 [tool.poetry.scripts]
 odd = "odd.main:main"
