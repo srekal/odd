@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record model="ir.ui.view" id="foo_view_search">
+    <field name="model">foo</field>
+    <field name="arch" type="xml">
+        <search>
+            <field name="name"/>
+            <filter string="Bar" name="filter_bar" domain="[('field_1', '!=', False), ('field_2', '=', False), ('field_3', '=', False]"/>
+        </search>
+    </field>
+</record>
+
+</odoo>

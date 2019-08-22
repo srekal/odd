@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record model="ir.ui.view" id="foo_view_search">
+    <field name="model">foo</field>
+    <field name="arch" type="xml">
+        <kanban>
+            <field name="name"/>
+            <templates>
+                <t t-set="bar" t-value="!record.name.value || (record.name.value &amp;&amp; record.name.raw_value === 'baz')"/>
+            </templates>
+        </kanban>
+    </field>
+</record>
+
+</odoo>
