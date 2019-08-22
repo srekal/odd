@@ -1,6 +1,6 @@
 from odd.check import Check
 from odd.issue import Issue, Location
-from odd.xmlutils import get_model_records
+from odd.xml_utils import get_model_records
 
 
 def collect_fields(record):

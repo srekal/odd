@@ -5,7 +5,7 @@ import lxml.etree as ET
 from odd.check import Check
 from odd.const import SUPPORTED_VERSIONS
 from odd.issue import Issue, Location
-from odd.xmlutils import get_root
+from odd.xml_utils import get_root
 
 
 _LOG = logging.getLogger(__name__)

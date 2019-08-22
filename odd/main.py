@@ -13,7 +13,7 @@ from odd.const import SUPPORTED_VERSIONS
 from odd.parso_utils import get_parso_grammar
 from odd.typedefs import OdooVersion
 from odd.utils import format_issue, list_files
-from odd.xmlutils import get_root
+from odd.xml_utils import get_root
 
 _LOG = logging.getLogger(__name__)
 

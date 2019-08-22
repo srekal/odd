@@ -1,7 +1,7 @@
 from odd.check import Check
 from odd.issue import Issue, Location
 from odd.utils import odoo_source_url
-from odd.xmlutils import get_model_records, get_view_arch
+from odd.xml_utils import get_model_records, get_view_arch
 
 CLASS_MAP = {"oe_highlight": "btn-primary", "oe_link": "btn-link"}
 

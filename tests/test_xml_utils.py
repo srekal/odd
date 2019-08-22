@@ -1,6 +1,6 @@
 import pytest
 
-from odd.xmlutils import get_xpath_expr_target_element
+from odd.xml_utils import get_xpath_expr_target_element
 
 
 @pytest.mark.parametrize(

@@ -21,7 +21,7 @@ from odd.parso_utils import (
     column_index_1,
 )
 from odd.utils import lookup_version_list, split_external_id
-from odd.xmlutils import get_view_arch
+from odd.xml_utils import get_view_arch
 
 _LOG = logging.getLogger(__name__)
 

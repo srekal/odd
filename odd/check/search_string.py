@@ -1,6 +1,10 @@
 from odd.check import Check
 from odd.issue import Issue, Location
-from odd.xmlutils import get_model_records, get_view_arch, get_xpath_expr_target_element
+from odd.xml_utils import (
+    get_model_records,
+    get_view_arch,
+    get_xpath_expr_target_element,
+)
 
 
 class SearchString(Check):
