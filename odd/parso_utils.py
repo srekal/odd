@@ -57,8 +57,27 @@ class Model:
     fields: typing.List[Field] = dataclasses.field(default_factory=list)
 
     @property
-    def name(self):
-        return self.params.get("_name") or self.params.get("_inherit")
+    def name(self) -> typing.Optional[str]:
+        _name = self.params.get("_name")
+        if _name:
+            return _name
+        _inherit = self.params.get("_inherit")
+        if _inherit:
+            if isinstance(_inherit, list):
+                # `_inherit = []`
+                if len(_inherit) == 0:
+                    return None
+                # `_inherit = ['foo']`
+                elif len(_inherit) == 1:
+                    return _inherit[0]
+                # `_inherit = ['foo', 'bar', ...]`, currently not supported.
+                else:
+                    raise ValueError(
+                        f"Unexpected number of `_inherit` models: {len(_inherit)}"
+                    )
+            else:
+                return _inherit
+        return None
 
 
 @dataclasses.dataclass
