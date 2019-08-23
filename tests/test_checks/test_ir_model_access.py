@@ -23,7 +23,7 @@ from ..common import run_check_test
         )
     ],
 )
-def test_data_file_inclusion(test_data_dir, addon_name, expected):
+def test_ir_model_access_no_group(test_data_dir, addon_name, expected):
     run_check_test(
         test_data_dir,
         "ir_model_access_no_group",
