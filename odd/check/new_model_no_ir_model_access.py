@@ -1,6 +1,3 @@
-import csv
-import pathlib
-
 from odd.check import Check
 from odd.issue import Issue, Location
 from odd.parso_utils import column_index_1, get_model_definition, get_model_type
@@ -8,7 +5,7 @@ from odd.utils import split_external_id
 
 
 class NewModelNoIrModelAccess(Check):
-    _handles = {"python_module", "data_file", "demo_file", "xml_record"}
+    _handles = {"python_module", "xml_record", "csv_row"}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -30,24 +27,14 @@ class NewModelNoIrModelAccess(Check):
                 self._models[model_name] = python_module.path, classdef.start_pos
         yield from ()
 
-    def _process_csv(self, path: pathlib.Path):
-        with path.open(mode="r") as f:
-            for row in csv.DictReader(f):
-                external_id = row.get("model_id:id") or row.get("model_id/id")
-                if external_id:
-                    _, record_id = split_external_id(external_id)
-                    self._access_rules.add(record_id)
+    def on_csv_row(self, csv_row):
+        if csv_row.path.name.lower() != "ir.model.access.csv":
+            return
+        external_id = csv_row.row.get("model_id:id") or csv_row.row.get("model_id/id")
+        if external_id:
+            _, record_id = split_external_id(external_id)
+            self._access_rules.add(record_id)
         yield from ()
-
-    def on_data_file(self, data_file):
-        if data_file.path.name.lower() != "ir.model.access.csv":
-            return
-        yield from self._process_csv(data_file.path)
-
-    def on_demo_file(self, demo_file):
-        if demo_file.path.name.lower() != "ir.model.access.csv":
-            return
-        yield from self._process_csv(demo_file.path)
 
     def on_xml_record(self, xml_record):
         if xml_record.record_node.attrib["model"] != "ir.model.access":
@@ -58,6 +45,8 @@ class NewModelNoIrModelAccess(Check):
                 _, record_id = split_external_id(external_id)
                 self._access_rules.add(record_id)
         yield from ()
+
+    # TODO: Add support for .yml in Odoo <= 10.
 
     def on_after(self, addon):
         for model_name, (filename, start_pos) in self._models.items():

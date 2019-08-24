@@ -1,5 +1,5 @@
 import ast
-import csv
+import collections
 import dataclasses
 import typing
 
@@ -8,9 +8,9 @@ import parso
 from odd.addon import Addon
 from odd.artifact import Artifact
 from odd.check import Check
+from odd.check.python_emitter import PythonModule
 from odd.const import SUPPORTED_VERSIONS, UNKNOWN
 from odd.issue import Location
-from odd.check.python_emitter import PythonModule
 from odd.parso_utils import (
     Call,
     column_index_1,
@@ -25,7 +25,7 @@ from odd.utils import (
     split_groups,
 )
 from odd.xml_utils import get_view_arch
-from odd.yaml_utils import YamlTag, load, line_column_index_1
+from odd.yaml_utils import YamlTag, line_column_index_1, load
 
 XML_OPERATION_VERSION_MAP = expand_version_list(
     {
@@ -138,13 +138,17 @@ def _for_xml_id_getter(
 
 
 class ExternalIDEmitter(Check):
-    _handles = {"xml_tree", "data_file", "demo_file", "python_module"}
+    _handles = {"xml_tree", "data_file", "demo_file", "python_module", "csv_row"}
     _emits = {"external_id", "external_id_reference", "python_module"}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._grammar_2 = parso.load_grammar(version="2.7")
         self._grammar_3 = parso.load_grammar(version="3.5")
+
+        # A cache map of `pathlib.Path` -> {external IDs field names} to not compute
+        # the field names repeatedly for each row in a file.
+        self._csv_external_id_fields = collections.defaultdict(set)
 
     def _get_grammar(self, addon: Addon) -> parso.Grammar:
         return self._grammar_2 if addon.version < 11 else self._grammar_3
@@ -397,60 +401,6 @@ class ExternalIDEmitter(Check):
                     addon, filename, field.sourceline, eval_
                 )
 
-    def _extract_path_csv(self, addon, path):
-        model = path.stem
-
-        yield ExternalIDReference(
-            addon, UNKNOWN, _model_record_id(model), "ir.model", Location(path)
-        )
-
-        with path.open(mode="r") as f:
-            reader = csv.DictReader(f)
-
-            external_id_fields = set()
-            for field_name in reader.fieldnames:
-                if (
-                    field_name.split(":")[-1] == "id"
-                    or field_name.split("/")[-1] == "id"
-                ):
-                    external_id_fields.add(field_name)
-
-                # Add references to fields from the CSV file header.
-                field_external_id = _field_record_id(
-                    model,
-                    (
-                        field_name[:-3]
-                        if field_name.endswith((":id", "/id"))
-                        else field_name
-                    ),
-                )
-                yield ExternalIDReference(
-                    addon,
-                    UNKNOWN,
-                    field_external_id,
-                    "ir.model.fields",
-                    Location(path, [1]),
-                )
-
-            if not external_id_fields:
-                return
-
-            for line_no, row in enumerate(reader, start=2):
-                # TODO: Add support for KNOWN_FIELD_MODELS.
-                for field_name in external_id_fields:
-                    external_id = row[field_name]
-                    if not external_id:
-                        continue
-                    addon_name, record_id = split_external_id(external_id)
-                    cls_ = ExternalID if field_name == "id" else ExternalIDReference
-                    yield cls_(
-                        addon,
-                        addon_name,
-                        record_id,
-                        model if field_name == "id" else UNKNOWN,
-                        Location(path, [line_no]),
-                    )
-
     def _extract_path_yml(self, addon, path):
         for entry in load(path):
             if isinstance(entry, str):
@@ -478,13 +428,6 @@ class ExternalIDEmitter(Check):
                         # FIXME: The position will be wrong here.
                         yield PythonModule(addon, path, module)
                 # TODO: Support other tags? I haven't seen them being used, though.
-
-    def _check_file(self, addon, path):
-        # NOTE: XML is already handled by `xml_tree`.
-        if path.suffix.lower() == ".csv":
-            yield from self._extract_path_csv(addon, path)
-        elif path.suffix.lower() == ".yml" and addon.version < 12:
-            yield from self._extract_path_yml(addon, path)
 
     def _get_ref_from_eval(self, addon, filename, position, eval_value):
         if not eval_value or eval_value in ("True", "False", "1", "0"):
@@ -516,17 +459,18 @@ class ExternalIDEmitter(Check):
                 if ref:
                     yield _ref(addon, filename, position, ref, UNKNOWN)
 
+    def _check_file(self, addon_path):
+        # NOTE: XML is already handled by `xml_tree`.
+        if addon_path.path.suffix.lower() == ".yml" and addon_path.addon.version < 12:
+            yield from self._extract_path_yml(addon_path.addon, addon_path.path)
+
     def on_xml_tree(self, xml_tree):
         for op in XML_OPERATION_VERSION_MAP[xml_tree.addon.version]:
             yield from getattr(self, f"_extract_xml_{op}")(
                 xml_tree.addon, xml_tree.path, xml_tree.tree_node
             )
 
-    def on_data_file(self, data_file):
-        yield from self._check_file(data_file.addon, data_file.path)
-
-    def on_demo_file(self, demo_file):
-        yield from self._check_file(demo_file.addon, demo_file.path)
+    on_data_file = on_demo_file = _check_file
 
     def on_python_module(self, python_module):
         addon_version = python_module.addon.version
@@ -562,3 +506,51 @@ class ExternalIDEmitter(Check):
                 if found:
                     # We found our match, no point in continuing.
                     break
+
+    def on_csv_row(self, csv_row):
+        model = csv_row.path.stem
+        addon, path, row = csv_row.addon, csv_row.path, csv_row.row
+
+        yield ExternalIDReference(
+            addon, UNKNOWN, _model_record_id(model), "ir.model", Location(path)
+        )
+
+        if path not in self._csv_external_id_fields:
+            for field_name in row:
+                if (
+                    field_name.split(":")[-1] == "id"
+                    or field_name.split("/")[-1] == "id"
+                ):
+                    self._csv_external_id_fields[path].add(field_name)
+
+                # Add references to fields from the CSV file header.
+                field_external_id = _field_record_id(
+                    model,
+                    (
+                        field_name[:-3]
+                        if field_name.endswith((":id", "/id"))
+                        else field_name
+                    ),
+                )
+                yield ExternalIDReference(
+                    addon,
+                    UNKNOWN,
+                    field_external_id,
+                    "ir.model.fields",
+                    Location(path, [1]),
+                )
+
+        for field_name in self._csv_external_id_fields[path]:
+            # TODO: Add support for KNOWN_FIELD_MODELS.
+            external_id = csv_row.row[field_name]
+            if not external_id:
+                continue
+            addon_name, record_id = split_external_id(external_id)
+            cls_ = ExternalID if field_name == "id" else ExternalIDReference
+            yield cls_(
+                csv_row.addon,
+                addon_name,
+                record_id,
+                model if field_name == "id" else UNKNOWN,
+                Location(csv_row.path, [csv_row.line_no]),
+            )
