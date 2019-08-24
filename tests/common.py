@@ -19,6 +19,7 @@ def run_check_test(
         "xml_tree_emitter",
         "python_emitter",
         "external_id_emitter",
+        "csv_row_emitter",
     ),
 ):
     manifest_path = ManifestPath(data_dir.joinpath(check_name, *manifest_path_parts))

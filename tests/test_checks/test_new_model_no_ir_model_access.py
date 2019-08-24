@@ -47,6 +47,17 @@ from ..common import run_check_test
         ("has_ir_model_access_in_csv_full_external_id", []),
         ("has_ir_model_access_in_xml_full_external_id", []),
         ("has_ir_model_access_in_csv_different_notation", []),
+        (
+            "other_model_csv",
+            [
+                {
+                    "slug": "no_ir_model_access_record",
+                    "description": ('Model "foo" has no `ir.model.access` records'),
+                    "locations": [(["models", "foo.py"], [(4, 1)])],
+                    "categories": ["correctness", "security"],
+                }
+            ],
+        ),
     ],
 )
 def test_new_model_no_ir_model_access(test_data_dir, addon_name, expected):
