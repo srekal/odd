@@ -1,12 +1,12 @@
 from odd.check import Check
 from odd.issue import Issue, Location
 from odd.utils import odoo_source_url
-from odd.xml_utils import get_model_records, get_view_arch
+from odd.xml_utils import get_view_arch
 
 CLASS_MAP = {"oe_highlight": "btn-primary", "oe_link": "btn-link"}
 
 
-def _get_issues(addon, filename, element, classes):
+def _get_issues(xml_record, element, classes):
     classes = set((classes or "").split())
     for old_class, new_class in CLASS_MAP.items():
         if old_class in classes:
@@ -14,8 +14,8 @@ def _get_issues(addon, filename, element, classes):
                 "deprecated_button_class",
                 f"`{old_class}` button class is deprecated since v12.0 "
                 f"in favor of `{new_class}`",
-                addon.addon_path,
-                [Location(filename, [element.sourceline])],
+                xml_record.addon.manifest_path,
+                [Location(xml_record.path, [element.sourceline])],
                 categories=["maintainability", "deprecated"],
                 sources=[
                     odoo_source_url(
@@ -29,22 +29,24 @@ def _get_issues(addon, filename, element, classes):
 
 
 class ButtonClasses(Check):
-    def on_xml_tree(self, addon, filename, tree):
-        if addon.version < 12 or (
-            filename not in addon.data_files and filename not in addon.demo_files
+    _handles = {"xml_record"}
+
+    def on_xml_record(self, xml_record):
+        if (
+            xml_record.addon.version < 12
+            or xml_record.record_node.get("model") != "ir.ui.view"
         ):
             return
-        for record in get_model_records(tree, "ir.ui.view"):
-            arch = get_view_arch(record)
-            if arch is None:
+        arch = get_view_arch(xml_record.record_node)
+        if arch is None:
+            return
+
+        for button in arch.xpath(".//button"):
+            if button.get("position"):
                 continue
+            yield from _get_issues(xml_record, button, button.get("class"))
 
-            for button in arch.xpath(".//button"):
-                if button.get("position"):
-                    continue
-                yield from _get_issues(addon, filename, button, button.get("class"))
-
-            for attribute in arch.xpath(
-                ".//button[@position='attributes']/attribute[@name='class']"
-            ):
-                yield from _get_issues(addon, filename, attribute, attribute.text)
+        for attribute in arch.xpath(
+            ".//button[@position='attributes']/attribute[@name='class']"
+        ):
+            yield from _get_issues(xml_record, attribute, attribute.text)

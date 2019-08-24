@@ -58,7 +58,7 @@ def format_issue(issue: Issue) -> str:
     locations = []
     if issue.locations:
         for location in issue.locations:
-            relative_path = location.path.relative_to(issue.addon_path.path)
+            relative_path = location.path.relative_to(issue.manifest_path.addon_path)
             line_numbers = ""
             if location.line_numbers:
                 if len(location.line_numbers) > 1:
@@ -74,7 +74,7 @@ def format_issue(issue: Issue) -> str:
 
     location_str = " (%s)" % "; ".join(locations) if locations else ""
 
-    return f"{issue.addon_path.name}{location_str}: {issue.description}"
+    return f"{issue.manifest_path.name}{location_str}: {issue.description}"
 
 
 def _get_operator(version_spec: str, version_cls):

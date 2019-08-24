@@ -1,7 +1,6 @@
 from odd.check import Check
 from odd.issue import Issue, Location
 from odd.utils import split_external_id
-from odd.xml_utils import get_model_records
 
 MODELS = frozenset(
     (
@@ -18,39 +17,35 @@ MODELS = frozenset(
 )
 
 
-def is_noupdate(record) -> bool:
-    parent = record.getparent()
-    if parent.tag not in ("data", "odoo", "openerp"):
-        raise ValueError(f"Unexpected <record> parent tag: {parent.tag}")
-    if "noupdate" in parent.attrib:
-        return parent.get("noupdate") == "1"
-    else:
-        if parent.tag == "data":
-            return is_noupdate(parent)
-        else:
-            return False
-
-
 class NoUpdate(Check):
-    def on_xml_tree(self, addon, filename, tree):
-        if filename not in addon.data_files:
-            return
-        for record in get_model_records(tree):
-            addon_name, _ = split_external_id(record.get("id"))
-            if addon_name and addon_name != addon.name:
-                continue
+    _handles = {"xml_record"}
 
-            model = record.get("model")
-            if model in MODELS and not is_noupdate(record):
-                yield Issue(
-                    "expected_noupdate_flag",
-                    f'`{model}` model records should be declared in a `noupdate="1"` '
-                    f"XML data section to allow user modifications",
-                    addon.addon_path,
-                    [
-                        Location(
-                            filename, [record.sourceline, record.getparent().sourceline]
-                        )
-                    ],
-                    categories=["correctness"],
-                )
+    def on_xml_record(self, xml_record):
+        record = xml_record.record_node
+        record_id = record.get("id")
+        if (
+            not record_id
+            or xml_record.noupdate
+            or xml_record.path not in xml_record.addon.data_files
+        ):
+            return
+
+        addon_name, _ = split_external_id(record_id)
+        if addon_name and addon_name != xml_record.addon.name:
+            return
+
+        model = record.attrib["model"]
+        if model in MODELS:
+            yield Issue(
+                "expected_noupdate_flag",
+                f'`{model}` model records should be declared in a `noupdate="1"` '
+                f"XML data element to allow user modifications",
+                xml_record.addon.manifest_path,
+                [
+                    Location(
+                        xml_record.path,
+                        [record.sourceline, record.getparent().sourceline],
+                    )
+                ],
+                categories=["correctness"],
+            )

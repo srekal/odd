@@ -21,7 +21,21 @@ from ..common import run_check_test
                     "categories": ["correctness", "maintainability"],
                 }
             ],
-        )
+        ),
+        (
+            "duplicated_field_no_id",
+            [
+                {
+                    "slug": "duplicate_record_field",
+                    "description": ('`foo` record has duplicated values for field "a"'),
+                    "locations": [
+                        (["data", "foo.xml"], [5]),
+                        (["data", "foo.xml"], [7]),
+                    ],
+                    "categories": ["correctness", "maintainability"],
+                }
+            ],
+        ),
     ],
 )
 def test_duplicate_record_fields(test_data_dir, addon_name, expected):

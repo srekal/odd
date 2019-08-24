@@ -5,11 +5,13 @@ from odd.utils import odoo_commit_url
 
 
 class TrackVisibilityAlways(Check):
-    def on_python_module(self, addon, filename, module):
-        if addon.version < 12:
+    _handles = {"python_module"}
+
+    def on_python_module(self, python_module):
+        if python_module.addon.version < 12:
             return
 
-        for node in walk(module):
+        for node in walk(python_module.module):
             if node.type != "argument":
                 continue
             if (
@@ -24,8 +26,8 @@ class TrackVisibilityAlways(Check):
                     "track_visibility_always_deprecated",
                     'Field `track_visibility` attribute value "always" is '
                     "deprecated since version 12.0",
-                    addon.addon_path,
-                    [Location(filename, [column_index_1(node.start_pos)])],
+                    python_module.addon.manifest_path,
+                    [Location(python_module.path, [column_index_1(node.start_pos)])],
                     categories=["deprecated"],
                     sources=[
                         odoo_commit_url("c99de4551583e801ecc6669ac456c4f7e2eef1da")

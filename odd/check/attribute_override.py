@@ -3,17 +3,17 @@ from odd.issue import Issue, Location
 
 
 class AttributeOverride(Check):
-    def on_xml_tree(self, addon, filename, tree):
-        if addon.version < 9 or (
-            filename not in addon.data_files and filename not in addon.demo_files
-        ):
+    _handles = {"xml_tree"}
+
+    def on_xml_tree(self, xml_tree):
+        if xml_tree.addon.version < 9:
             return
         attributes = ", ".join(f'"{attr}"' for attr in ["class"])
         xpath = "|".join(
             f"/{main_tag}//attribute[@name=({attributes})]"
             for main_tag in ("openerp", "odoo")
         )
-        for el in tree.xpath(xpath):
+        for el in xml_tree.tree_node.xpath(xpath):
             is_override = not any(a in el.attrib for a in ("add", "remove"))
             if is_override:
                 yield Issue(
@@ -21,7 +21,7 @@ class AttributeOverride(Check):
                     f"`<attribute>` overrides the `{el.get('name')}` attribute value, "
                     f'consider using `add="..."` or `remove="..."` instead of '
                     f"overriding",
-                    addon.addon_path,
-                    [Location(filename, [el.sourceline])],
+                    xml_tree.addon.manifest_path,
+                    [Location(xml_tree.path, [el.sourceline])],
                     categories=["correctness", "maintainability"],
                 )

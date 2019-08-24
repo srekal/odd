@@ -5,19 +5,23 @@ from odd.utils import odoo_commit_url
 
 
 class UnitTestTestCaseTagged(Check):
-    def on_python_module(self, addon, filename, module):
-        if addon.version < 12 or not filename.name.startswith("test_"):
+    _handles = {"python_module"}
+
+    def on_python_module(self, python_module):
+        if python_module.addon.version < 12 or not python_module.path.name.startswith(
+            "test_"
+        ):
             return
 
         imports = set()
-        for imp in get_imports(module):
+        for imp in get_imports(python_module.module):
             from_part = ".".join(imp.from_names)
             if from_part:
                 imports.update((from_part, n) for n in imp.names)
             else:
                 imports.update(imp.names)
 
-        for classdef in module.iter_classdefs():
+        for classdef in python_module.module.iter_classdefs():
             bases = get_bases(classdef.get_super_arglist())
             is_test_case = (
                 ("unittest", "TestCase") in bases and "unittest" in imports
@@ -36,8 +40,12 @@ class UnitTestTestCaseTagged(Check):
                     f"`unittest.TestCase` subclass `{classdef.name.value}` is not "
                     f"decorated with `@tagged()`, it will not be picked up by Odoo "
                     f"test runner",
-                    addon.addon_path,
-                    [Location(filename, [column_index_1(classdef.start_pos)])],
+                    python_module.addon.manifest_path,
+                    [
+                        Location(
+                            python_module.path, [column_index_1(classdef.start_pos)]
+                        )
+                    ],
                     categories=["correctness"],
                     sources=[
                         odoo_commit_url("b356b190338e3ee032b9e3a7f670f76468965006")

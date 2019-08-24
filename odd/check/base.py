@@ -1,4 +1,10 @@
-class Check:
+import abc
+import typing
+
+
+class Check(abc.ABC):
+    _emits: typing.Set[str] = set()
+    _handles: typing.Set[str] = set()
 
     """
     def on_before(self, addon: Addon):

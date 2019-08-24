@@ -2,7 +2,7 @@ import dataclasses
 import pathlib
 import typing
 
-from odd.addon import AddonPath
+from odd.addon import ManifestPath
 
 
 @dataclasses.dataclass
@@ -17,7 +17,7 @@ class Location:
 class Issue:
     slug: str
     description: str
-    addon_path: AddonPath
+    manifest_path: ManifestPath
     locations: typing.List[Location] = dataclasses.field(default_factory=list)
     categories: typing.List[str] = dataclasses.field(default_factory=list)
     sources: typing.List[str] = dataclasses.field(default_factory=list)

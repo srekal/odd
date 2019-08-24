@@ -10,8 +10,10 @@ from odd.utils import odoo_source_url
 
 
 class NewModelDescription(Check):
-    def on_python_module(self, addon, filename, module):
-        for classdef in module.iter_classdefs():
+    _handles = {"python_module"}
+
+    def on_python_module(self, python_module):
+        for classdef in python_module.module.iter_classdefs():
             if get_model_type(classdef) == UNKNOWN:
                 continue
 
@@ -25,10 +27,16 @@ class NewModelDescription(Check):
                 yield Issue(
                     "no_model_description",
                     f'Model "{model_name}" has no `_description` set',
-                    addon.addon_path,
-                    [Location(filename, [column_index_1(classdef.start_pos)])],
+                    python_module.addon.manifest_path,
+                    [
+                        Location(
+                            python_module.path, [column_index_1(classdef.start_pos)]
+                        )
+                    ],
                     categories=(
-                        ["future-warning"] if addon.version < 12 else ["correctness"]
+                        ["future-warning"]
+                        if python_module.addon.version < 12
+                        else ["correctness"]
                     ),
                     sources=[
                         odoo_source_url(

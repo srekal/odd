@@ -48,7 +48,21 @@ bandit = "^1.6"
 [tool.poetry.scripts]
 odd = "odd.main:main"
 
+[tool.poetry.plugins."odd.artifact_type"]
+addon = "odd.addon:Addon"
+addon_path = "odd.check.path_emitter:AddonPath"
+data_file = "odd.check.addon_file_emitter:DataFile"
+demo_file = "odd.check.addon_file_emitter:DemoFile"
+xml_tree = "odd.check.xml_tree_emitter:XMLTree"
+xml_record = "odd.check.xml_tree_emitter:XMLRecord"
+python_module = "odd.check.python_emitter:PythonModule"
+
 [tool.poetry.plugins."odd.check"]
+addon_path_emitter = "odd.check.path_emitter:AddonPathEmitter"
+addon_file_emitter = "odd.check.addon_file_emitter:AddonFileEmitter"
+xml_tree_emitter = "odd.check.xml_tree_emitter:XMLTreeEmitter"
+python_emitter = "odd.check.python_emitter:PythonEmitter"
+
 attribute_override = "odd.check:AttributeOverride"
 button_classes = "odd.check:ButtonClasses"
 data_file_inclusion = "odd.check:DataFileInclusion"

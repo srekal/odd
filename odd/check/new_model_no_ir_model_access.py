@@ -1,4 +1,5 @@
 import csv
+import pathlib
 
 from odd.check import Check
 from odd.issue import Issue, Location
@@ -7,13 +8,15 @@ from odd.utils import split_external_id
 
 
 class NewModelNoIrModelAccess(Check):
-    def __init__(self):
-        super().__init__()
+    _handles = {"python_module", "data_file", "demo_file", "xml_record"}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._models = {}
         self._access_rules = set()
 
-    def on_python_module(self, addon, filename, module):
-        for classdef in module.iter_classdefs():
+    def on_python_module(self, python_module):
+        for classdef in python_module.module.iter_classdefs():
             if get_model_type(classdef) != "model":
                 continue
 
@@ -24,17 +27,10 @@ class NewModelNoIrModelAccess(Check):
             if not isinstance(model_name, str):
                 continue
             if model_name and not model.params.get("_inherit"):
-                self._models[model_name] = filename, classdef.start_pos
+                self._models[model_name] = python_module.path, classdef.start_pos
         yield from ()
 
-    def on_path(self, addon, path):
-        if (
-            not path.is_file()
-            or path.name.lower() != "ir.model.access.csv"
-            or path not in addon.data_files
-        ):
-            return
-
+    def _process_csv(self, path: pathlib.Path):
         with path.open(mode="r") as f:
             for row in csv.DictReader(f):
                 external_id = row.get("model_id:id") or row.get("model_id/id")
@@ -43,12 +39,20 @@ class NewModelNoIrModelAccess(Check):
                     self._access_rules.add(record_id)
         yield from ()
 
-    def on_xml_tree(self, addon, filename, tree):
-        if filename not in addon.data_files:
+    def on_data_file(self, data_file):
+        if data_file.path.name.lower() != "ir.model.access.csv":
             return
-        for model_el in tree.xpath(
-            "//record[@model='ir.model.access']/field[@name='model_id']"
-        ):
+        yield from self._process_csv(data_file.path)
+
+    def on_demo_file(self, demo_file):
+        if demo_file.path.name.lower() != "ir.model.access.csv":
+            return
+        yield from self._process_csv(demo_file.path)
+
+    def on_xml_record(self, xml_record):
+        if xml_record.record_node.attrib["model"] != "ir.model.access":
+            return
+        for model_el in xml_record.record_node.xpath("./field[@name='model_id']"):
             external_id = model_el.attrib.get("ref")
             if external_id:
                 _, record_id = split_external_id(external_id)
@@ -62,7 +66,7 @@ class NewModelNoIrModelAccess(Check):
                 yield Issue(
                     "no_ir_model_access_record",
                     f'Model "{model_name}" has no `ir.model.access` records',
-                    addon.addon_path,
+                    addon.manifest_path,
                     [Location(filename, [column_index_1(start_pos)])],
                     categories=["correctness", "security"],
                 )

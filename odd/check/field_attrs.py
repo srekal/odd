@@ -164,7 +164,10 @@ ATTRS_VERSION_MAP = {
 
 
 class FieldAttrs(Check):
-    def on_python_module(self, addon, filename, module):
+    _handles = {"python_module"}
+
+    def on_python_module(self, python_module):
+        addon, module = python_module.addon, python_module.module
         known_fields = FIELD_TYPE_VERSION_MAP.get(addon.version, set())
         common_field_attrs = COMMON_ATTRS_VERSION_MAP.get(addon.version, set())
         for classdef in module.iter_classdefs():
@@ -177,8 +180,12 @@ class FieldAttrs(Check):
                     yield Issue(
                         "unknown_field_type",
                         f'Unknown field type "{field.class_name}"',
-                        addon.addon_path,
-                        [Location(filename, [column_index_1(field.start_pos)])],
+                        addon.manifest_path,
+                        [
+                            Location(
+                                python_module.path, [column_index_1(field.start_pos)]
+                            )
+                        ],
                         categories=["correctness"],
                     )
                     continue
@@ -209,10 +216,11 @@ class FieldAttrs(Check):
                             "deprecated_field_attribute",
                             f'Deprecated field attribute "{attr}" '
                             f'for field type "{field.class_name}"',
-                            addon.addon_path,
+                            addon.manifest_path,
                             [
                                 Location(
-                                    filename, [column_index_1(kwargs[attr].start_pos)]
+                                    python_module.path,
+                                    [column_index_1(kwargs[attr].start_pos)],
                                 )
                             ],
                             categories=["deprecated"],
@@ -222,7 +230,12 @@ class FieldAttrs(Check):
                         "unknown_field_attribute",
                         f'Unknown field attribute "{attr}" '
                         f'for field type "{field.class_name}"',
-                        addon.addon_path,
-                        [Location(filename, [column_index_1(kwargs[attr].start_pos)])],
+                        addon.manifest_path,
+                        [
+                            Location(
+                                python_module.path,
+                                [column_index_1(kwargs[attr].start_pos)],
+                            )
+                        ],
                         categories=["correctness"],
                     )
