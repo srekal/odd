@@ -13,7 +13,13 @@ def run_check_test(
     manifest_path_parts,
     version,
     issues,
-    extra_checks=(),
+    extra_checks=(
+        "addon_path_emitter",
+        "addon_file_emitter",
+        "xml_tree_emitter",
+        "python_emitter",
+        "external_id_emitter",
+    ),
 ):
     manifest_path = ManifestPath(data_dir.joinpath(check_name, *manifest_path_parts))
     expected_issues = []
@@ -39,14 +45,9 @@ def run_check_test(
             )
         )
 
-    checks_to_load = {
-        check_name,
-        "addon_path_emitter",
-        "addon_file_emitter",
-        "xml_tree_emitter",
-        "python_emitter",
-        "external_id_emitter",
-    }
+    checks_to_load = {check_name}
+    if extra_checks:
+        checks_to_load.update(extra_checks)
 
     actual_issues = list(
         check_addon(manifest_path, get_checks(checks_to_load), version=version)
