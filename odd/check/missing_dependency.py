@@ -183,7 +183,10 @@ WHERE dependency.addon_id = :addon_id
 
 
 class MissingDependency(Check):
-    def __init__(self):
+    _handles = {"xml_tree", "python_module", "data_file", "demo_file"}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._external_ids = []
 
     def _get_ref_from_eval(self, addon, filename, xml_node, eval_value, grammar):
@@ -531,19 +534,20 @@ class MissingDependency(Check):
                         )
                     )
 
-    def on_xml_tree(self, addon, filename, tree):
-        if not (filename in addon.data_files or filename in addon.demo_files):
-            return
-
-        for op in lookup_version_list(XML_OPERATION_VERSION_MAP, addon.version):
+    def on_xml_tree(self, xml_tree):
+        for op in lookup_version_list(
+            XML_OPERATION_VERSION_MAP, xml_tree.addon.version
+        ):
             self._external_ids.extend(
-                getattr(self, f"_extract_xml_{op}")(addon, filename, tree)
+                getattr(self, f"_extract_xml_{op}")(
+                    xml_tree.addon, xml_tree.path, xml_tree.tree_node
+                )
             )
 
         yield from ()
 
-    def on_python_module(self, addon, filename, module):
-        addon_version = addon.version
+    def on_python_module(self, python_module):
+        addon_version = python_module.addon.version
 
         def _check_call(call: Call, call_end_parts, ref_values_getter, model=UNKNOWN):
             for end_part in call_end_parts:
@@ -553,14 +557,20 @@ class MissingDependency(Check):
                 position = column_index_1(call.start_pos)
                 for ref_value in ref_values_getter(addon_version, call):
                     self._external_ids.append(
-                        _ref(addon, filename, position, ref_value, model)
+                        _ref(
+                            python_module.addon,
+                            python_module.path,
+                            position,
+                            ref_value,
+                            model,
+                        )
                     )
                 # We found our match, no point in continuing.
                 return True
             return False
 
         # TODO: Add support if external ID was passed via `kwargs`.
-        for call in iter_calls(module):
+        for call in iter_calls(python_module.module):
             for end_parts, ref_getter, model in [
                 ([("env", "ref")], _ref_getter, UNKNOWN),
                 ([("has_group",)], _ref_getter, "res.groups"),
@@ -572,12 +582,7 @@ class MissingDependency(Check):
 
         yield from ()
 
-    def on_path(self, addon, path):
-        if not path.is_file() or (
-            path not in addon.data_files and path not in addon.demo_files
-        ):
-            return
-
+    def _check_file(self, addon, path):
         if path.suffix.lower() == ".csv":
             self._extract_path_csv(addon, path)
         elif path.suffix.lower() == ".yml" and addon.version < 12:
@@ -585,6 +590,12 @@ class MissingDependency(Check):
             pass
 
         yield from ()
+
+    def on_data_file(self, data_file):
+        yield from self._check_file(data_file.addon, data_file.path)
+
+    def on_demo_file(self, demo_file):
+        yield from self._check_file(demo_file.addon, demo_file.path)
 
     def on_after(self, addon):
         with importlib.resources.path("odd.data", "addon_db.sqlite") as db_path:
@@ -607,7 +618,7 @@ class MissingDependency(Check):
                     "missing_dependency",
                     f'Addon references other addon "{ext_id.addon_name}", '
                     f"but it is not in the transitive dependency tree",
-                    addon.addon_path,
+                    addon.manifest_path,
                     locations=[ext_id.location],
                     categories=["correctness"],
                 )

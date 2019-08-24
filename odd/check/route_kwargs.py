@@ -17,8 +17,10 @@ ROUTE_KWARGS = expand_version_list(
 
 
 class RouteKwargs(Check):
-    def on_python_module(self, addon, filename, module):
-        for node in walk(module):
+    _handles = {"python_module"}
+
+    def on_python_module(self, python_module):
+        for node in walk(python_module.module):
             if node.type != "decorator":
                 continue
 
@@ -38,11 +40,11 @@ class RouteKwargs(Check):
                 if c.type == "argument"
             }
 
-            for kw in kwargs.keys() - ROUTE_KWARGS[addon.version]:
+            for kw in kwargs.keys() - ROUTE_KWARGS[python_module.addon.version]:
                 yield Issue(
                     "unknown_route_kwarg",
                     f'Unknown `http.route()` keyword argument "{kw}"',
-                    addon.addon_path,
-                    [Location(filename, [kwargs[kw][0]])],
+                    python_module.addon.manifest_path,
+                    [Location(python_module.path, [kwargs[kw][0]])],
                     categories=["correctness"],
                 )

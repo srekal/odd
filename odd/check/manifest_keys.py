@@ -55,6 +55,8 @@ KNOWN_KEYS = {
 
 
 class ManifestKeys(Check):
+    _handles = {"python_module"}
+
     def _check_active(self, manifest):
         if "active" in manifest:
             yield "active", {
@@ -101,20 +103,20 @@ class ManifestKeys(Check):
                 break
         return key_locations
 
-    def on_python_module(self, addon, filename, module):
-        if filename.name.lower() not in MANIFEST_FILENAMES:
+    def on_python_module(self, python_module):
+        if python_module.path.name not in MANIFEST_FILENAMES:
             return
         key_locations = None
         for check in ("active", "deprecated_xml", "unknown_keys"):
-            for key, issue in getattr(self, f"_check_{check}")(addon.manifest):
+            for key, issue in getattr(self, f"_check_{check}")(
+                python_module.addon.manifest
+            ):
                 if key_locations is None:
-                    key_locations = self._get_key_locations(module)
+                    key_locations = self._get_key_locations(python_module.module)
                 yield Issue(
                     **{
-                        "locations": [
-                            Location(addon.manifest_path, key_locations[key])
-                        ],
-                        "addon_path": addon.addon_path,
+                        "locations": [Location(python_module.path, key_locations[key])],
+                        "manifest_path": python_module.addon.manifest_path,
                         **issue,
                     }
                 )

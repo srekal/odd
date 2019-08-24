@@ -3,12 +3,12 @@ from odd.issue import Issue, Location
 
 
 class RedundantTAttf(Check):
-    def on_xml_tree(self, addon, filename, tree):
-        if filename not in addon.data_files and filename not in addon.demo_files:
-            return
-        for template in tree.xpath("//template"):
+    _handles = {"xml_tree"}
+
+    def on_xml_tree(self, xml_tree):
+        for template in xml_tree.tree_node.xpath("//template"):
             for el in template.xpath(".//*/@*[starts-with(name(), 't-attf-')]/.."):
-                for name, value in el.attrib.iteritems():
+                for name, value in el.attrib.items():
                     if not name.startswith("t-attf-"):
                         continue
 
@@ -20,7 +20,7 @@ class RedundantTAttf(Check):
                             "redundant_t_attf",
                             f"Element `<{el.tag}>` has a redundant `t-attf-$name` "
                             f"attribute `{name}`: {value}",
-                            addon.addon_path,
-                            [Location(filename, [el.sourceline])],
+                            xml_tree.addon.manifest_path,
+                            [Location(xml_tree.path, [el.sourceline])],
                             categories=["correctness", "performance"],
                         )

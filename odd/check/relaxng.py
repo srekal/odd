@@ -21,20 +21,19 @@ for version in SUPPORTED_VERSIONS:
 
 
 class RelaxNG(Check):
-    def on_xml_tree(self, addon, filename, tree):
-        if filename not in addon.data_files and filename not in addon.demo_files:
-            return
+    _handles = {"xml_tree"}
 
-        relaxng = VERSION_RNG_MAP[addon.version]
+    def on_xml_tree(self, xml_tree):
+        relaxng = VERSION_RNG_MAP[xml_tree.addon.version]
 
         try:
-            relaxng.assert_(tree)
+            relaxng.assert_(xml_tree.tree_node)
         except AssertionError:
             last_error = relaxng.error_log.last_error
             yield Issue(
                 "relaxng_error",
                 f"XML file does not match Odoo RelaxNG schema: {last_error.message}",
-                addon.addon_path,
-                [Location(filename, [(last_error.line, last_error.column + 1)])],
+                xml_tree.addon.manifest_path,
+                [Location(xml_tree.path, [(last_error.line, last_error.column + 1)])],
                 categories=["correctness"],
             )

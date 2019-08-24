@@ -6,6 +6,8 @@ from odd.issue import Issue, Location
 
 
 class IrModelAccessNoGroup(Check):
+    _handles = {"data_file", "demo_file"}
+
     def _check_csv(self, addon, csv_path: pathlib.Path):
         with csv_path.open(mode="r") as f:
             reader = csv.DictReader(f)
@@ -25,12 +27,15 @@ class IrModelAccessNoGroup(Check):
                     f"`ir.model.access` record ({row['id']}) allows the "
                     f"following operations to users without group: "
                     f"{', '.join(permissions)}",
-                    addon.addon_path,
+                    addon.manifest_path,
                     [Location(csv_path, [line_no])],
                     categories=["security", "correctness"],
                 )
 
-    def on_before(self, addon):
-        for data_file_path in addon.data_files:
-            if data_file_path.name.lower() == "ir.model.access.csv":
-                yield from self._check_csv(addon, data_file_path)
+    def on_data_file(self, data_file):
+        if data_file.path.name.lower() == "ir.model.access.csv":
+            yield from self._check_csv(data_file.addon, data_file.path)
+
+    def on_demo_file(self, demo_file):
+        if demo_file.path.name.lower() == "ir.model.access.csv":
+            yield from self._check_csv(demo_file.addon, demo_file.path)

@@ -1,19 +1,17 @@
 import argparse
 import collections
-import inspect
 import logging
 import pathlib
 import typing
 
-import lxml
 import pkg_resources
-from odd.addon import Addon, AddonPath, discover_addons, parse_manifest
+from odd.addon import Addon, ManifestPath, discover_addons, parse_manifest
 from odd.check import Check
 from odd.const import SUPPORTED_VERSIONS
-from odd.parso_utils import get_parso_grammar
+from odd.issue import Issue
 from odd.typedefs import OdooVersion
-from odd.utils import format_issue, list_files
-from odd.xml_utils import get_root
+from odd.utils import format_issue
+from odd.artifact import Artifact
 
 _LOG = logging.getLogger(__name__)
 
@@ -45,69 +43,99 @@ def get_checks(
     return checks
 
 
+def get_artifact_types() -> typing.Dict[str, typing.Type[Artifact]]:
+    return {
+        ep.name: ep.load()
+        for ep in pkg_resources.iter_entry_points("odd.artifact_type")
+    }
+
+
 def check_addon(
-    manifest_path: pathlib.Path,
+    manifest_path: ManifestPath,
     checks: typing.Mapping[str, typing.Type[Check]],
     *,
     version: OdooVersion,
 ):
-    addon_path = AddonPath(manifest_path)
-    # FIXME: Make a function to do the separation.
-    checks_by_type: typing.DefaultDict[
-        str, typing.Dict[str, Check]
-    ] = collections.defaultdict(dict)
+    artifact_types = get_artifact_types()
+    artifact_type_inverse = {cls_: name for name, cls_ in artifact_types.items()}
+    emitters: typing.Dict[str, typing.List[str]] = collections.defaultdict(list)
+    handlers: typing.Dict[str, typing.List[str]] = collections.defaultdict(list)
+    check_instances = {}
 
     for check_name, check_cls in checks.items():
-        check = check_cls()
+        load = True
+        for emit in check_cls._emits:
+            if emit not in artifact_types:
+                _LOG.error(
+                    "Check: %s emits unknown artifact type: %s. "
+                    "It will not be loaded.",
+                    check_name,
+                    emit,
+                )
+                load = False
+                break
+            else:
+                emitters[emit].append(check_name)
+
+        if not load:
+            continue
+
+        for handle in check_cls._handles:
+            if handle not in artifact_types:
+                _LOG.warning(
+                    "Check: %s handles unknown artifact type: %s.", check_name, handle
+                )
+            else:
+                handlers[handle].append(check_name)
+
+        if load:
+            check_instances[check_name] = check_cls()
+        """
         for method_name, _ in inspect.getmembers(
             check_cls, predicate=inspect.isfunction
         ):
             if not method_name.startswith("on_"):
                 continue
             checks_by_type[method_name][check_name] = check
+        """
 
     # TODO: Validate check types.
 
     try:
-        manifest = parse_manifest(addon_path)
+        manifest = parse_manifest(manifest_path)
     except Exception as exc:
         raise SystemExit(
-            f'Error while parsing the manifest of "{addon_path.name}"'
-            f"({addon_path.manifest_path}): {exc}"
+            f'Error while parsing the manifest of "{manifest_path.name}"'
+            f"({manifest_path.path}): {exc}"
         )
 
     addon = Addon(manifest_path, manifest, version)
-    grammar = get_parso_grammar(addon)
+    artifacts = collections.deque([addon])
 
-    for before_check in checks_by_type["on_before"].values():
-        yield from getattr(before_check, "on_before")(addon)
+    def _handle_artifact(a, handler_name):
+        if isinstance(a, Issue):
+            yield a
+        elif isinstance(a, Artifact):
+            artifacts.append(a)
+        else:
+            _LOG.warning(
+                "Unknown result type (%s) received from handler: %s",
+                type(a),
+                handler_name,
+            )
 
-    for path in list_files(addon.path, list_dirs=True):
-        for path_check in checks_by_type["on_path"].values():
-            yield from getattr(path_check, "on_path")(addon, path)
+    while artifacts:
+        artifact = artifacts.popleft()
+        artifact_type_name = artifact_type_inverse[type(artifact)]
 
-        if not path.is_file():
-            continue
+        for handler_name in handlers[artifact_type_name]:
+            handler = check_instances[handler_name]
+            for new_artifact in getattr(handler, f"on_{artifact_type_name}")(artifact):
+                yield from _handle_artifact(new_artifact, handler_name)
 
-        if checks_by_type["on_python_module"] and path.suffix.lower() == ".py":
-            with path.open(mode="rb") as f:
-                module = grammar.parse(f.read())
-            for python_check in checks_by_type["on_python_module"].values():
-                yield from getattr(python_check, "on_python_module")(
-                    addon, path, module
-                )
-
-        if checks_by_type["on_xml_tree"] and path.suffix.lower() == ".xml":
-            try:
-                tree = get_root(path)
-            except lxml.etree.XMLSyntaxError:
-                _LOG.exception("Error while parsing XML file: %s", path)
-            else:
-                for xml_check in checks_by_type["on_xml_tree"].values():
-                    yield from getattr(xml_check, "on_xml_tree")(addon, path, tree)
-
-    for after_check in checks_by_type["on_after"].values():
-        yield from getattr(after_check, "on_after")(addon)
+    for check in check_instances.values():
+        if hasattr(check, "on_after"):
+            yield from check.on_after(addon)
 
 
 def main():

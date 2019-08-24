@@ -6,7 +6,9 @@ EXT_VERSION_MAP = {">=8": ["csv", "xml", "sql"], ">=8,<12": ["yml"]}
 
 
 class DataFileInclusion(Check):
-    def on_before(self, addon):
+    _handles = {"addon"}
+
+    def on_addon(self, addon):
         extensions = {
             f".{ext}" for ext in lookup_version_list(EXT_VERSION_MAP, addon.version)
         }
@@ -23,7 +25,7 @@ class DataFileInclusion(Check):
                     "data_file_missing_in_manifest",
                     "Data file is not included in `demo` or `data` "
                     "sections in the manifest file",
-                    addon.addon_path,
+                    addon.manifest_path,
                     [Location(file_path)],
                     categories=["correctness"],
                 )

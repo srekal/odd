@@ -2,31 +2,42 @@ import pathlib
 
 import pytest
 
-from odd.addon import AddonPath
+from odd.addon import ManifestPath
 from odd.issue import Issue, Location
 from odd.utils import format_issue, lookup_version_list
 
-TEST_MANIFEST_PATH = pathlib.Path("/addons/baz/__manifest__.py")
-TEST_ADDON_PATH = AddonPath(TEST_MANIFEST_PATH)
+TEST_MANIFEST_FILE_PATH = pathlib.Path("/addons/baz/__manifest__.py")
+TEST_MANIFEST_PATH = ManifestPath(TEST_MANIFEST_FILE_PATH)
 
 
 @pytest.mark.parametrize(
     "issue, expected",
     [
-        (Issue("foo", "bar", TEST_ADDON_PATH), "baz: bar"),
+        (Issue("foo", "bar", TEST_MANIFEST_PATH), "baz: bar"),
         (
-            Issue("foo", "bar", TEST_ADDON_PATH, [Location(TEST_MANIFEST_PATH, [5])]),
+            Issue(
+                "foo",
+                "bar",
+                TEST_MANIFEST_PATH,
+                [Location(TEST_MANIFEST_PATH.path, [5])],
+            ),
             "baz (__manifest__.py, line: 5): bar",
         ),
         (
             Issue(
-                "foo", "bar", TEST_ADDON_PATH, [Location(TEST_MANIFEST_PATH, [2, 10])]
+                "foo",
+                "bar",
+                TEST_MANIFEST_PATH,
+                [Location(TEST_MANIFEST_PATH.path, [2, 10])],
             ),
             "baz (__manifest__.py, lines: 2, 10): bar",
         ),
         (
             Issue(
-                "foo", "bar", TEST_ADDON_PATH, [Location(TEST_MANIFEST_PATH, [(2, 10)])]
+                "foo",
+                "bar",
+                TEST_MANIFEST_PATH,
+                [Location(TEST_MANIFEST_PATH.path, [(2, 10)])],
             ),
             "baz (__manifest__.py, line: 2, column: 10): bar",
         ),

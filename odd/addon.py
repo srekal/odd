@@ -3,31 +3,37 @@ import dataclasses
 import pathlib
 import typing
 
+from odd.artifact import Artifact
 from odd.const import MANIFEST_FILENAMES
 from odd.typedefs import OdooVersion
 
 
 @dataclasses.dataclass(unsafe_hash=True)
-class AddonPath:
-    manifest_path: pathlib.Path
+class ManifestPath:
+    path: pathlib.Path
 
     @property
-    def path(self) -> pathlib.Path:
-        return self.manifest_path.parent
+    def addon_path(self) -> pathlib.Path:
+        return self.path.parent
 
     @property
     def name(self) -> str:
-        return self.path.name
+        return self.addon_path.name
 
 
 @dataclasses.dataclass
-class Addon(AddonPath):
+class Addon(Artifact):
+    manifest_path: ManifestPath
     manifest: typing.Dict[str, typing.Any]
     version: OdooVersion
 
     @property
-    def addon_path(self) -> AddonPath:
-        return AddonPath(self.manifest_path)
+    def path(self) -> pathlib.Path:
+        return self.manifest_path.addon_path
+
+    @property
+    def name(self) -> str:
+        return self.manifest_path.name
 
     @property
     def data_files(self):
@@ -49,9 +55,9 @@ class Addon(AddonPath):
         return files
 
 
-def parse_manifest(addon_path: AddonPath) -> typing.Any:
+def parse_manifest(manifest_path: ManifestPath) -> typing.Any:
     # FIXME: Check for manifest file size.
-    with addon_path.manifest_path.open(mode="r") as f:
+    with manifest_path.path.open(mode="r") as f:
         return ast.literal_eval(f.read())
 
 
@@ -64,11 +70,11 @@ def find_manifest(path: pathlib.Path) -> typing.Optional[pathlib.Path]:
 
 def discover_addons(
     dir_path: pathlib.Path
-) -> typing.Generator[pathlib.Path, None, None]:
+) -> typing.Generator[ManifestPath, None, None]:
     for child in dir_path.iterdir():
         if child.is_dir():
             manifest = find_manifest(child)
             if manifest:
-                yield manifest
+                yield ManifestPath(manifest)
             else:
                 yield from discover_addons(child)

@@ -5,7 +5,7 @@ from lxml import etree
 from odd.check import Check
 from odd.issue import Issue, Location
 from odd.utils import split_external_id
-from odd.xml_utils import get_model_records, get_view_arch
+from odd.xml_utils import get_view_arch
 
 _LOG = logging.getLogger(__name__)
 VIEW_TAGS = frozenset(
@@ -42,53 +42,58 @@ def find_fields(el, path):
 
 
 class DuplicateViewFields(Check):
-    def on_xml_tree(self, addon, filename, tree):
-        if filename not in addon.data_files and filename not in addon.demo_files:
+    _handles = {"xml_record"}
+
+    def on_xml_record(self, xml_record):
+        record = xml_record.record_node
+        if record.attrib["model"] != "ir.ui.view":
             return
-        for record in get_model_records(tree, model="ir.ui.view"):
-            view_xml_id = record.attrib["id"]
+        view_xml_id = record.get("id")
 
-            # Skip inherited views.
-            inherit_id = record.xpath("./field[@name='inherit_id']")
-            if inherit_id and inherit_id[0].attrib.get("ref"):
-                continue
+        # Skip inherited views.
+        inherit_id = record.xpath("./field[@name='inherit_id']")
+        if inherit_id and inherit_id[0].attrib.get("ref"):
+            return
 
-            # Skip `arch` override in an extending addon.
+        # Skip `arch` override in an extending addon.
+        if view_xml_id:
             addon_name, _ = split_external_id(view_xml_id)
-            if addon_name and addon_name != addon.name:
-                continue
+            if addon_name and addon_name != xml_record.addon.name:
+                return
 
-            arch = get_view_arch(record)
-            if arch is None:
-                _LOG.warning(
-                    "`ir.ui.view` record has no `arch` field " "in file: %s at line %d",
-                    filename,
-                    record.sourceline,
+        arch = get_view_arch(record)
+        if arch is None:
+            _LOG.warning(
+                "`ir.ui.view` record has no `arch` field " "in file: %s at line %d",
+                xml_record.path,
+                record.sourceline,
+            )
+            return
+
+        children = [c for c in arch.getchildren() if c.tag is not etree.Comment]
+        if len(children) != 1:
+            _LOG.warning(
+                "Unexpected number of children in `ir.ui.view` "
+                "`arch` in file: %s at line %d",
+                xml_record.path,
+                arch.sourceline,
+            )
+            return
+
+        fields = collections.defaultdict(list)
+        for path, line_no in find_fields(arch, ()):
+            fields[path].append(line_no)
+
+        for path, line_nos in fields.items():
+            if len(line_nos) > 1:
+                field_name = path.split("/")[-1]
+                yield Issue(
+                    "duplicate_view_field",
+                    f'"{view_xml_id}" `ir.ui.view` has duplicate field '
+                    f'"{field_name}"'
+                    if view_xml_id
+                    else (f'`ir.ui.view` has duplicate field "{field_name}"'),
+                    xml_record.addon.manifest_path,
+                    [Location(xml_record.path, [line_no]) for line_no in line_nos],
+                    categories=["correctness"],
                 )
-                continue
-
-            children = [c for c in arch.getchildren() if c.tag is not etree.Comment]
-            if len(children) != 1:
-                _LOG.warning(
-                    "Unexpected number of children in `ir.ui.view` "
-                    "`arch` in file: %s at line %d",
-                    filename,
-                    arch.sourceline,
-                )
-                continue
-
-            fields = collections.defaultdict(list)
-            for path, line_no in find_fields(arch, ()):
-                fields[path].append(line_no)
-
-            for path, line_nos in fields.items():
-                if len(line_nos) > 1:
-                    field_name = path.split("/")[-1]
-                    yield Issue(
-                        "duplicate_view_field",
-                        f'"{view_xml_id}" `ir.ui.view` has duplicate field '
-                        f'"{field_name}"',
-                        addon.addon_path,
-                        [Location(filename, [line_no]) for line_no in line_nos],
-                        categories=["correctness"],
-                    )

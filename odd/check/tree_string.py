@@ -1,40 +1,39 @@
 from odd.check import Check
 from odd.issue import Issue, Location
-from odd.xml_utils import (
-    get_model_records,
-    get_view_arch,
-    get_xpath_expr_target_element,
-)
+from odd.xml_utils import get_view_arch, get_xpath_expr_target_element
 
 
 class TreeString(Check):
-    def on_xml_tree(self, addon, filename, tree):
-        if filename not in addon.data_files and filename not in addon.demo_files:
+    _handles = {"xml_record"}
+
+    def on_xml_record(self, xml_record):
+        model = xml_record.record_node.get("model")
+        if model != "ir.ui.view":
             return
-        for record in get_model_records(tree, "ir.ui.view"):
-            arch = get_view_arch(record)
-            if arch is None:
+
+        arch = get_view_arch(xml_record.record_node)
+        if arch is None:
+            return
+        for search in arch.iter("tree"):
+            if "string" in search.attrib:
+                yield Issue(
+                    "tree_view_string_attribute_deprecated",
+                    "`<tree>` `string` attribute is deprecated "
+                    "(no longer displayed) since version 8.0",
+                    xml_record.addon.manifest_path,
+                    [Location(xml_record.path, [search.sourceline])],
+                    categories=["maintainability", "deprecated"],
+                )
+        for xpath in arch.xpath('.//xpath[@position="attributes"]'):
+            nodename = get_xpath_expr_target_element(xpath.get("expr"))
+            if nodename != "tree":
                 continue
-            for search in arch.iter("tree"):
-                if "string" in search.attrib:
-                    yield Issue(
-                        "tree_view_string_attribute_deprecated",
-                        "`<tree>` `string` attribute is deprecated "
-                        "(no longer displayed) since version 8.0",
-                        addon.addon_path,
-                        [Location(filename, [search.sourceline])],
-                        categories=["maintainability", "deprecated"],
-                    )
-            for xpath in arch.xpath('.//xpath[@position="attributes"]'):
-                nodename = get_xpath_expr_target_element(xpath.get("expr"))
-                if nodename != "tree":
-                    continue
-                for attr in xpath.xpath('.//attribute[@name="string"]'):
-                    yield Issue(
-                        "tree_view_string_attribute_deprecated",
-                        "`<tree>` `string` attribute is deprecated "
-                        "(no longer displayed) since version 8.0",
-                        addon.addon_path,
-                        [Location(filename, [attr.sourceline])],
-                        categories=["maintainability", "deprecated"],
-                    )
+            for attr in xpath.xpath('.//attribute[@name="string"]'):
+                yield Issue(
+                    "tree_view_string_attribute_deprecated",
+                    "`<tree>` `string` attribute is deprecated "
+                    "(no longer displayed) since version 8.0",
+                    xml_record.addon.manifest_path,
+                    [Location(xml_record.path, [attr.sourceline])],
+                    categories=["maintainability", "deprecated"],
+                )

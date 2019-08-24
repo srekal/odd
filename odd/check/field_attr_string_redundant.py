@@ -83,7 +83,10 @@ def get_odoo_string_compute_func(version: int) -> typing.Callable[[str], str]:
 
 
 class FieldAttrStringRedundant(Check):
-    def on_python_module(self, addon, filename, module):
+    _handles = {"python_module"}
+
+    def on_python_module(self, python_module):
+        addon, module = python_module.addon, python_module.module
         known_fields = FIELD_TYPE_VERSION_MAP.get(addon.version, set())
         get_odoo_string = get_odoo_string_compute_func(addon.version)
         sources = (
@@ -110,8 +113,13 @@ class FieldAttrStringRedundant(Check):
                         f'Redundant field attribute `string="{string_kwarg.value}"` '
                         f'for field "{field.name}". The same value will be computed '
                         f"by Odoo automatically.",
-                        addon.addon_path,
-                        [Location(filename, [column_index_1(string_kwarg.start_pos)])],
+                        addon.manifest_path,
+                        [
+                            Location(
+                                python_module.path,
+                                [column_index_1(string_kwarg.start_pos)],
+                            )
+                        ],
                         categories=["redundancy"],
                         sources=sources,
                     )
@@ -129,10 +137,11 @@ class FieldAttrStringRedundant(Check):
                             f"Redundant implied field attribute `string` "
                             f'"{string_arg.value}"` for field "{field.name}". '
                             f"The same value will be computed by Odoo automatically.",
-                            addon.addon_path,
+                            addon.manifest_path,
                             [
                                 Location(
-                                    filename, [column_index_1(string_arg.start_pos)]
+                                    python_module.path,
+                                    [column_index_1(string_arg.start_pos)],
                                 )
                             ],
                             categories=["redundancy"],

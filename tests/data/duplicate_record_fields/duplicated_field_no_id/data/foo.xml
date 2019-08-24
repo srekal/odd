@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record model="foo">
+    <field name="a">foo</field>
+    <field name="b">bar</field>
+    <field name="a">baz</field>
+</record>
+
+</odoo>
