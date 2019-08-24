@@ -7,6 +7,7 @@ from typing import (
     Iterable,
     List,
     Mapping,
+    NamedTuple,
     Optional,
     Set,
     Tuple,
@@ -17,6 +18,11 @@ import yarl
 
 from odd.const import SUPPORTED_VERSIONS
 from odd.issue import Issue
+
+
+class Position(NamedTuple):
+    line: int
+    column: int
 
 
 def odoo_commit_url(commit: str) -> yarl.URL:

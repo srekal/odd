@@ -29,4 +29,4 @@ class PythonEmitter(Check):
             return
         with addon_path.path.open(mode="rb") as f:
             module = self._get_grammar(addon_path.addon).parse(f.read())
-            yield PythonModule(addon_path.addon, addon_path.path, module)
+        yield PythonModule(addon_path.addon, addon_path.path, module)

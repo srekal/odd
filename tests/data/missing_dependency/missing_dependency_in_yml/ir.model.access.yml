@@ -1,0 +1,5 @@
+-
+  I edit some ir.model.access record.
+-
+  !record {model: ir.model.access, id: sale.access_somefoo_group}:
+    perm_write: False

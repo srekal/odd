@@ -10,6 +10,7 @@ from odd.artifact import Artifact
 from odd.check import Check
 from odd.const import SUPPORTED_VERSIONS, UNKNOWN
 from odd.issue import Location
+from odd.check.python_emitter import PythonModule
 from odd.parso_utils import (
     Call,
     column_index_1,
@@ -24,6 +25,7 @@ from odd.utils import (
     split_groups,
 )
 from odd.xml_utils import get_view_arch
+from odd.yaml_utils import YamlTag, load, line_column_index_1
 
 XML_OPERATION_VERSION_MAP = expand_version_list(
     {
@@ -137,7 +139,7 @@ def _for_xml_id_getter(
 
 class ExternalIDEmitter(Check):
     _handles = {"xml_tree", "data_file", "demo_file", "python_module"}
-    _emits = {"external_id", "external_id_reference"}
+    _emits = {"external_id", "external_id_reference", "python_module"}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -148,8 +150,6 @@ class ExternalIDEmitter(Check):
         return self._grammar_2 if addon.version < 11 else self._grammar_3
 
     def _extract_xml_record(self, addon, filename, tree):
-        grammar = self._get_grammar(addon)
-
         # <record> operation.
         for record in tree.xpath("//record"):
             record_model, record_id = record.attrib["model"], record.get("id")
@@ -182,7 +182,7 @@ class ExternalIDEmitter(Check):
 
                 for attr_name in ("eval", "search"):
                     yield from self._get_ref_from_eval(
-                        addon, filename, field, field.get(attr_name), grammar
+                        addon, filename, field.sourceline, field.get(attr_name)
                     )
 
             # View-specific tags.
@@ -330,14 +330,12 @@ class ExternalIDEmitter(Check):
                     )
 
     def _extract_xml_delete(self, addon, filename, tree):
-        grammar = self._get_grammar(addon)
-
         # <delete> operation.
         for delete in tree.xpath("//delete"):
             search = delete.get("search")
             if search:
                 yield from self._get_ref_from_eval(
-                    addon, filename, delete, search, grammar
+                    addon, filename, delete.sourceline, search
                 )
 
             model = delete.get("model")
@@ -349,8 +347,6 @@ class ExternalIDEmitter(Check):
                 yield _ref(addon, filename, delete.sourceline, record_id, model)
 
     def _extract_xml_function(self, addon, filename, tree):
-        grammar = self._get_grammar(addon)
-
         # <function> operation.
         for function in tree.xpath("//function"):
             model = function.get("model")
@@ -360,14 +356,14 @@ class ExternalIDEmitter(Check):
             eval_ = function.get("eval")
             if eval_:
                 yield from self._get_ref_from_eval(
-                    addon, filename, function, eval_, grammar
+                    addon, filename, function.sourceline, eval_
                 )
 
             for value in function.iterchildren(tag="value"):
                 eval_ = value.get("eval")
                 if eval_:
                     yield from self._get_ref_from_eval(
-                        addon, filename, value, eval_, grammar
+                        addon, filename, value.sourceline, eval_
                     )
 
     def _extract_xml_workflow(self, addon, filename, tree):
@@ -384,8 +380,6 @@ class ExternalIDEmitter(Check):
                 yield _ref(addon, filename, workflow.sourceline, uid, "res.users")
 
     def _extract_xml_ir_set(self, addon, filename, tree):
-        grammar = self._get_grammar(addon)
-
         # <ir_set> operation (removed in v9).
         for ir_set in tree.xpath("//ir_set"):
             for field in ir_set.iterchildren(tag="field"):
@@ -400,7 +394,7 @@ class ExternalIDEmitter(Check):
                             yield _model_ref(addon, filename, field.sourceline, model)
 
                 yield from self._get_ref_from_eval(
-                    addon, filename, field, eval_, grammar
+                    addon, filename, field.sourceline, eval_
                 )
 
     def _extract_path_csv(self, addon, path):
@@ -457,15 +451,42 @@ class ExternalIDEmitter(Check):
                         Location(path, [line_no]),
                     )
 
+    def _extract_path_yml(self, addon, path):
+        for entry in load(path):
+            if isinstance(entry, str):
+                continue
+            for key, val in entry.items():
+                if isinstance(key, YamlTag) and key.tag in ("record", "python"):
+                    model = key.get("model")
+                    record_id = key.get("id")
+
+                    if model:
+                        yield _model_ref(
+                            addon, path, line_column_index_1(key.start_pos), model
+                        )
+
+                    if model and record_id:
+                        yield _ref(
+                            addon,
+                            path,
+                            line_column_index_1(key.start_pos),
+                            record_id,
+                            model,
+                        )
+                    if key.tag == "python":
+                        module = self._get_grammar(addon).parse(val)
+                        # FIXME: The position will be wrong here.
+                        yield PythonModule(addon, path, module)
+                # TODO: Support other tags? I haven't seen them being used, though.
+
     def _check_file(self, addon, path):
         # NOTE: XML is already handled by `xml_tree`.
         if path.suffix.lower() == ".csv":
             yield from self._extract_path_csv(addon, path)
         elif path.suffix.lower() == ".yml" and addon.version < 12:
-            # TODO: Add support for .yml files in < 12
-            pass
+            yield from self._extract_path_yml(addon, path)
 
-    def _get_ref_from_eval(self, addon, filename, xml_node, eval_value, grammar):
+    def _get_ref_from_eval(self, addon, filename, position, eval_value):
         if not eval_value or eval_value in ("True", "False", "1", "0"):
             return
 
@@ -476,7 +497,7 @@ class ExternalIDEmitter(Check):
         #    ]"/>
         # </function>
 
-        module = grammar.parse(eval_value)
+        module = self._get_grammar(addon).parse(eval_value)
         for node in walk(module):
             if (
                 node.type == "atom_expr"
@@ -493,7 +514,7 @@ class ExternalIDEmitter(Check):
             ):
                 ref = get_string_node_value(node.children[1].children[1])
                 if ref:
-                    yield _ref(addon, filename, xml_node.sourceline, ref, UNKNOWN)
+                    yield _ref(addon, filename, position, ref, UNKNOWN)
 
     def on_xml_tree(self, xml_tree):
         for op in XML_OPERATION_VERSION_MAP[xml_tree.addon.version]:

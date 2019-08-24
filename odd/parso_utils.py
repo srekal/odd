@@ -6,14 +6,10 @@ import parso
 
 from odd.addon import Addon
 from odd.const import UNKNOWN
+from odd.utils import Position
 
 STRING_NODE_TYPES = frozenset(("string", "strings"))
 ATOM_EXPR_NODE_TYPES = frozenset(("atom_expr", "power"))  # "power" is PY2.
-
-
-class Position(typing.NamedTuple):
-    line: int
-    column: int
 
 
 @dataclasses.dataclass

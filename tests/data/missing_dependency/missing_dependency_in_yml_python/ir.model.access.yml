@@ -1,0 +1,5 @@
+-
+  I delete some ir.model.access record.
+-
+  !python {model: ir.model.access, id: False}:
+    self.env.ref('project.access_somefoo_group').unlink()

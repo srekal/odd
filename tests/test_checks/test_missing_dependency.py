@@ -22,6 +22,37 @@ from ..common import run_check_test
             ],
         ),
         (
+            "missing_dependency_in_yml",
+            10,
+            [
+                {
+                    "slug": "missing_dependency",
+                    "description": (
+                        'Addon references other addon "sale", but it is not in the '
+                        "transitive dependency tree"
+                    ),
+                    "locations": [(["ir.model.access.yml"], [(4, 3)])],
+                    "categories": ["correctness"],
+                }
+            ],
+        ),
+        (
+            "missing_dependency_in_yml_python",
+            10,
+            [
+                {
+                    "slug": "missing_dependency",
+                    "description": (
+                        'Addon references other addon "project", but it is not in the '
+                        "transitive dependency tree"
+                    ),
+                    # FIXME: This position is wrong (PythonModule yielded from YAML.)
+                    "locations": [(["ir.model.access.yml"], [(1, 13)])],
+                    "categories": ["correctness"],
+                }
+            ],
+        ),
+        (
             "missing_dependency_in_menuitem",
             12,
             [
