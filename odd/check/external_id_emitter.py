@@ -406,6 +406,10 @@ class ExternalIDEmitter(Check):
     def _extract_path_csv(self, addon, path):
         model = path.stem
 
+        yield ExternalIDReference(
+            addon, UNKNOWN, _model_record_id(model), "ir.model", Location(path)
+        )
+
         with path.open(mode="r") as f:
             reader = csv.DictReader(f)
 
