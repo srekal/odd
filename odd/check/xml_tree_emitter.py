@@ -1,24 +1,12 @@
 import dataclasses
 import logging
-import pathlib
 import typing
 
-from odd.addon import Addon
 from odd.check import Check
 from odd.check.path_emitter import AddonPath
 from odd.xml_utils import get_root
 
 _LOG = logging.getLogger(__name__)
-
-
-def _validate_xml_tree_params(params):
-    if not set(params) == {"addon", "path", "tree"}:
-        raise ValueError("Invalid params")
-    if not isinstance(params["addon"], Addon):
-        raise TypeError("Expected `addon` to be an instance of `Addon`")
-    if not isinstance(params["path"], pathlib.Path):
-        raise TypeError("Expected `path` to be an instance of `pathlib.Path`")
-    # TODO: Validate `tree`.
 
 
 def is_noupdate(record_node) -> bool:

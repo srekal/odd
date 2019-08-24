@@ -7,15 +7,6 @@ from odd.check import Check
 from odd.utils import list_files
 
 
-def _validate_path_params(params):
-    if not set(params) == {"addon", "path"}:
-        raise ValueError("Invalid params")
-    if not isinstance(params["addon"], Addon):
-        raise TypeError("Expected `addon` to be an instance of `Addon`")
-    if not isinstance(params["path"], pathlib.Path):
-        raise TypeError("Expected `path` to be an instance of `pathlib.Path`")
-
-
 @dataclasses.dataclass
 class AddonPath(Artifact):
     addon: Addon
