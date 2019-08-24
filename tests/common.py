@@ -45,6 +45,7 @@ def run_check_test(
         "addon_file_emitter",
         "xml_tree_emitter",
         "python_emitter",
+        "external_id_emitter",
     }
 
     actual_issues = list(

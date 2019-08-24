@@ -1,8 +1,20 @@
 import operator
 import pathlib
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Set, Tuple, Union
+from typing import (
+    Any,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 import yarl
+
 from odd.const import SUPPORTED_VERSIONS
 from odd.issue import Issue
 
@@ -148,3 +160,12 @@ def split_external_id(external_id: str) -> Tuple[Optional[str], str]:
     if "." in external_id:
         addon_name, record_id = external_id.split(".")[:2]
     return addon_name, record_id
+
+
+def split_groups(groups: str) -> Generator[str, None, None]:
+    for group in groups.split(","):
+        yield group.strip().lstrip("-!")
+
+
+def remove_old_style_format(s: str) -> str:
+    return s[2:-2] if s.startswith("%(") and s.endswith((")d", ")s")) else s
