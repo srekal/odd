@@ -25,7 +25,7 @@ FIELD_TYPE_VERSION_MAP = expand_version_list(
             "Text",
         },
         ">=9": {"Monetary"},
-        ">=13": {"Image"},
+        ">=13": {"Image", "Many2oneReference"},
     },
     *SUPPORTED_VERSIONS,
     result_cls=set,
@@ -161,6 +161,7 @@ FIELD_ATTRS_VERSION_MAPS = {
         }
     },
     "Image": {">=13": {"max_width", "max_height"}},
+    "Many2oneReference": {">=13": {"model_field"}},
 }
 ATTRS_VERSION_MAP = {
     field_type: expand_version_list(version_map, *SUPPORTED_VERSIONS, result_cls=set)

@@ -112,6 +112,19 @@ from ..common import run_check_test
             ],
         ),
         ("image_field", 13, []),
+        (
+            "many2one_reference_field",
+            12,
+            [
+                {
+                    "slug": "unknown_field_type",
+                    "description": 'Unknown field type "Many2oneReference"',
+                    "categories": ["correctness"],
+                    "locations": [(["models", "foo.py"], [(14, 14)])],
+                }
+            ],
+        ),
+        ("many2one_reference_field", 13, []),
     ],
 )
 def test_field_attrs(test_data_dir, addon_name, version, expected):
