@@ -1,0 +1,5 @@
+{
+    "data": [
+        "data/foo.xml",
+    ],
+}

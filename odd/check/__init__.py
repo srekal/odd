@@ -1,6 +1,7 @@
 from .base import Check
 from .attribute_override import AttributeOverride
 from .button_classes import ButtonClasses
+from .data_element_parent import DataElementParent
 from .data_file_inclusion import DataFileInclusion
 from .duplicate_record_fields import DuplicateRecordFields
 from .duplicate_view_fields import DuplicateViewFields
@@ -29,6 +30,7 @@ __all__ = [
     "AttributeOverride",
     "ButtonClasses",
     "Check",
+    "DataElementParent",
     "DataFileInclusion",
     "DirectoryPermissions",
     "DuplicateRecordFields",

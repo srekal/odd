@@ -70,6 +70,7 @@ csv_row_emitter = "odd.check.csv_row_emitter:CSVRowEmitter"
 
 attribute_override = "odd.check:AttributeOverride"
 button_classes = "odd.check:ButtonClasses"
+data_element_parent = "odd.check:DataElementParent"
 data_file_inclusion = "odd.check:DataFileInclusion"
 directory_permissions = "odd.check:DirectoryPermissions"
 duplicate_record_fields = "odd.check:DuplicateRecordFields"
