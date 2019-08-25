@@ -25,6 +25,7 @@ FIELD_TYPE_VERSION_MAP = expand_version_list(
             "Text",
         },
         ">=9": {"Monetary"},
+        ">=13": {"Image"},
     },
     *SUPPORTED_VERSIONS,
     result_cls=set,
@@ -159,6 +160,7 @@ FIELD_ATTRS_VERSION_MAPS = {
             "limit",
         }
     },
+    "Image": {">=13": {"max_width", "max_height"}},
 }
 ATTRS_VERSION_MAP = {
     field_type: expand_version_list(version_map, *SUPPORTED_VERSIONS, result_cls=set)

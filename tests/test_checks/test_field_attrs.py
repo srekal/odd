@@ -99,6 +99,19 @@ from ..common import run_check_test
         ("django_fields", 12, []),
         ("no_fields", 12, []),
         ("very_long_import", 12, []),
+        (
+            "image_field",
+            12,
+            [
+                {
+                    "slug": "unknown_field_type",
+                    "description": 'Unknown field type "Image"',
+                    "categories": ["correctness"],
+                    "locations": [(["models", "foo.py"], [(8, 17)])],
+                }
+            ],
+        ),
+        ("image_field", 13, []),
     ],
 )
 def test_field_attrs(test_data_dir, addon_name, version, expected):
