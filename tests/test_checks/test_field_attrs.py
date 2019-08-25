@@ -137,6 +137,7 @@ from ..common import run_check_test
                 }
             ],
         ),
+        ("depends_context_attribute", 13, []),
     ],
 )
 def test_field_attrs(test_data_dir, addon_name, version, expected):

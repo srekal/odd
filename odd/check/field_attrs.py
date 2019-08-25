@@ -66,10 +66,12 @@ COMMON_ATTRS_VERSION_MAP = expand_version_list(
             "sparse",
         },
         ">=13": {
+            "depends_context",
             # mail
             "tracking",
             "tracking_sequence",
         },
+        ">10,<13": {"context_dependent"},
     },
     *SUPPORTED_VERSIONS,
     result_cls=set,
