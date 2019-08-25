@@ -125,6 +125,18 @@ from ..common import run_check_test
             ],
         ),
         ("many2one_reference_field", 13, []),
+        (
+            "renamed_attribute_select",
+            10,
+            [
+                {
+                    "slug": "renamed_field_attribute",
+                    "description": 'Field attribute "select" was renamed to "index"',
+                    "categories": ["deprecated"],
+                    "locations": [(["models", "foo.py"], [(9, 9)])],
+                }
+            ],
+        ),
     ],
 )
 def test_field_attrs(test_data_dir, addon_name, version, expected):

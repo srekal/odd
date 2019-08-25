@@ -168,6 +168,12 @@ ATTRS_VERSION_MAP = {
     for field_type, version_map in FIELD_ATTRS_VERSION_MAPS.items()
 }
 
+RENAMED_ATTRS_VERSION_MAP = expand_version_list(
+    {">=10": {("select", "index"), ("digits_compute", "digits")}},
+    *SUPPORTED_VERSIONS,
+    result_cls=set,
+)
+
 
 class FieldAttrs(Check):
     _handles = {"python_module"}
@@ -218,8 +224,27 @@ class FieldAttrs(Check):
                 if "related" in kwargs:
                     expected_attrs |= RELATED_ATTRS
                 unknown_attrs = kwargs.keys() - expected_attrs
+                renamed_attrs = dict(
+                    RENAMED_ATTRS_VERSION_MAP.get(addon.version, set())
+                )
 
                 for attr in unknown_attrs:
+                    if attr in renamed_attrs:
+                        yield Issue(
+                            "renamed_field_attribute",
+                            f'Field attribute "{attr}" '
+                            f'was renamed to "{renamed_attrs[attr]}"',
+                            addon.manifest_path,
+                            [
+                                Location(
+                                    python_module.path,
+                                    [column_index_1(kwargs[attr].start_pos)],
+                                )
+                            ],
+                            categories=["deprecated"],
+                        )
+                        continue
+
                     if attr in deprecated_attrs:
                         yield Issue(
                             "deprecated_field_attribute",
