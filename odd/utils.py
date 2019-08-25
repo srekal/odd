@@ -136,10 +136,15 @@ def lookup_version_list(
     else:
         raise TypeError(f"Unknown type for `result_cls`: {type(result_cls)}")
     for version_ranges, values in version_map.items():
+        all_matched = True
         for version_spec in version_ranges.split(","):
             op, v2 = _get_operator(version_spec, version_cls=int)
-            if op(version, v2):
-                extend(values)
+            if not op(version, v2):
+                all_matched = False
+                break
+
+        if all_matched:
+            extend(values)
     return result
 
 
