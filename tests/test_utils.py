@@ -54,6 +54,7 @@ def test_format_issue(issue, expected):
         ({"==8": ["a"]}, 8, ["a"]),
         ({"==8": ["a"]}, 9, []),
         ({"==8": ["a"], "<10": ["b"]}, 9, ["b"]),
+        ({">=8,<13": ["a"]}, 13, []),
         ({"==8": ["a"]}, 7, ValueError(r"^Unsupported version")),
         ({"==8": ["a"]}, "10", TypeError(r"^Invalid version")),
         ({"~8": ["a"]}, 8, ValueError(r"^Invalid version specification")),

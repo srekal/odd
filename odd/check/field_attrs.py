@@ -43,7 +43,6 @@ COMMON_ATTRS_VERSION_MAP = expand_version_list(
             "states",
             "groups",
             "copy",
-            "oldname",
             "company_dependent",
             "change_default",
             "deprecated",
@@ -51,8 +50,9 @@ COMMON_ATTRS_VERSION_MAP = expand_version_list(
             "inherited",
         },
         ">=8,<13": {
+            "oldname",
             # mail
-            "track_visibility"
+            "track_visibility",
         },
         "==12": {
             # mail
@@ -86,6 +86,9 @@ MODEL_ATTR_VERSION_MAP = {
     for model, version_map in MODEL_ATTRS_VERSION_MAPS.items()
 }
 
+COMMON_DEPRECATED_ATTRS_VERSION_MAP = expand_version_list(
+    {">=13": {"oldname"}}, *SUPPORTED_VERSIONS, result_cls=set
+)
 DEPRECATED_ATTRS_VERSION_MAPS = {
     "Char": {">=8": {"size"}, ">=13": {"track_visibility", "track_sequence"}}
 }
@@ -197,6 +200,9 @@ class FieldAttrs(Check):
                 deprecated_attrs = DEPRECATED_ATTR_VERSION_MAP.get(
                     field.class_name, {}
                 ).get(addon.version, set())
+                deprecated_attrs |= COMMON_DEPRECATED_ATTRS_VERSION_MAP.get(
+                    addon.version, set()
+                )
                 expected_attrs = (
                     ATTRS_VERSION_MAP.get(field.class_name, {}).get(
                         addon.version, set()

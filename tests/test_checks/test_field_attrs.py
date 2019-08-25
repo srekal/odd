@@ -36,6 +36,21 @@ from ..common import run_check_test
                 }
             ],
         ),
+        ("oldname", 12, []),
+        (
+            "oldname",
+            13,
+            [
+                {
+                    "slug": "deprecated_field_attribute",
+                    "description": (
+                        'Deprecated field attribute "oldname" for field type "Char"'
+                    ),
+                    "categories": ["deprecated"],
+                    "locations": [(["models", "foo.py"], [(9, 9)])],
+                }
+            ],
+        ),
         (
             "direct_import",
             12,
