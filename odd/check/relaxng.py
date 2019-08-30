@@ -14,7 +14,7 @@ _LOG = logging.getLogger(__name__)
 VERSION_RNG_MAP = {}
 for version in SUPPORTED_VERSIONS:
     with importlib.resources.path(
-        "odd.data.relaxng", f"import_xml_{version:d}.rng"
+        f"odd.data.relaxng.v{version:d}", f"import_xml.rng"
     ) as path:
         _LOG.debug("Loading RelaxNG schema from file: %s", path)
         VERSION_RNG_MAP[version] = ET.RelaxNG(get_root(path))
