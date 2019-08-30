@@ -44,13 +44,7 @@ SELECT id
             return None
 
         cr.execute(
-            """
-SELECT addon.name
-FROM addon
-LEFT JOIN dependency
-ON dependency.dependency_id = addon.id
-WHERE dependency.addon_id = :addon_id
-        ;""",
+            "SELECT name FROM dependency WHERE addon_id = :addon_id;",
             {"addon_id": addon_id},
         )
         dependency_names = {d[0] for d in cr.fetchall()}
