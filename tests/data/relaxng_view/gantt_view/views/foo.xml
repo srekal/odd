@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="foo_view_gantt" model="ir.ui.view">
+    <field name="name">foo.gantt</field>
+    <field name="model">foo</field>
+    <field name="arch" type="xml">
+        <gantt date_stpo="bar"/>
+    </field>
+</record>
+
+</odoo>

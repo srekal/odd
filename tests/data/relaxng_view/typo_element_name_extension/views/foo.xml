@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="foo_view_tree" model="ir.ui.view">
+    <field name="name">foo.tree</field>
+    <field name="model">foo</field>
+    <field name="inherit_id" ref="some_addon.foo_view_tree"/>
+    <field name="arch" type="xml">
+        <tree editable="top">
+            <fiedl name="name"/>
+        </tree>
+    </field>
+</record>
+
+</odoo>

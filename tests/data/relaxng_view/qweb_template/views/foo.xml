@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="foo_template" model="ir.ui.view">
+    <field name="name">Some template</field>
+    <field name="model">foo</field>
+    <field name="type">qweb</field>
+    <field name="arch" type="html">
+        <p></p>
+    </field>
+</record>
+
+</odoo>
