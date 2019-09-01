@@ -2,6 +2,8 @@ import dataclasses
 import pathlib
 import typing
 
+import yarl
+
 from odd.addon import ManifestPath
 
 
@@ -20,4 +22,6 @@ class Issue:
     manifest_path: ManifestPath
     locations: typing.List[Location] = dataclasses.field(default_factory=list)
     categories: typing.List[str] = dataclasses.field(default_factory=list)
-    sources: typing.List[str] = dataclasses.field(default_factory=list)
+    sources: typing.List[typing.Union[str, yarl.URL]] = dataclasses.field(
+        default_factory=list
+    )

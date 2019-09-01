@@ -1,30 +1,27 @@
 from odd.check import Check
 from odd.issue import Issue, Location
-from odd.parso_utils import column_index_1, get_model_definition, get_model_type
+from odd.parso_utils import column_index_1, get_model_type
 from odd.utils import split_external_id
 
 
 class NewModelNoIrModelAccess(Check):
-    _handles = {"python_module", "xml_record", "csv_row"}
+    _handles = {"model_definition", "xml_record", "csv_row"}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._models = {}
         self._access_rules = set()
 
-    def on_python_module(self, python_module):
-        for classdef in python_module.module.iter_classdefs():
-            if get_model_type(classdef) != "model":
-                continue
+    def on_model_definition(self, model):
+        if get_model_type(model.node) != "model":
+            return
 
-            model = get_model_definition(classdef, extract_fields=False)
-
-            model_name = model.params.get("_name")
-            # In case the model name is e.g. evaluated via function.
-            if not isinstance(model_name, str):
-                continue
-            if model_name and not model.params.get("_inherit"):
-                self._models[model_name] = python_module.path, classdef.start_pos
+        model_name = model.params.get("_name")
+        # In case the model name is e.g. evaluated via function.
+        if not isinstance(model_name, str):
+            return
+        if model_name and not model.params.get("_inherit"):
+            self._models[model_name] = model.path, model.node.start_pos
         yield from ()
 
     def on_csv_row(self, csv_row):

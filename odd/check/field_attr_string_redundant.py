@@ -4,7 +4,7 @@ import typing
 from odd.check import Check
 from odd.const import SUPPORTED_VERSIONS
 from odd.issue import Issue, Location
-from odd.parso_utils import column_index_1, get_model_definition
+from odd.parso_utils import column_index_1
 from odd.utils import expand_version_list, odoo_source_url
 
 _LOG = logging.getLogger(__name__)
@@ -83,10 +83,10 @@ def get_odoo_string_compute_func(version: int) -> typing.Callable[[str], str]:
 
 
 class FieldAttrStringRedundant(Check):
-    _handles = {"python_module"}
+    _handles = {"field_definition"}
 
-    def on_python_module(self, python_module):
-        addon, module = python_module.addon, python_module.module
+    def on_field_definition(self, field):
+        addon, path = field.model.addon, field.model.path
         known_fields = FIELD_TYPE_VERSION_MAP.get(addon.version, set())
         get_odoo_string = get_odoo_string_compute_func(addon.version)
         sources = (
@@ -94,57 +94,42 @@ class FieldAttrStringRedundant(Check):
             if addon.version in ODOO_SOURCE_URL_VERSION_MAP
             else []
         )
-        for classdef in module.iter_classdefs():
-            model = get_model_definition(classdef, extract_fields=True)
+        if field.class_name not in known_fields:
+            _LOG.warning("Unknown field type: %s", field.class_name)
+            return
 
-            for field in model.fields:
-                if field.class_name not in known_fields:
-                    _LOG.warning("Unknown field type: %s", field.class_name)
-                    continue
+        string_kwarg = None
+        for kwarg in field.kwargs:
+            if kwarg.name == "string":
+                string_kwarg = kwarg
+                break
+        if string_kwarg and string_kwarg.value == get_odoo_string(field.name):
+            yield Issue(
+                "redundant_field_attribute",
+                f'Redundant field attribute `string="{string_kwarg.value}"` '
+                f'for field "{field.name}". The same value will be computed '
+                f"by Odoo automatically.",
+                addon.manifest_path,
+                [Location(path, [column_index_1(string_kwarg.start_pos)])],
+                categories=["redundancy"],
+                sources=sources,
+            )
+            return
 
-                string_kwarg = None
-                for kwarg in field.kwargs:
-                    if kwarg.name == "string":
-                        string_kwarg = kwarg
-                        break
-                if string_kwarg and string_kwarg.value == get_odoo_string(field.name):
-                    yield Issue(
-                        "redundant_field_attribute",
-                        f'Redundant field attribute `string="{string_kwarg.value}"` '
-                        f'for field "{field.name}". The same value will be computed '
-                        f"by Odoo automatically.",
-                        addon.manifest_path,
-                        [
-                            Location(
-                                python_module.path,
-                                [column_index_1(string_kwarg.start_pos)],
-                            )
-                        ],
-                        categories=["redundancy"],
-                        sources=sources,
-                    )
-                    continue
+        if field.args:
+            arg_index = FIELD_TYPE_STRING_INDEX_MAP.get(field.class_name, 0)
+            if len(field.args) < arg_index + 1:
+                return
+            string_arg = field.args[arg_index]
 
-                if field.args:
-                    arg_index = FIELD_TYPE_STRING_INDEX_MAP.get(field.class_name, 0)
-                    if len(field.args) < arg_index + 1:
-                        continue
-                    string_arg = field.args[arg_index]
-
-                    if string_arg.value == get_odoo_string(field.name):
-                        yield Issue(
-                            "redundant_field_attribute",
-                            f"Redundant implied field attribute `string` "
-                            f'"{string_arg.value}"` for field "{field.name}". '
-                            f"The same value will be computed by Odoo automatically.",
-                            addon.manifest_path,
-                            [
-                                Location(
-                                    python_module.path,
-                                    [column_index_1(string_arg.start_pos)],
-                                )
-                            ],
-                            categories=["redundancy"],
-                            sources=sources,
-                        )
-                        continue
+            if string_arg.value == get_odoo_string(field.name):
+                yield Issue(
+                    "redundant_field_attribute",
+                    f"Redundant implied field attribute `string` "
+                    f'"{string_arg.value}"` for field "{field.name}". '
+                    f"The same value will be computed by Odoo automatically.",
+                    addon.manifest_path,
+                    [Location(path, [column_index_1(string_arg.start_pos)])],
+                    categories=["redundancy"],
+                    sources=sources,
+                )

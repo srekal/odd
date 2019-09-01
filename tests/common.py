@@ -1,4 +1,5 @@
 import pathlib
+import typing
 
 import yarl
 
@@ -20,6 +21,8 @@ def run_check_test(
         "python_emitter",
         "external_id_emitter",
         "csv_row_emitter",
+        "model_definition_emitter",
+        "field_definition_emitter",
     ),
 ):
     manifest_path = ManifestPath(data_dir.joinpath(check_name, *manifest_path_parts))
@@ -55,3 +58,9 @@ def run_check_test(
     )
 
     assert expected_issues == actual_issues
+
+
+def subdict(
+    d: typing.Dict[str, typing.Any], *keys: str
+) -> typing.Dict[str, typing.Any]:
+    return {k: v for k, v in d.items() if k in keys}

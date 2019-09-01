@@ -1,10 +1,10 @@
 import typing
 import ast
 import dataclasses
+import functools
 
 import parso
 
-from odd.addon import Addon
 from odd.const import UNKNOWN
 from odd.utils import Position
 
@@ -18,62 +18,6 @@ class ModuleImport:
     end_pos: Position
     from_names: typing.Tuple[str, ...] = dataclasses.field(default_factory=tuple)
     names: typing.Tuple[str, ...] = dataclasses.field(default_factory=tuple)
-
-
-@dataclasses.dataclass
-class FieldArg:
-    value: typing.Any
-    start_pos: Position
-    end_pos: Position
-
-
-@dataclasses.dataclass
-class FieldKwarg:
-    name: str
-    value: typing.Any
-    start_pos: Position
-    end_pos: Position
-
-
-@dataclasses.dataclass
-class Field:
-    name: str
-    class_name: str
-    start_pos: Position
-    end_pos: Position
-    args: typing.List[FieldArg] = dataclasses.field(default_factory=list)
-    kwargs: typing.List[FieldKwarg] = dataclasses.field(default_factory=list)
-
-
-@dataclasses.dataclass
-class Model:
-    class_name: str
-    params: typing.Dict[str, typing.Any] = dataclasses.field(default_factory=dict)
-    bases: typing.List = dataclasses.field(default_factory=list)
-    fields: typing.List[Field] = dataclasses.field(default_factory=list)
-
-    @property
-    def name(self) -> typing.Optional[str]:
-        _name = self.params.get("_name")
-        if _name:
-            return _name
-        _inherit = self.params.get("_inherit")
-        if _inherit:
-            if isinstance(_inherit, list):
-                # `_inherit = []`
-                if len(_inherit) == 0:
-                    return None
-                # `_inherit = ['foo']`
-                elif len(_inherit) == 1:
-                    return _inherit[0]
-                # `_inherit = ['foo', 'bar', ...]`, currently not supported.
-                else:
-                    raise ValueError(
-                        f"Unexpected number of `_inherit` models: {len(_inherit)}"
-                    )
-            else:
-                return _inherit
-        return None
 
 
 @dataclasses.dataclass
@@ -167,8 +111,9 @@ def _parse_call(node: parso.tree.Node) -> typing.Generator[Call, None, None]:
             # print(f"Unexpected node while parsing call: {child!r}")
 
 
-def get_parso_grammar(addon: Addon) -> parso.Grammar:
-    return parso.load_grammar(version="2.7" if addon.version < 11 else "3.5")
+@functools.lru_cache()
+def get_parso_grammar(addon_version: int) -> parso.Grammar:
+    return parso.load_grammar(version="2.7" if addon_version < 11 else "3.5")
 
 
 def walk(
@@ -214,31 +159,6 @@ def get_node_value(node: parso.tree.NodeOrLeaf) -> typing.Any:
                 return ast.literal_eval(node.get_code().strip())
             except (SyntaxError, ValueError, IndentationError):
                 return UNKNOWN
-
-
-def get_model_params(
-    classdef_node: parso.python.tree.Class
-) -> typing.Dict[str, typing.Any]:
-    model_params = {}
-    suite = classdef_node.get_suite()
-    for child in suite.children:
-        if child.type == "simple_stmt":
-            expr_stmt = first_child_type_node(child, "expr_stmt")
-        elif child.type == "expr_stmt":
-            expr_stmt = child
-        else:
-            continue
-
-        if expr_stmt is None:
-            continue
-        if expr_stmt.children[0].type != "name":
-            continue
-        param = expr_stmt.children[0].value
-        if not param.startswith("_"):
-            continue
-        value_node = expr_stmt.children[2]
-        model_params[param] = get_node_value(value_node)
-    return model_params
 
 
 def extract_func_name(node: parso.tree.NodeOrLeaf) -> typing.List[str]:
@@ -367,97 +287,6 @@ def consume_name(
         else:
             leftover_nodes.append(child)
     return name_parts, leftover_nodes
-
-
-def _get_model_fields(suite):
-    for node in filter_child_nodes(suite, "simple_stmt"):
-        expr_stmt_node = first_child_type_node(node, "expr_stmt")
-        if expr_stmt_node is None:
-            continue
-
-        if (
-            expr_stmt_node.children[0].type == "name"
-            and expr_stmt_node.children[1].type == "operator"
-            and expr_stmt_node.children[2].type in ATOM_EXPR_NODE_TYPES
-        ):
-            field_name = expr_stmt_node.children[0].value
-
-            # atom_expr
-            field_node = expr_stmt_node.children[2]
-            name_parts, leftover_nodes = consume_name(field_node)
-            if not name_parts or len(name_parts) > 3 or len(leftover_nodes) != 1:
-                continue
-
-            if len(name_parts) == 3 and (
-                name_parts[0] not in ("odoo", "openerp") or name_parts[1] != "fields"
-            ):
-                continue
-            elif len(name_parts) == 2 and name_parts[0] != "fields":
-                continue
-
-            field_class = name_parts[-1]
-            args, kwargs = [], []
-            arg_node_list = []
-            for child in leftover_nodes[0].children:
-                if child.type == "operator":
-                    continue
-                elif child.type == "argument":
-                    arg_node_list = [child]
-                    break
-                elif child.type == "arglist":
-                    arg_node_list = [
-                        arg for arg in child.children if arg.type == "argument"
-                    ]
-                    break
-                else:
-                    args.append(
-                        FieldArg(get_node_value(child), child.start_pos, child.end_pos)
-                    )
-
-            for arg_node in arg_node_list:
-                if arg_node.children[0].type == "name":
-                    kwarg_name = arg_node.children[0].value
-
-                    if arg_node.children[2].type in STRING_NODE_TYPES:
-                        kwarg_value = get_string_node_value(arg_node.children[2])
-                    else:
-                        kwarg_value = UNKNOWN
-
-                    kwargs.append(
-                        FieldKwarg(
-                            name=kwarg_name,
-                            value=kwarg_value,
-                            start_pos=arg_node.start_pos,
-                            end_pos=arg_node.end_pos,
-                        )
-                    )
-
-            yield Field(
-                name=field_name,
-                class_name=field_class,
-                start_pos=field_node.start_pos,
-                end_pos=field_node.end_pos,
-                args=args,
-                kwargs=kwargs,
-            )
-
-
-def get_model_definition(classdef_node, *, extract_fields: bool = True):
-    assert classdef_node.type == "classdef"
-
-    model_params = get_model_params(classdef_node)
-
-    model = Model(
-        class_name=classdef_node.name.value,
-        params=model_params,
-        bases=get_bases(classdef_node.get_super_arglist()),
-    )
-
-    if extract_fields:
-        for field in _get_model_fields(classdef_node.get_suite()):
-            model.fields.append(field)
-
-    return model
 
 
 def get_model_type(classdef_node) -> typing.Union[str, object]:

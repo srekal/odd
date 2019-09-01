@@ -1,36 +1,9 @@
 from odd.check import Check
+from odd.check.python_emitter import FIELD_TYPE_VERSION_MAP
 from odd.const import SUPPORTED_VERSIONS
 from odd.issue import Issue, Location
-from odd.parso_utils import column_index_1, get_model_definition
+from odd.parso_utils import column_index_1
 from odd.utils import expand_version_list
-
-FIELD_TYPE_VERSION_MAP = expand_version_list(
-    {
-        ">=8": {
-            "Binary",
-            "Boolean",
-            "Char",
-            "Date",
-            "Datetime",
-            "Float",
-            "Html",
-            "Id",
-            "Integer",
-            "Many2many",
-            "Many2one",
-            "One2many",
-            "Reference",
-            "Selection",
-            "Serialized",
-            "Text",
-        },
-        ">=9": {"Monetary"},
-        ">=13": {"Image", "Many2oneReference"},
-    },
-    *SUPPORTED_VERSIONS,
-    result_cls=set,
-)
-
 
 COMMON_ATTRS_VERSION_MAP = expand_version_list(
     {
@@ -178,100 +151,80 @@ RENAMED_ATTRS_VERSION_MAP = expand_version_list(
 
 
 class FieldAttrs(Check):
-    _handles = {"python_module"}
+    _handles = {"field_definition"}
 
-    def on_python_module(self, python_module):
-        addon, module = python_module.addon, python_module.module
-        known_fields = FIELD_TYPE_VERSION_MAP.get(addon.version, set())
-        common_field_attrs = COMMON_ATTRS_VERSION_MAP.get(addon.version, set())
+    def on_field_definition(self, field):
+        """
         for classdef in module.iter_classdefs():
             model = get_model_definition(classdef, extract_fields=True)
             if not model.name:
                 continue
 
             for field in model.fields:
-                if field.class_name not in known_fields:
-                    yield Issue(
-                        "unknown_field_type",
-                        f'Unknown field type "{field.class_name}"',
-                        addon.manifest_path,
-                        [
-                            Location(
-                                python_module.path, [column_index_1(field.start_pos)]
-                            )
-                        ],
-                        categories=["correctness"],
-                    )
-                    continue
+        """
+        addon, path = field.model.addon, field.model.path
+        known_fields = FIELD_TYPE_VERSION_MAP.get(addon.version, set())
+        common_field_attrs = COMMON_ATTRS_VERSION_MAP.get(addon.version, set())
 
-                kwargs = {kw.name: kw for kw in field.kwargs}
-                model_attrs = MODEL_ATTR_VERSION_MAP.get(model.name, {}).get(
-                    addon.version, set()
-                )
-                deprecated_attrs = DEPRECATED_ATTR_VERSION_MAP.get(
-                    field.class_name, {}
-                ).get(addon.version, set())
-                deprecated_attrs |= COMMON_DEPRECATED_ATTRS_VERSION_MAP.get(
-                    addon.version, set()
-                )
-                expected_attrs = (
-                    ATTRS_VERSION_MAP.get(field.class_name, {}).get(
-                        addon.version, set()
-                    )
-                    | common_field_attrs
-                    | model_attrs
-                )
-                if "compute" in kwargs:
-                    expected_attrs |= COMPUTE_ATTRS
-                if "related" in kwargs:
-                    expected_attrs |= RELATED_ATTRS
-                unknown_attrs = kwargs.keys() - expected_attrs
-                renamed_attrs = dict(
-                    RENAMED_ATTRS_VERSION_MAP.get(addon.version, set())
-                )
+        if field.class_name not in known_fields:
+            yield Issue(
+                "unknown_field_type",
+                f'Unknown field type "{field.class_name}"',
+                addon.manifest_path,
+                [Location(path, [column_index_1(field.start_pos)])],
+                categories=["correctness"],
+            )
+            return
 
-                for attr in unknown_attrs:
-                    if attr in renamed_attrs:
-                        yield Issue(
-                            "renamed_field_attribute",
-                            f'Field attribute "{attr}" '
-                            f'was renamed to "{renamed_attrs[attr]}"',
-                            addon.manifest_path,
-                            [
-                                Location(
-                                    python_module.path,
-                                    [column_index_1(kwargs[attr].start_pos)],
-                                )
-                            ],
-                            categories=["deprecated"],
-                        )
-                        continue
+        kwargs = {kw.name: kw for kw in field.kwargs}
+        model_attrs = MODEL_ATTR_VERSION_MAP.get(field.model.name, {}).get(
+            addon.version, set()
+        )
+        deprecated_attrs = DEPRECATED_ATTR_VERSION_MAP.get(field.class_name, {}).get(
+            addon.version, set()
+        )
+        deprecated_attrs |= COMMON_DEPRECATED_ATTRS_VERSION_MAP.get(
+            addon.version, set()
+        )
+        expected_attrs = (
+            ATTRS_VERSION_MAP.get(field.class_name, {}).get(addon.version, set())
+            | common_field_attrs
+            | model_attrs
+        )
+        if "compute" in kwargs:
+            expected_attrs |= COMPUTE_ATTRS
+        if "related" in kwargs:
+            expected_attrs |= RELATED_ATTRS
+        unknown_attrs = kwargs.keys() - expected_attrs
+        renamed_attrs = dict(RENAMED_ATTRS_VERSION_MAP.get(addon.version, set()))
 
-                    if attr in deprecated_attrs:
-                        yield Issue(
-                            "deprecated_field_attribute",
-                            f'Deprecated field attribute "{attr}" '
-                            f'for field type "{field.class_name}"',
-                            addon.manifest_path,
-                            [
-                                Location(
-                                    python_module.path,
-                                    [column_index_1(kwargs[attr].start_pos)],
-                                )
-                            ],
-                            categories=["deprecated"],
-                        )
-                        continue
-                    yield Issue(
-                        "unknown_field_attribute",
-                        f'Unknown field attribute "{attr}" '
-                        f'for field type "{field.class_name}"',
-                        addon.manifest_path,
-                        [
-                            Location(
-                                python_module.path,
-                                [column_index_1(kwargs[attr].start_pos)],
-                            )
-                        ],
-                        categories=["correctness"],
-                    )
+        for attr in unknown_attrs:
+            if attr in renamed_attrs:
+                yield Issue(
+                    "renamed_field_attribute",
+                    f'Field attribute "{attr}" '
+                    f'was renamed to "{renamed_attrs[attr]}"',
+                    addon.manifest_path,
+                    [Location(path, [column_index_1(kwargs[attr].start_pos)])],
+                    categories=["deprecated"],
+                )
+                continue
+
+            if attr in deprecated_attrs:
+                yield Issue(
+                    "deprecated_field_attribute",
+                    f'Deprecated field attribute "{attr}" '
+                    f'for field type "{field.class_name}"',
+                    addon.manifest_path,
+                    [Location(path, [column_index_1(kwargs[attr].start_pos)])],
+                    categories=["deprecated"],
+                )
+                continue
+            yield Issue(
+                "unknown_field_attribute",
+                f'Unknown field attribute "{attr}" '
+                f'for field type "{field.class_name}"',
+                addon.manifest_path,
+                [Location(path, [column_index_1(kwargs[attr].start_pos)])],
+                categories=["correctness"],
+            )
