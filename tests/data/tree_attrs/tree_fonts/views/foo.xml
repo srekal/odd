@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<record id="foo_view_tree_1" model="ir.ui.view">
+    <field name="model">foo</field>
+    <field name="arch" type="xml">
+        <tree fonts="bold:bar=='baz'">
+            <field name="bar"/>
+        </tree>
+    </field>
+</record>
+
+<record id="foo_view_tree_2" model="ir.ui.view">
+    <field name="model">foo</field>
+    <field name="arch" type="xml">
+        <tree>
+            <field name="bar"/>
+        </tree>
+    </field>
+</record>
+
+</odoo>
