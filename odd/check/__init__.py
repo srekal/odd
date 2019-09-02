@@ -23,7 +23,7 @@ from .relaxng_view import RelaxNGView
 from .route_kwargs import RouteKwargs
 from .search_string import SearchString
 from .track_visibility_always import TrackVisibilityAlways
-from .tree_string import TreeString
+from .tree_attrs import TreeAttrs
 from .unittest_testcase_tagged import UnitTestTestCaseTagged
 from .xml_operation_no_id import XMLOperationNoID
 
@@ -54,7 +54,7 @@ __all__ = [
     "RouteKwargs",
     "SearchString",
     "TrackVisibilityAlways",
-    "TreeString",
+    "TreeAttrs",
     "UnitTestTestCaseTagged",
     "XMLOperationNoID",
 ]
