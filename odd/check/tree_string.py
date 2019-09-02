@@ -14,16 +14,15 @@ class TreeString(Check):
         arch = get_view_arch(xml_record.record_node)
         if arch is None:
             return
-        for search in arch.iter("tree"):
-            if "string" in search.attrib:
-                yield Issue(
-                    "tree_view_string_attribute_deprecated",
-                    "`<tree>` `string` attribute is deprecated "
-                    "(no longer displayed) since version 8.0",
-                    xml_record.addon.manifest_path,
-                    [Location(xml_record.path, [search.sourceline])],
-                    categories=["maintainability", "deprecated"],
-                )
+        for search in arch.xpath(".//tree[@string]"):
+            yield Issue(
+                "tree_view_string_attribute_deprecated",
+                "`<tree>` `string` attribute is deprecated "
+                "(no longer displayed) since version 8.0",
+                xml_record.addon.manifest_path,
+                [Location(xml_record.path, [search.sourceline])],
+                categories=["maintainability", "deprecated"],
+            )
         for xpath in arch.xpath('.//xpath[@position="attributes"]'):
             nodename = get_xpath_expr_target_element(xpath.get("expr"))
             if nodename != "tree":
