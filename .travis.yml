@@ -1,0 +1,28 @@
+language: python
+sudo: false
+cache:
+    directories:
+        - $HOME/.cache/pip
+
+matrix:
+    include:
+        - python: 3.7
+          dist: xenial
+          sudo: true
+          env: {TOX_ENV: py37, COVERAGE: 1}
+        - python: 3.7
+          dist: xenial
+          sudo: true
+          env: {TOX_ENV: qa}
+
+install:
+    - pip install tox
+
+script:
+    - tox -e $TOX_ENV
+
+after_success:
+    - "[ ! -z $COVERAGE ] && bash <(curl -s https://codecov.io/bash) || true"
+
+notifications:
+    email: false
