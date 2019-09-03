@@ -7,24 +7,17 @@ name = "odd"
 version = "0.0.1a1"
 description = "odd, the Odoo linter"
 license = "Apache-2.0"
-authors = ["Naglis Jonaitis <naglis@mailbox.org>"]
+authors = ["Naglis Jonaitis <hello@naglis.me>"]
 readme = "README.rst"
-homepage = "https://naglis.me/"
-repository = "https://gitlab.com/naglis/odd"
+repository = "https://github.com/naglis/odd"
 keywords = ["Odoo", "static code analysis", "linter"]
 classifiers = [
     "Development Status :: 1 - Planning",
     "Environment :: Console",
     "Framework :: Odoo",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Natural Language :: English",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python",
     "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
     "Topic :: Software Development :: Quality Assurance",
     "Typing :: Typed",
