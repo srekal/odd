@@ -1,10 +1,10 @@
-.. image:: https://gitlab.com/naglis/odd/badges/master/pipeline.svg
+.. image:: https://travis-ci.org/naglis/odd.svg?branch=master
    :alt: Build Status
-   :target: https://gitlab.com/naglis/odd/commits/master
+   :target: https://travis-ci.org/naglis/odd
 
-.. image:: https://gitlab.com/naglis/odd/badges/master/coverage.svg
+.. image:: https://codecov.io/gh/naglis/odd/branch/master/graph/badge.svg
    :alt: Code Coverage
-   :target:  https://gitlab.com/naglis/odd/commits/master
+   :target: https://codecov.io/gh/naglis/odd
 
 .. image:: https://img.shields.io/badge/python-3.7-green.svg
    :alt: Python 3.7
