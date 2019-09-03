@@ -156,11 +156,14 @@ def main():
     logging.basicConfig(level=args.loglevel)
 
     checks = get_checks(whitelist=args.whitelist)
-    num_issues = 0
+    issues_found = False
     for path in args.paths:
         for manifest_path in discover_addons(path):
             for issue in check_addon(manifest_path, checks, version=args.version):
-                num_issues += 1
+                issues_found = True
                 print(format_issue(issue))
-    if not num_issues:
-        _LOG.info("That's odd, no issues were found")
+
+    parser.exit(
+        status=issues_found,
+        message=None if issues_found else "That's odd, no issues were found",
+    )
